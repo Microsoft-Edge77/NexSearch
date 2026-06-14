@@ -13,8 +13,10 @@
       background: #000;
       color: #3B82F6;
       font-family: "Poppins", sans-serif;
+      overflow-x: hidden;
     }
 
+    /* Top search bar */
     .topbar {
       width: 100%;
       padding: 20px;
@@ -22,6 +24,7 @@
       border-bottom: 1px solid #1E3A8A;
       display: flex;
       justify-content: center;
+      position: relative;
     }
 
     .search-box {
@@ -47,11 +50,32 @@
       box-shadow: 0 0 0 2px #2563EB;
     }
 
+    /* NexAI toggle button */
+    .nexai-toggle {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #111827;
+      border: 1px solid #1E3A8A;
+      color: #3B82F6;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .nexai-toggle:hover {
+      border-color: #2563EB;
+    }
+
+    /* Main results container */
     .container {
       width: 90%;
       max-width: 900px;
       margin: auto;
       margin-top: 25px;
+      padding-bottom: 40px;
     }
 
     .section-title {
@@ -87,12 +111,132 @@
       font-size: 0.9rem;
       opacity: 0.7;
       margin-bottom: 8px;
+      word-break: break-all;
     }
 
     .snippet {
       font-size: 1rem;
       color: #93C5FD;
       white-space: pre-line;
+    }
+
+    /* NexAI sidebar */
+    .nexai-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 340px;
+      max-width: 100%;
+      height: 100vh;
+      background: #020617;
+      border-left: 1px solid #1E3A8A;
+      transform: translateX(100%);
+      transition: transform 0.25s ease-out;
+      display: flex;
+      flex-direction: column;
+      z-index: 999;
+    }
+
+    .nexai-panel.open {
+      transform: translateX(0);
+    }
+
+    .nexai-header {
+      padding: 16px;
+      border-bottom: 1px solid #1E3A8A;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #3B82F6;
+      font-weight: 600;
+    }
+
+    .nexai-close {
+      cursor: pointer;
+      font-size: 1.2rem;
+      color: #60A5FA;
+    }
+
+    .nexai-messages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .msg {
+      max-width: 90%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    .msg-user {
+      align-self: flex-end;
+      background: #111827;
+      color: #93C5FD;
+    }
+
+    .msg-ai {
+      align-self: flex-start;
+      background: #020617;
+      border: 1px solid #1E3A8A;
+      color: #BFDBFE;
+    }
+
+    .nexai-input-area {
+      padding: 10px;
+      border-top: 1px solid #1E3A8A;
+      display: flex;
+      gap: 8px;
+    }
+
+    .nexai-input-area input {
+      flex: 1;
+      padding: 0.6rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid #1F2937;
+      background: #000;
+      color: #3B82F6;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .nexai-input-area input:focus {
+      border-color: #2563EB;
+      box-shadow: 0 0 0 1px #2563EB;
+    }
+
+    .nexai-send {
+      padding: 0.5rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid #1E3A8A;
+      background: #111827;
+      color: #3B82F6;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .nexai-send:hover {
+      border-color: #2563EB;
+    }
+
+    .nexai-status {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      padding: 0 12px 6px;
+      color: #60A5FA;
+    }
+
+    @media (max-width: 768px) {
+      .nexai-panel {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -103,21 +247,43 @@
     <form class="search-box" action="results.html" method="GET">
       <input type="text" name="q" id="searchInput" placeholder="Rechercher..." autocomplete="off" />
     </form>
+    <button class="nexai-toggle" id="nexaiToggle">💬 NexAI</button>
   </div>
 
+  <!-- CONTENU PRINCIPAL -->
   <div class="container">
     <div id="results"></div>
   </div>
 
+  <!-- PANEL NEXAI -->
+  <div class="nexai-panel" id="nexaiPanel">
+    <div class="nexai-header">
+      <span>NexAI</span>
+      <span class="nexai-close" id="nexaiClose">×</span>
+    </div>
+    <div class="nexai-status" id="nexaiStatus">
+      Modèle IA connecté via Eden AI (LLM).
+    </div>
+    <div class="nexai-messages" id="nexaiMessages"></div>
+    <div class="nexai-input-area">
+      <input type="text" id="nexaiInput" placeholder="Écris un message..." autocomplete="off" />
+      <button class="nexai-send" id="nexaiSend">Envoyer</button>
+    </div>
+  </div>
+
   <script>
-    // 1. Récupération de la requête
+    /* -----------------------------
+       1. Récupération de la requête
+    ------------------------------ */
     const params = new URLSearchParams(window.location.search);
     const query = (params.get("q") || "").trim();
     document.getElementById("searchInput").value = query;
 
     const resultsContainer = document.getElementById("results");
 
-    // 2. Redirections directes vers des sites (mode "raccourci")
+    /* -----------------------------
+       2. Redirections directes
+    ------------------------------ */
     const siteShortcuts = {
       "amazon": "https://www.amazon.fr",
       "youtube": "https://www.youtube.com",
@@ -138,7 +304,9 @@
       window.location.href = siteShortcuts[query.toLowerCase()];
     }
 
-    // 3. Module de calcul
+    /* -----------------------------
+       3. Module calculatrice
+    ------------------------------ */
     function isMathExpression(str) {
       return /^[0-9+\-*/().\s]+$/.test(str) && /[0-9]/.test(str);
     }
@@ -151,141 +319,29 @@
       }
     }
 
-    // 4. "IA" maison : règles + mini base de connaissances
-    function aiEngine(q) {
-      const lower = q.toLowerCase();
-      const recs = [];
-      let answer = "";
-
-      // Cas cuisine / recettes
-      if (
-        lower.includes("cake") ||
-        lower.includes("gâteau") ||
-        lower.includes("gateau") ||
-        lower.includes("recette") ||
-        lower.includes("cuisine")
-      ) {
-        answer =
-          "Voici une idée simple de recette de cake :\n\n" +
-          "- Préchauffe ton four à 180°C.\n" +
-          "- Mélange 3 œufs, 150 g de sucre et 100 g de beurre fondu.\n" +
-          "- Ajoute 200 g de farine, 1 sachet de levure et une pincée de sel.\n" +
-          "- Tu peux ajouter : pépites de chocolat, citron, vanille ou fruits.\n" +
-          "- Verse dans un moule beurré et enfourne 35 à 45 minutes.\n\n" +
-          "Vérifie la cuisson avec la pointe d’un couteau : si elle ressort sèche, ton cake est prêt.";
-
-        recs.push(
-          {
-            name: "Marmiton – Recettes de cakes",
-            url: "https://www.marmiton.org/recettes/recherche.aspx?aqt=" + encodeURIComponent(q),
-            snippet: "Des dizaines de recettes de cakes notées et commentées (sucrés, salés, faciles, rapides)."
-          },
-          {
-            name: "750g – Idées de cakes",
-            url: "https://www.750g.com/recherche?q=" + encodeURIComponent(q),
-            snippet: "Autres variantes de cakes, astuces de cuisson et idées originales."
-          }
-        );
-        return { answer, recs };
+    /* -----------------------------
+       4. Résultats intelligents simples
+       (liens externes, pas d'IA ici)
+    ------------------------------ */
+    const smartResults = [
+      {
+        name: "Bing",
+        url: "https://www.bing.com/search?q=" + encodeURIComponent(query),
+        snippet: "Résultats complets provenant du moteur Bing."
+      },
+      {
+        name: "YouTube",
+        url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(query),
+        snippet: "Vidéos et contenus liés à « " + query + " »."
+      },
+      {
+        name: "Wikipédia",
+        url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(query),
+        snippet: "Article encyclopédique détaillé (si disponible)."
       }
+    ];
 
-      // Cas programmation
-      if (
-        lower.includes("javascript") ||
-        lower.includes("python") ||
-        lower.includes("code") ||
-        lower.includes("programmation") ||
-        lower.includes("developer") ||
-        lower.includes("développeur")
-      ) {
-        answer =
-          "Tu sembles chercher quelque chose lié au code ou à la programmation.\n\n" +
-          "En général, pour progresser efficacement :\n" +
-          "- Choisis un langage (ex : JavaScript ou Python).\n" +
-          "- Suis un tutoriel structuré étape par étape.\n" +
-          "- Pratique en construisant de petits projets concrets.\n" +
-          "- Lis la documentation officielle et des exemples de code.\n\n" +
-          "Si tu précises ta question (ex : \"comment faire un bouton en JavaScript ?\"), NexSearch peut te guider plus finement.";
-
-        recs.push(
-          {
-            name: "MDN Web Docs – JavaScript",
-            url: "https://developer.mozilla.org/fr/docs/Web/JavaScript",
-            snippet: "Documentation officielle, exemples et guides pour JavaScript."
-          },
-          {
-            name: "W3Schools – Tutoriels Web",
-            url: "https://www.w3schools.com/",
-            snippet: "Tutoriels simples pour HTML, CSS, JavaScript et plus."
-          }
-        );
-        return { answer, recs };
-      }
-
-      // Cas questions "comment", "pourquoi", "qu'est-ce que"
-      if (
-        lower.startsWith("comment ") ||
-        lower.startsWith("pourquoi ") ||
-        lower.startsWith("qu'est-ce que") ||
-        lower.startsWith("qu est ce que") ||
-        lower.startsWith("c'est quoi") ||
-        lower.startsWith("c est quoi")
-      ) {
-        answer =
-          "Tu poses une question de type explicative :\n\n" +
-          "« " + q + " »\n\n" +
-          "NexSearch te propose une approche :\n" +
-          "- Commence par une définition simple du sujet.\n" +
-          "- Identifie les étapes ou les causes principales.\n" +
-          "- Cherche un exemple concret ou une analogie.\n\n" +
-          "Les sites ci-dessous sont de bons points de départ pour approfondir.";
-
-        recs.push(
-          {
-            name: "Wikipédia",
-            url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(q.replace(/comment |pourquoi |qu'est-ce que |qu est ce que |c'est quoi |c est quoi /i, "")),
-            snippet: "Article encyclopédique pour comprendre le contexte, l’historique et les notions clés."
-          },
-          {
-            name: "Bing – Résultats détaillés",
-            url: "https://www.bing.com/search?q=" + encodeURIComponent(q),
-            snippet: "Résultats variés (articles, vidéos, forums) pour explorer différentes réponses."
-          }
-        );
-        return { answer, recs };
-      }
-
-      // Cas générique : recherche classique
-      answer =
-        "Je n’ai pas détecté de domaine spécifique (cuisine, code, etc.), mais voici une sélection de sources pertinentes pour « " +
-        q +
-        " ».\n\n" +
-        "Tu peux affiner ta requête avec des mots-clés comme :\n" +
-        "- \"recette\", \"tutoriel\", \"avis\", \"définition\", \"exemple\"…";
-
-      recs.push(
-        {
-          name: "Bing – Résultats pour « " + q + " »",
-          url: "https://www.bing.com/search?q=" + encodeURIComponent(q),
-          snippet: "Résultats complets (sites, vidéos, actualités, forums) pour ta recherche."
-        },
-        {
-          name: "YouTube – Vidéos sur « " + q + " »",
-          url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(q),
-          snippet: "Tutoriels, explications et contenus vidéo liés à ta requête."
-        },
-        {
-          name: "Wikipédia – Article potentiel",
-          url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(q),
-          snippet: "Si un article existe, tu auras une vue d’ensemble structurée."
-        }
-      );
-
-      return { answer, recs };
-    }
-
-    // 5. Rendu
-    function render() {
+    function renderMain() {
       if (!query) {
         resultsContainer.innerHTML = `
           <div class="section-title">Aucune requête</div>
@@ -298,7 +354,7 @@
 
       resultsContainer.innerHTML = "";
 
-      // Bloc calcul si applicable
+      // Calcul
       if (isMathExpression(query)) {
         const calc = calculateExpression(query);
         if (calc !== null && calc !== undefined && !Number.isNaN(calc)) {
@@ -312,20 +368,9 @@
         }
       }
 
-      // IA maison
-      const { answer, recs } = aiEngine(query);
-
-      resultsContainer.innerHTML += `
-        <div class="section-title">Réponse IA NexSearch</div>
-        <div class="result">
-          <div class="snippet">${answer.replace(/\n/g, "<br>")}</div>
-        </div>
-      `;
-
-      // Sites recommandés
-      resultsContainer.innerHTML += `<div class="section-title">Sites recommandés</div>`;
-
-      recs.forEach(r => {
+      // Résultats intelligents
+      resultsContainer.innerHTML += `<div class="section-title">Résultats intelligents</div>`;
+      smartResults.forEach(r => {
         resultsContainer.innerHTML += `
           <div class="result">
             <div class="title">${r.name}</div>
@@ -336,7 +381,127 @@
       });
     }
 
-    render();
+    renderMain();
+
+    /* -----------------------------
+       5. NexAI – vrai chat IA via Eden AI
+    ------------------------------ */
+
+    const nexaiPanel = document.getElementById("nexaiPanel");
+    const nexaiToggle = document.getElementById("nexaiToggle");
+    const nexaiClose = document.getElementById("nexaiClose");
+    const nexaiMessages = document.getElementById("nexaiMessages");
+    const nexaiInput = document.getElementById("nexaiInput");
+    const nexaiSend = document.getElementById("nexaiSend");
+    const nexaiStatus = document.getElementById("nexaiStatus");
+
+    let chatHistory = [];
+
+    nexaiToggle.addEventListener("click", () => {
+      nexaiPanel.classList.add("open");
+      nexaiInput.focus();
+      if (chatHistory.length === 0) {
+        addAIMessage("Bonjour ! Je suis NexAI. Pose-moi une question ou dis-moi ce que tu veux faire.");
+      }
+    });
+
+    nexaiClose.addEventListener("click", () => {
+      nexaiPanel.classList.remove("open");
+    });
+
+    nexaiSend.addEventListener("click", sendUserMessage);
+    nexaiInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendUserMessage();
+      }
+    });
+
+    function addUserMessage(text) {
+      const div = document.createElement("div");
+      div.className = "msg msg-user";
+      div.textContent = text;
+      nexaiMessages.appendChild(div);
+      nexaiMessages.scrollTop = nexaiMessages.scrollHeight;
+    }
+
+    function addAIMessage(text) {
+      const div = document.createElement("div");
+      div.className = "msg msg-ai";
+      div.textContent = text;
+      nexaiMessages.appendChild(div);
+      nexaiMessages.scrollTop = nexaiMessages.scrollHeight;
+    }
+
+    async function sendUserMessage() {
+      const text = nexaiInput.value.trim();
+      if (!text) return;
+      nexaiInput.value = "";
+      addUserMessage(text);
+
+      chatHistory.push({ role: "user", content: text });
+
+      nexaiStatus.textContent = "NexAI réfléchit...";
+      const reply = await callEdenAI(chatHistory);
+      nexaiStatus.textContent = "Modèle IA connecté via Eden AI (LLM).";
+
+      if (reply) {
+        addAIMessage(reply);
+        chatHistory.push({ role: "assistant", content: reply });
+      } else {
+        addAIMessage("Je n’ai pas pu générer de réponse pour le moment.");
+      }
+    }
+
+    async function callEdenAI(history) {
+      const API_KEY = "YOUR_EDENAI_API_KEY"; // 🔁 Remplace par ta clé réelle
+      const url = "https://api.edenai.run/v2/text/chat";
+
+      // On convertit l'historique en format messages
+      const messages = history.map(m => ({
+        role: m.role,
+        content: m.content
+      }));
+
+      // On ajoute un message système pour cadrer le comportement
+      messages.unshift({
+        role: "system",
+        content:
+          "Tu es NexAI, une IA générale intégrée dans un moteur de recherche public. " +
+          "Tu réponds en français, de manière claire, concise et utile. " +
+          "Tu ne mentionnes jamais le nom de l'utilisateur. " +
+          "Tu peux proposer des recettes, des idées, des explications, des conseils. " +
+          "Si la question concerne la nourriture, tu peux proposer une recette simple et éventuellement suggérer un site comme Marmiton ou autre, sans inventer d’URL précises."
+      });
+
+      const body = {
+        providers: ["openai"],   // ou autre provider supporté par Eden AI
+        text: messages,          // format chat
+        temperature: 0.4,
+        max_tokens: 256
+      };
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await res.json();
+        // Structure typique : data.openai.generated_text
+        if (data && data.openai && data.openai.generated_text) {
+          return data.openai.generated_text.trim();
+        }
+        return null;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
+    }
   </script>
 </body>
 </html>

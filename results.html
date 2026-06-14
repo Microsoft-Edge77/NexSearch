@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NexSearch – Résultats</title>
+  <title>NexSearch – Résultats + NexAI</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -25,6 +25,7 @@
       display: flex;
       justify-content: center;
       position: relative;
+      box-sizing: border-box;
     }
 
     .search-box {
@@ -76,6 +77,7 @@
       margin: auto;
       margin-top: 25px;
       padding-bottom: 40px;
+      box-sizing: border-box;
     }
 
     .section-title {
@@ -109,7 +111,7 @@
 
     .url {
       font-size: 0.9rem;
-      opacity: 0.8;
+      opacity: 0.85;
       margin-bottom: 8px;
       word-break: break-all;
     }
@@ -145,6 +147,7 @@
       display: flex;
       flex-direction: column;
       z-index: 999;
+      box-sizing: border-box;
     }
 
     .nexai-panel.open {
@@ -159,12 +162,21 @@
       align-items: center;
       color: #3B82F6;
       font-weight: 600;
+      box-sizing: border-box;
     }
 
     .nexai-close {
       cursor: pointer;
       font-size: 1.2rem;
       color: #60A5FA;
+    }
+
+    .nexai-status {
+      font-size: 0.75rem;
+      opacity: 0.7;
+      padding: 0 12px 6px;
+      color: #60A5FA;
+      box-sizing: border-box;
     }
 
     .nexai-messages {
@@ -174,6 +186,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
+      box-sizing: border-box;
     }
 
     .msg {
@@ -184,6 +197,7 @@
       line-height: 1.4;
       white-space: pre-wrap;
       word-wrap: break-word;
+      box-sizing: border-box;
     }
 
     .msg-user {
@@ -204,6 +218,7 @@
       border-top: 1px solid #1E3A8A;
       display: flex;
       gap: 8px;
+      box-sizing: border-box;
     }
 
     .nexai-input-area input {
@@ -236,13 +251,6 @@
       border-color: #2563EB;
     }
 
-    .nexai-status {
-      font-size: 0.75rem;
-      opacity: 0.7;
-      padding: 0 12px 6px;
-      color: #60A5FA;
-    }
-
     @media (max-width: 768px) {
       .nexai-panel {
         width: 100%;
@@ -268,11 +276,11 @@
   <!-- PANEL NEXAI -->
   <div class="nexai-panel" id="nexaiPanel">
     <div class="nexai-header">
-      <span>NexAI</span>
+      <span>NexAI (IA locale)</span>
       <span class="nexai-close" id="nexaiClose">×</span>
     </div>
     <div class="nexai-status" id="nexaiStatus">
-      IA locale NexAI (sans API).
+      IA locale avancée (sans API) – comprend le contexte et propose des idées.
     </div>
     <div class="nexai-messages" id="nexaiMessages"></div>
     <div class="nexai-input-area">
@@ -296,6 +304,7 @@
     ------------------------------ */
     const siteShortcuts = {
       "amazon": "https://www.amazon.fr",
+      "shopify": "https://www.shopify.com",
       "youtube": "https://www.youtube.com",
       "yt": "https://www.youtube.com",
       "wikipedia": "https://fr.wikipedia.org",
@@ -307,7 +316,8 @@
       "x": "https://x.com",
       "instagram": "https://instagram.com",
       "github": "https://github.com",
-      "marmiton": "https://www.marmiton.org"
+      "marmiton": "https://www.marmiton.org",
+      "750g": "https://www.750g.com"
     };
 
     if (siteShortcuts[query.toLowerCase()]) {
@@ -330,25 +340,88 @@
     }
 
     /* -----------------------------
-       4. Résultats intelligents simples
+       4. Détection de site / marque
     ------------------------------ */
-    const smartResults = [
-      {
-        name: "Bing",
-        url: "https://www.bing.com/search?q=" + encodeURIComponent(query),
-        snippet: "Résultats complets provenant du moteur Bing."
-      },
-      {
-        name: "YouTube",
-        url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(query),
-        snippet: "Vidéos et contenus liés à « " + query + " »."
-      },
-      {
-        name: "Wikipédia",
-        url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(query),
-        snippet: "Article encyclopédique détaillé (si disponible)."
+    function looksLikeSite(str) {
+      const s = str.trim().toLowerCase();
+      if (!s) return null;
+
+      if (siteShortcuts[s]) {
+        return siteShortcuts[s];
       }
-    ];
+
+      if (s.endsWith(".com") || s.endsWith(".fr") || s.endsWith(".net") || s.endsWith(".org")) {
+        return "https://" + s;
+      }
+
+      if (/^[a-z0-9\-]+$/i.test(s)) {
+        // tentative : marque ou site simple
+        return "https://www." + s + ".com";
+      }
+
+      return null;
+    }
+
+    /* -----------------------------
+       5. Résultats intelligents
+    ------------------------------ */
+    function buildSmartResults(q) {
+      const list = [];
+
+      // Si ça ressemble à un site, on le met en avant
+      const siteGuess = looksLikeSite(q);
+      if (siteGuess) {
+        list.push({
+          name: "Accès direct au site",
+          url: siteGuess,
+          snippet: "Lien direct vers ce site ou cette marque."
+        });
+      }
+
+      // Bing
+      list.push({
+        name: "Bing – Résultats pour « " + q + " »",
+        url: "https://www.bing.com/search?q=" + encodeURIComponent(q),
+        snippet: "Résultats complets (sites, vidéos, actualités, forums) pour ta recherche."
+      });
+
+      // YouTube
+      list.push({
+        name: "YouTube – Vidéos sur « " + q + " »",
+        url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(q),
+        snippet: "Tutoriels, explications et contenus vidéo liés à ta requête."
+      });
+
+      // Wikipédia
+      list.push({
+        name: "Wikipédia – Article potentiel",
+        url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(q),
+        snippet: "Si un article existe, tu auras une vue d’ensemble structurée."
+      });
+
+      // Cas cuisine / gâteau
+      const lower = q.toLowerCase();
+      if (
+        lower.includes("gateau") ||
+        lower.includes("gâteau") ||
+        lower.includes("cake") ||
+        lower.includes("recette") ||
+        lower.includes("cuisine")
+      ) {
+        list.push({
+          name: "Marmiton – Recettes de gâteaux",
+          url: "https://www.marmiton.org/recettes/recherche.aspx?aqt=" + encodeURIComponent(q),
+          snippet: "Des dizaines de recettes de gâteaux notées et commentées."
+        });
+        list.push({
+          name: "750g – Idées de gâteaux",
+          url: "https://www.750g.com/recherche?q=" + encodeURIComponent(q),
+          snippet: "Autres variantes de gâteaux, astuces de cuisson et idées originales."
+        });
+      }
+
+      return list;
+    }
 
     function renderMain() {
       if (!query) {
@@ -378,6 +451,7 @@
       }
 
       // Résultats intelligents
+      const smartResults = buildSmartResults(query);
       resultsContainer.innerHTML += `<div class="section-title">Résultats intelligents</div>`;
       smartResults.forEach(r => {
         resultsContainer.innerHTML += `
@@ -393,7 +467,7 @@
     renderMain();
 
     /* -----------------------------
-       5. NexAI – IA locale (rule-based)
+       6. NexAI – IA locale avancée
     ------------------------------ */
 
     const nexaiPanel = document.getElementById("nexaiPanel");
@@ -410,7 +484,7 @@
       nexaiPanel.classList.add("open");
       nexaiInput.focus();
       if (chatHistory.length === 0) {
-        addAIMessage("Salut ! Je suis NexAI, une IA locale. Pose-moi une question ou dis-moi ce que tu veux faire.");
+        addAIMessage("Salut ! Je suis NexAI, une IA locale. Tu peux me demander une recette, un conseil, un calcul, ou une explication.");
       }
     });
 
@@ -454,31 +528,46 @@
       chatHistory.push({ role: "assistant", content: reply });
     }
 
-    // IA locale : moteur d’intentions + réponses générées
+    // IA locale : moteur d’intentions + contexte
     function localAIReply(history) {
-      const last = history[history.length - 1].content.toLowerCase();
+      const lastMsg = history[history.length - 1].content;
+      const last = lastMsg.toLowerCase();
+
+      const context = {
+        hasTalkedFood: history.some(m => m.role === "user" && /\b(manger|faim|recette|cuisine|gateau|gâteau|cake)\b/i.test(m.content)),
+        hasTalkedCode: history.some(m => m.role === "user" && /\b(javascript|python|code|programmation|développeur|developer)\b/i.test(m.content)),
+        hasAskedHow: history.some(m => m.role === "user" && /^comment\b/i.test(m.content.toLowerCase()))
+      };
 
       // salutation
       if (/\b(bonjour|salut|yo|hey|coucou)\b/.test(last)) {
-        return "Salut ! Je suis NexAI. Tu peux me poser des questions, me demander une idée de recette, un conseil, ou même un calcul.";
+        if (context.hasTalkedFood) {
+          return "Salut ! On parlait déjà de nourriture, tu veux une autre idée de recette ou quelque chose de différent ?";
+        }
+        if (context.hasTalkedCode) {
+          return "Salut ! On discutait de code tout à l’heure. Tu veux continuer sur la programmation ou changer de sujet ?";
+        }
+        return "Salut ! Je suis NexAI. Tu peux me demander une recette, un site utile, un calcul ou une explication sur un sujet.";
       }
 
       // comment ça va
       if (last.includes("comment ça va") || last.includes("comment ca va")) {
-        return "Je fonctionne bien, prêt à répondre à tes questions. Et toi, qu’est-ce que tu veux faire ?";
+        return "Je fonctionne bien, prêt à réfléchir avec toi. Dis-moi ce dont tu as besoin : une recette, un site, un tutoriel, un calcul…";
       }
 
       // faim / manger / recette
-      if (/\b(manger|faim|j'ai faim|je veux manger|recette|cuisine)\b/.test(last)) {
+      if (/\b(manger|faim|j'ai faim|je veux manger|recette|cuisine|gateau|gâteau|cake)\b/.test(last)) {
         return (
-          "Tu as envie de manger, bonne idée.\n\n" +
-          "Voici une recette simple de cake nature :\n" +
+          "Tu as envie de manger, parfait.\n\n" +
+          "Voici un site qui propose des recettes de gâteaux : Marmiton (https://www.marmiton.org).\n" +
+          "Tu peux aussi chercher « recette de gâteau » dans NexSearch pour plus de résultats.\n\n" +
+          "Je te propose moi-même une recette de cake nature simple :\n" +
           "- Préchauffe ton four à 180°C.\n" +
           "- Mélange 3 œufs, 150 g de sucre et 100 g de beurre fondu.\n" +
           "- Ajoute 200 g de farine, 1 sachet de levure et une pincée de sel.\n" +
-          "- Tu peux ajouter de la vanille, du citron ou des pépites de chocolat.\n" +
+          "- Tu peux incorporer de la vanille, du citron ou des pépites de chocolat.\n" +
           "- Verse dans un moule beurré et enfourne 35 à 45 minutes.\n\n" +
-          "Pour plus d’idées, tu peux aller voir des sites comme Marmiton ou 750g."
+          "Avec ça, tu as à la fois un site pour explorer d’autres recettes et une base pour faire ton propre gâteau."
         );
       }
 
@@ -487,21 +576,23 @@
         const expr = last.replace(/^calcule\s+/i, "");
         const res = calculateExpression(expr);
         if (res !== null && !Number.isNaN(res)) {
-          return `Si je calcule « ${expr} », j’obtiens : ${res}.`;
+          return `Si je calcule « ${expr} », j’obtiens : ${res}. Tu peux aussi taper cette expression directement dans NexSearch pour voir le résultat dans la zone de résultats.`;
         } else {
-          return "Je n’arrive pas à calculer cette expression. Essaie avec quelque chose comme 3*(5+2).";
+          return "Je n’arrive pas à calculer cette expression. Essaie avec quelque chose comme 3*(5+2) ou « calcule 12*4 ».";
         }
       }
 
       // tutoriel / code
       if (/\b(javascript|python|code|programmation|développeur|developer)\b/.test(last)) {
         return (
-          "Tu sembles t’intéresser au code ou à la programmation.\n\n" +
-          "Une bonne approche :\n" +
-          "- Choisir un langage (JavaScript ou Python par exemple).\n" +
-          "- Suivre un tutoriel étape par étape.\n" +
-          "- Pratiquer avec de petits projets concrets.\n\n" +
-          "Pour JavaScript, tu peux regarder MDN Web Docs ou W3Schools. Pour Python, des sites comme Real Python ou la doc officielle sont utiles."
+          "Tu t’intéresses à la programmation, bonne idée.\n\n" +
+          "Pour apprendre efficacement :\n" +
+          "- Choisis un langage (JavaScript pour le web, Python pour la polyvalence).\n" +
+          "- Suis un tutoriel structuré étape par étape.\n" +
+          "- Construis de petits projets concrets (un mini site, un script, un outil).\n\n" +
+          "Pour JavaScript, tu peux consulter MDN Web Docs ou W3Schools.\n" +
+          "Pour Python, la documentation officielle et des sites comme Real Python sont utiles.\n\n" +
+          "Tu peux aussi taper « tutoriel JavaScript » ou « apprendre Python » dans NexSearch pour obtenir des liens cliquables vers ces ressources."
         );
       }
 
@@ -519,28 +610,39 @@
           "Une bonne façon de comprendre un sujet :\n" +
           "- Commencer par une définition simple.\n" +
           "- Identifier les éléments importants ou les étapes.\n" +
-          "- Chercher un exemple concret.\n\n" +
-          "Tu peux aussi faire une recherche plus précise dans NexSearch avec des mots-clés comme « définition », « tutoriel », ou « exemple »."
+          "- Chercher un exemple concret ou une analogie.\n\n" +
+          "Pour approfondir, tu peux taper ta question ou le mot-clé principal dans NexSearch : tu auras des liens vers Wikipédia, des tutoriels, des vidéos, etc."
         );
       }
 
-      // recherche de site
-      if (last.includes("site") || last.includes("sites")) {
+      // recherche de site / marque
+      if (last.includes("site") || last.includes("sites") || last.includes("marque")) {
         return (
-          "Si tu cherches des sites utiles, tu peux essayer :\n" +
-          "- Marmiton pour la cuisine.\n" +
-          "- YouTube pour des tutoriels vidéo.\n" +
-          "- Wikipédia pour des définitions et du contexte.\n" +
-          "- Bing ou Google pour une recherche générale.\n\n" +
-          "Tu peux aussi taper directement le nom du site dans NexSearch (ex : « marmiton », « youtube »)."
+          "Si tu cherches des sites précis, tu peux :\n" +
+          "- Taper directement le nom du site dans NexSearch (ex : « shopify », « amazon », « marmiton »).\n" +
+          "- NexSearch essaiera de te proposer un lien direct vers ce site.\n\n" +
+          "Pour des recettes : Marmiton, 750g.\n" +
+          "Pour des tutoriels vidéo : YouTube.\n" +
+          "Pour des définitions : Wikipédia.\n" +
+          "Pour une recherche générale : Bing ou Google."
+        );
+      }
+
+      // contexte : déjà parlé de nourriture
+      if (context.hasTalkedFood && !/\b(manger|faim|recette|cuisine|gateau|gâteau|cake)\b/.test(last)) {
+        return (
+          "On a déjà parlé de recettes et de nourriture. Si tu veux, je peux te proposer une autre idée :\n" +
+          "- Un cake salé (avec fromage, jambon, olives).\n" +
+          "- Un gâteau au yaourt très simple.\n\n" +
+          "Tu peux aussi me dire un ingrédient que tu as (ex : chocolat, citron, banane) et je t’inspire une recette rapide."
         );
       }
 
       // fallback générique
       return (
-        "Je suis une IA locale, donc je ne peux pas accéder à tout le web en temps réel, " +
+        "Je suis une IA locale, donc je ne peux pas lire les sites en temps réel, " +
         "mais je peux t’aider à réfléchir, te proposer des idées, des recettes simples, des conseils ou des explications.\n\n" +
-        "Essaie de me dire ce que tu veux : une recette, un tutoriel, un calcul, une définition…"
+        "Essaie de préciser ce que tu veux : une recette, un site, un tutoriel, un calcul, ou une définition sur un sujet."
       );
     }
   </script>

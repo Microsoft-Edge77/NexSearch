@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NexSearch-Recherche NexSearch</title>
+  <title>NexSearch-Recherche IA</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -60,7 +60,6 @@
       box-shadow: 0 0 0 2px #2563EB;
     }
 
-    /* NexAI toggle button */
     .nexai-toggle {
       position: absolute;
       right: 20px;
@@ -79,7 +78,6 @@
       border-color: #2563EB;
     }
 
-    /* Main results container */
     .container {
       width: 90%;
       max-width: 900px;
@@ -272,7 +270,6 @@
     }
   </style>
 </head>
-
 <body>
   <!-- BARRE DE RECHERCHE -->
   <div class="topbar">
@@ -290,11 +287,11 @@
   <!-- PANEL NEXAI -->
   <div class="nexai-panel" id="nexaiPanel">
     <div class="nexai-header">
-      <span>NexAI (IA locale avancée)</span>
+      <span>NexAI (IA locale hybride)</span>
       <span class="nexai-close" id="nexaiClose">×</span>
     </div>
     <div class="nexai-status" id="nexaiStatus">
-      IA locale sans API – comprend le contexte, propose des sites et des idées.
+      IA locale avec mini réseau de neurones (intentions + génération dynamique).
     </div>
     <div class="nexai-messages" id="nexaiMessages"></div>
     <div class="nexai-input-area">
@@ -302,7 +299,6 @@
       <button class="nexai-send" id="nexaiSend">Envoyer</button>
     </div>
   </div>
-
   <script>
     /* -----------------------------
        1. Récupération de la requête
@@ -314,10 +310,13 @@
     const resultsContainer = document.getElementById("results");
 
     /* -----------------------------
-       2. Base de sites (200+ possibles)
+       2. Base de sites (extrait, extensible)
     ------------------------------ */
     const siteDatabase = [
       { name: "Amazon", url: "https://www.amazon.fr", tags: ["achat", "shopping", "livre", "produits", "ecommerce"] },
+      { name: "Amazon Livres", url: "https://www.amazon.fr/livres", tags: ["livre", "lecture"] },
+      { name: "Fnac", url: "https://www.fnac.com", tags: ["livre", "tech", "culture", "shopping"] },
+      { name: "Fnac Livres", url: "https://www.fnac.com/Livre", tags: ["livre", "lecture"] },
       { name: "Microsoft", url: "https://www.microsoft.com", tags: ["windows", "office", "logiciels", "cloud"] },
       { name: "Office", url: "https://www.office.com", tags: ["office", "word", "excel", "powerpoint"] },
       { name: "Word", url: "https://www.microsoft.com/microsoft-365/word", tags: ["word", "traitement de texte"] },
@@ -345,76 +344,19 @@
       { name: "Netflix", url: "https://www.netflix.com", tags: ["films", "séries", "streaming"] },
       { name: "Prime Video", url: "https://www.primevideo.com", tags: ["films", "séries", "streaming"] },
       { name: "Canva", url: "https://www.canva.com", tags: ["design", "graphisme", "présentation"] },
-      { name: "Trello", url: "https://trello.com", tags: ["organisation", "projet", "kanban"] },
       { name: "Notion", url: "https://www.notion.so", tags: ["notes", "organisation", "wiki"] },
       { name: "Dropbox", url: "https://www.dropbox.com", tags: ["cloud", "fichiers", "stockage"] },
       { name: "OneDrive", url: "https://onedrive.live.com", tags: ["cloud", "fichiers", "stockage"] },
       { name: "Google Drive", url: "https://drive.google.com", tags: ["cloud", "fichiers", "stockage"] },
-      { name: "Deezer", url: "https://www.deezer.com", tags: ["musique", "audio"] },
       { name: "Spotify", url: "https://www.spotify.com", tags: ["musique", "audio"] },
-      { name: "Le Monde", url: "https://www.lemonde.fr", tags: ["actualité", "journal"] },
-      { name: "Le Figaro", url: "https://www.lefigaro.fr", tags: ["actualité", "journal"] },
-      { name: "Numerama", url: "https://www.numerama.com", tags: ["tech", "actualité"] },
-      { name: "01net", url: "https://www.01net.com", tags: ["tech", "tests", "actualité"] },
-      { name: "Fnac", url: "https://www.fnac.com", tags: ["livre", "tech", "culture", "shopping"] },
-      { name: "Cultura", url: "https://www.cultura.com", tags: ["livre", "culture", "loisirs"] },
-      { name: "Decathlon", url: "https://www.decathlon.fr", tags: ["sport", "shopping"] },
-      { name: "Zara", url: "https://www.zara.com", tags: ["vêtements", "mode"] },
-      { name: "H&M", url: "https://www2.hm.com", tags: ["vêtements", "mode"] },
-      { name: "IKEA", url: "https://www.ikea.com", tags: ["meubles", "maison"] },
-      { name: "Darty", url: "https://www.darty.com", tags: ["électroménager", "tech"] },
-      { name: "Boulanger", url: "https://www.boulanger.com", tags: ["électroménager", "tech"] },
-      { name: "Steam", url: "https://store.steampowered.com", tags: ["jeux", "pc", "gaming"] },
-      { name: "Epic Games Store", url: "https://store.epicgames.com", tags: ["jeux", "pc", "gaming"] },
-      { name: "Ubisoft", url: "https://www.ubisoft.com", tags: ["jeux", "gaming"] },
-      { name: "PlayStation", url: "https://www.playstation.com", tags: ["jeux", "console"] },
-      { name: "Xbox", url: "https://www.xbox.com", tags: ["jeux", "console"] },
-      { name: "Nintendo", url: "https://www.nintendo.com", tags: ["jeux", "console"] },
-      { name: "Adobe", url: "https://www.adobe.com", tags: ["photoshop", "pdf", "design"] },
-      { name: "PDF24", url: "https://tools.pdf24.org", tags: ["pdf", "conversion"] },
-      { name: "Google Maps", url: "https://maps.google.com", tags: ["cartes", "itinéraire"] },
-      { name: "Booking", url: "https://www.booking.com", tags: ["voyage", "hotel"] },
-      { name: "Airbnb", url: "https://www.airbnb.com", tags: ["voyage", "logement"] },
-      { name: "Skyscanner", url: "https://www.skyscanner.net", tags: ["vols", "voyage"] },
-      { name: "Kayak", url: "https://www.kayak.com", tags: ["vols", "voyage"] },
-      { name: "OVHcloud", url: "https://www.ovhcloud.com", tags: ["serveur", "cloud", "hébergement"] },
-      { name: "GitLab", url: "https://gitlab.com", tags: ["code", "développement"] },
-      { name: "Bitbucket", url: "https://bitbucket.org", tags: ["code", "développement"] },
-      { name: "Coursera", url: "https://www.coursera.org", tags: ["cours", "formation"] },
-      { name: "Udemy", url: "https://www.udemy.com", tags: ["cours", "formation"] },
-      { name: "OpenClassrooms", url: "https://openclassrooms.com", tags: ["cours", "formation"] },
-      { name: "Khan Academy", url: "https://www.khanacademy.org", tags: ["cours", "maths", "science"] },
-      { name: "Duolingo", url: "https://www.duolingo.com", tags: ["langues", "apprentissage"] },
-      { name: "Reverso", url: "https://www.reverso.net", tags: ["traduction", "langues"] },
-      { name: "DeepL", url: "https://www.deepl.com", tags: ["traduction", "langues"] },
-      { name: "La Poste", url: "https://www.laposte.fr", tags: ["courrier", "colis"] },
-      { name: "Chronopost", url: "https://www.chronopost.fr", tags: ["colis", "livraison"] },
-      { name: "Colissimo", url: "https://www.laposte.fr/colissimo", tags: ["colis", "livraison"] },
-      { name: "Doctolib", url: "https://www.doctolib.fr", tags: ["santé", "rendez-vous"] },
-      { name: "Ameli", url: "https://www.ameli.fr", tags: ["santé", "sécurité sociale"] },
-      { name: "Impots.gouv", url: "https://www.impots.gouv.fr", tags: ["impôts", "administration"] },
-      { name: "Service-Public", url: "https://www.service-public.fr", tags: ["administration", "infos"] },
-      { name: "CAF", url: "https://www.caf.fr", tags: ["aides", "administration"] },
-      { name: "Pôle Emploi", url: "https://www.pole-emploi.fr", tags: ["emploi", "administration"] },
-      { name: "Indeed", url: "https://www.indeed.fr", tags: ["emploi", "job"] },
-      { name: "Monster", url: "https://www.monster.fr", tags: ["emploi", "job"] },
-      { name: "Leboncoin", url: "https://www.leboncoin.fr", tags: ["annonces", "occasion"] },
-      { name: "Vinted", url: "https://www.vinted.fr", tags: ["vêtements", "occasion"] },
-      { name: "Drive Intermarché", url: "https://www.intermarche.com", tags: ["courses", "supermarché"] },
-      { name: "Carrefour", url: "https://www.carrefour.fr", tags: ["courses", "supermarché"] },
-      { name: "Auchan", url: "https://www.auchan.fr", tags: ["courses", "supermarché"] },
-      { name: "Lidl", url: "https://www.lidl.fr", tags: ["courses", "supermarché"] },
-      { name: "Monoprix", url: "https://www.monoprix.fr", tags: ["courses", "supermarché"] },
-      { name: "Picard", url: "https://www.picard.fr", tags: ["surgelés", "cuisine"] },
+      { name: "Deezer", url: "https://www.deezer.com", tags: ["musique", "audio"] },
       { name: "Allociné", url: "https://www.allocine.fr", tags: ["films", "cinéma"] },
-      { name: "SensCritique", url: "https://www.senscritique.com", tags: ["films", "livres", "critiques"] },
-      { name: "Goodreads", url: "https://www.goodreads.com", tags: ["livres", "lecture"] },
-      { name: "Amazon Livres", url: "https://www.amazon.fr/livres", tags: ["livres", "lecture"] }
-      // Tu peux en rajouter autant que tu veux ici.
+      { name: "Goodreads", url: "https://www.goodreads.com", tags: ["livres", "lecture"] }
+      // Tu peux continuer à en rajouter.
     ];
 
     /* -----------------------------
-       3. Module calculatrice
+       3. Calculatrice
     ------------------------------ */
     function isMathExpression(str) {
       return /^[0-9+\-*/().\s]+$/.test(str) && /[0-9]/.test(str);
@@ -429,26 +371,7 @@
     }
 
     /* -----------------------------
-       4. Détection de site / marque
-    ------------------------------ */
-    function looksLikeSite(str) {
-      const s = str.trim().toLowerCase();
-      if (!s) return null;
-
-      if (s.includes(".fr") || s.includes(".com") || s.includes(".net") || s.includes(".org")) {
-        if (s.startsWith("http")) return s;
-        return "https://" + s;
-      }
-
-      if (/^[a-z0-9\-]+$/i.test(s)) {
-        return "https://www." + s + ".com";
-      }
-
-      return null;
-    }
-
-    /* -----------------------------
-       5. Moteur de recherche intelligent
+       4. Moteur de recherche intelligent
     ------------------------------ */
     function findMatchingSites(q) {
       const lower = q.toLowerCase();
@@ -456,9 +379,7 @@
 
       const scored = siteDatabase.map(site => {
         let score = 0;
-
         if (site.name.toLowerCase().includes(lower)) score += 5;
-
         site.tags.forEach(tag => {
           const t = tag.toLowerCase();
           if (lower.includes(t)) score += 3;
@@ -466,7 +387,6 @@
             if (t.includes(w)) score += 1;
           });
         });
-
         return { site, score };
       });
 
@@ -476,17 +396,8 @@
 
     function buildSmartResults(q) {
       const list = [];
-
-      const siteGuess = looksLikeSite(q);
-      if (siteGuess) {
-        list.push({
-          name: "Accès direct (détection automatique)",
-          url: siteGuess,
-          snippet: "Lien direct vers ce site ou cette marque supposée."
-        });
-      }
-
       const matches = findMatchingSites(q);
+
       matches.forEach(m => {
         list.push({
           name: m.site.name,
@@ -591,7 +502,191 @@
     renderMain();
 
     /* -----------------------------
-       6. NexAI – IA locale avancée
+       5. Mini réseau de neurones + NexAI
+    ------------------------------ */
+
+    // Encodage simple de texte en vecteur (bag-of-words réduit)
+    const intentWords = [
+      "bonjour","salut","hey",
+      "manger","faim","recette","cuisine","gateau","gâteau","cake",
+      "livre","lecture",
+      "code","programmation","javascript","python",
+      "site","marque","lien",
+      "comment","pourquoi","qu est ce que","c est quoi",
+      "calcul","calcule"
+    ];
+
+    function encodeText(text) {
+      const lower = text.toLowerCase();
+      const vec = new Array(intentWords.length).fill(0);
+      intentWords.forEach((w, i) => {
+        if (lower.includes(w)) vec[i] = 1;
+      });
+      return vec;
+    }
+
+    // MLP simple (input -> hidden -> output)
+    const inputSize = intentWords.length;
+    const hiddenSize = 16;
+    const outputSize = 6; // 0: smalltalk, 1: food, 2: books, 3: code, 4: sites, 5: explain
+
+    function randWeight() {
+      return (Math.random() - 0.5) * 0.2;
+    }
+
+    let W1 = [];
+    let b1 = [];
+    let W2 = [];
+    let b2 = [];
+
+    function initNetwork() {
+      const saved = localStorage.getItem("nexai_weights");
+      if (saved) {
+        try {
+          const obj = JSON.parse(saved);
+          W1 = obj.W1;
+          b1 = obj.b1;
+          W2 = obj.W2;
+          b2 = obj.b2;
+          return;
+        } catch {}
+      }
+
+      W1 = Array.from({ length: hiddenSize }, () =>
+        Array.from({ length: inputSize }, () => randWeight())
+      );
+      b1 = Array.from({ length: hiddenSize }, () => randWeight());
+      W2 = Array.from({ length: outputSize }, () =>
+        Array.from({ length: hiddenSize }, () => randWeight())
+      );
+      b2 = Array.from({ length: outputSize }, () => randWeight());
+
+      // petit pré-entraînement sur des exemples simples
+      const examples = [
+        { text: "bonjour salut hey", label: 0 },
+        { text: "je veux manger un gateau recette cuisine", label: 1 },
+        { text: "je cherche un livre pour lire", label: 2 },
+        { text: "je veux apprendre le code javascript programmation", label: 3 },
+        { text: "je cherche un site shopify amazon lien", label: 4 },
+        { text: "comment ça marche qu est ce que pourquoi", label: 5 }
+      ];
+      trainNetwork(examples, 50, 0.05);
+
+      localStorage.setItem("nexai_weights", JSON.stringify({ W1, b1, W2, b2 }));
+    }
+
+    function relu(x) {
+      return x > 0 ? x : 0;
+    }
+
+    function softmax(arr) {
+      const max = Math.max(...arr);
+      const exps = arr.map(v => Math.exp(v - max));
+      const sum = exps.reduce((a, b) => a + b, 0);
+      return exps.map(v => v / sum);
+    }
+
+    function forward(vec) {
+      const h = new Array(hiddenSize).fill(0);
+      for (let i = 0; i < hiddenSize; i++) {
+        let s = b1[i];
+        for (let j = 0; j < inputSize; j++) {
+          s += W1[i][j] * vec[j];
+        }
+        h[i] = relu(s);
+      }
+      const o = new Array(outputSize).fill(0);
+      for (let k = 0; k < outputSize; k++) {
+        let s = b2[k];
+        for (let i = 0; i < hiddenSize; i++) {
+          s += W2[k][i] * h[i];
+        }
+        o[k] = s;
+      }
+      const probs = softmax(o);
+      return { h, o: probs };
+    }
+
+    function trainNetwork(examples, epochs, lr) {
+      for (let e = 0; e < epochs; e++) {
+        examples.forEach(ex => {
+          const x = encodeText(ex.text);
+          const y = ex.label;
+          const { h, o } = forward(x);
+
+          const target = new Array(outputSize).fill(0);
+          target[y] = 1;
+
+          const dO = o.map((p, i) => p - target[i]);
+
+          const dW2 = Array.from({ length: outputSize }, () =>
+            new Array(hiddenSize).fill(0)
+          );
+          const db2 = new Array(outputSize).fill(0);
+
+          for (let k = 0; k < outputSize; k++) {
+            db2[k] = dO[k];
+            for (let i = 0; i < hiddenSize; i++) {
+              dW2[k][i] = dO[k] * h[i];
+            }
+          }
+
+          const dH = new Array(hiddenSize).fill(0);
+          for (let i = 0; i < hiddenSize; i++) {
+            let s = 0;
+            for (let k = 0; k < outputSize; k++) {
+              s += dO[k] * W2[k][i];
+            }
+            dH[i] = h[i] > 0 ? s : 0;
+          }
+
+          const dW1 = Array.from({ length: hiddenSize }, () =>
+            new Array(inputSize).fill(0)
+          );
+          const db1 = new Array(hiddenSize).fill(0);
+
+          for (let i = 0; i < hiddenSize; i++) {
+            db1[i] = dH[i];
+            for (let j = 0; j < inputSize; j++) {
+              dW1[i][j] = dH[i] * x[j];
+            }
+          }
+
+          for (let k = 0; k < outputSize; k++) {
+            b2[k] -= lr * db2[k];
+            for (let i = 0; i < hiddenSize; i++) {
+              W2[k][i] -= lr * dW2[k][i];
+            }
+          }
+
+          for (let i = 0; i < hiddenSize; i++) {
+            b1[i] -= lr * db1[i];
+            for (let j = 0; j < inputSize; j++) {
+              W1[i][j] -= lr * dW1[i][j];
+            }
+          }
+        });
+      }
+    }
+
+    initNetwork();
+
+    function predictIntent(text) {
+      const vec = encodeText(text);
+      const { o } = forward(vec);
+      let best = 0;
+      let idx = 0;
+      for (let i = 0; i < o.length; i++) {
+        if (o[i] > best) {
+          best = o[i];
+          idx = i;
+        }
+      }
+      return { intent: idx, confidence: best };
+    }
+
+    /* -----------------------------
+       6. NexAI UI + génération dynamique
     ------------------------------ */
 
     const nexaiPanel = document.getElementById("nexaiPanel");
@@ -600,7 +695,6 @@
     const nexaiMessages = document.getElementById("nexaiMessages");
     const nexaiInput = document.getElementById("nexaiInput");
     const nexaiSend = document.getElementById("nexaiSend");
-    const nexaiStatus = document.getElementById("nexaiStatus");
 
     let chatHistory = [];
 
@@ -608,7 +702,7 @@
       nexaiPanel.classList.add("open");
       nexaiInput.focus();
       if (chatHistory.length === 0) {
-        addAIMessage("Salut ! Je suis NexAI, une IA locale. Tu peux me demander une recette, un site utile, un calcul ou une explication.");
+        addAIMessage("Salut ! Je suis NexAI, une IA locale hybride. Pose-moi une question, demande une recette, un site ou un calcul.");
       }
     });
 
@@ -647,128 +741,132 @@
       addUserMessage(text);
       chatHistory.push({ role: "user", content: text });
 
-      const reply = localAIReply(chatHistory);
+      const reply = generateHybridReply(text);
       addAIMessage(reply);
       chatHistory.push({ role: "assistant", content: reply });
+
+      // apprentissage léger en continu
+      const intent = predictIntent(text).intent;
+      trainNetwork([{ text, label: intent }], 1, 0.01);
+      localStorage.setItem("nexai_weights", JSON.stringify({ W1, b1, W2, b2 }));
     }
 
-    function localAIReply(history) {
-      const lastMsg = history[history.length - 1].content;
-      const last = lastMsg.toLowerCase();
+    function randomChoice(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
 
-      const context = {
-        hasTalkedFood: history.some(m => m.role === "user" && /\b(manger|faim|recette|cuisine|gateau|gâteau|cake)\b/i.test(m.content)),
-        hasTalkedCode: history.some(m => m.role === "user" && /\b(javascript|python|code|programmation|développeur|developer)\b/i.test(m.content)),
-        hasAskedHow: history.some(m => m.role === "user" && /^comment\b/i.test(m.content.toLowerCase()))
-      };
+    function generateHybridReply(text) {
+      const { intent, confidence } = predictIntent(text);
+      const lower = text.toLowerCase();
 
-      if (/\b(bonjour|salut|yo|hey|coucou)\b/.test(last)) {
-        if (context.hasTalkedFood) {
-          return "Salut ! On parlait déjà de nourriture, tu veux une autre idée de recette ou quelque chose de différent ?";
-        }
-        if (context.hasTalkedCode) {
-          return "Salut ! On discutait de code tout à l’heure. Tu veux continuer sur la programmation ou changer de sujet ?";
-        }
-        return "Salut ! Je suis NexAI. Tu peux me demander une recette, un site utile, un calcul ou une explication sur un sujet.";
+      // mini bruit pour varier
+      const variation = Math.random();
+
+      if (intent === 0) {
+        const openings = [
+          "Salut !",
+          "Hey !",
+          "Coucou !",
+          "Yo !"
+        ];
+        const follow = [
+          "Tu peux me demander une recette, un site, un tutoriel ou un calcul.",
+          "Dis-moi ce que tu veux : manger, apprendre, trouver un site, ou juste discuter.",
+          "Je suis là pour t’inspirer : recettes, sites utiles, idées de lecture, code…"
+        ];
+        return randomChoice(openings) + " " + randomChoice(follow);
       }
 
-      if (last.includes("comment ça va") || last.includes("comment ca va")) {
-        return "Je fonctionne bien, prêt à réfléchir avec toi. Dis-moi ce dont tu as besoin : une recette, un site, un tutoriel, un calcul…";
+      if (intent === 1) {
+        const base =
+          "Tu parles de nourriture ou de recettes.\n\n" +
+          "Voici quelques sites utiles :\n" +
+          "- Marmiton : https://www.marmiton.org\n" +
+          "- 750g : https://www.750g.com\n\n";
+        const recipeVariants = [
+          "Recette rapide de cake nature :\n- 3 œufs\n- 150 g de sucre\n- 100 g de beurre fondu\n- 200 g de farine\n- 1 sachet de levure\n- une pincée de sel\nMélange, verse dans un moule beurré, 35–45 min à 180°C.",
+          "Recette simple de gâteau au yaourt :\n- 1 pot de yaourt\n- 2 pots de sucre\n- 3 pots de farine\n- 1/2 pot d’huile\n- 1 sachet de levure\nMélange, four à 180°C environ 30–35 min.",
+          "Tu peux aussi inventer ton propre cake : prends une base (œufs, farine, sucre, beurre) et ajoute ce que tu aimes (chocolat, citron, fruits)."
+        ];
+        return base + randomChoice(recipeVariants);
       }
 
-      if (/\b(manger|faim|j'ai faim|je veux manger|recette|cuisine|gateau|gâteau|cake)\b/.test(last)) {
+      if (intent === 2) {
+        const base =
+          "Tu sembles parler de livres ou de lecture.\n\n" +
+          "Sites pour trouver des livres :\n" +
+          "- Amazon Livres : https://www.amazon.fr/livres\n" +
+          "- Fnac Livres : https://www.fnac.com/Livre\n" +
+          "- Goodreads : https://www.goodreads.com\n\n";
+        const extra = [
+          "Tu peux chercher par genre (SF, fantasy, polar, manga) pour trouver quelque chose qui te plaît.",
+          "Une bonne approche : lire les avis, regarder les notes, puis choisir un livre qui correspond à ton humeur.",
+          "Si tu me dis ton style préféré (SF, fantasy, polar, manga), je peux te suggérer un type de lecture."
+        ];
+        return base + randomChoice(extra);
+      }
+
+      if (intent === 3) {
+        const base =
+          "Tu parles de code ou de programmation.\n\n" +
+          "Sites utiles :\n" +
+          "- MDN Web Docs : https://developer.mozilla.org\n" +
+          "- W3Schools : https://www.w3schools.com\n" +
+          "- Stack Overflow : https://stackoverflow.com\n\n";
+        const extra = [
+          "Commence par des petits projets : une page web, un script simple, un mini outil.",
+          "Choisis un langage (JavaScript pour le web, Python pour la polyvalence) et suis un tutoriel étape par étape.",
+          "Tu peux taper « tutoriel JavaScript » ou « apprendre Python » dans NexSearch pour des liens cliquables."
+        ];
+        return base + randomChoice(extra);
+      }
+
+      if (intent === 4) {
+        const base =
+          "Tu sembles chercher des sites ou des marques.\n\n" +
+          "Quelques exemples :\n" +
+          "- Amazon : https://www.amazon.fr\n" +
+          "- Microsoft : https://www.microsoft.com\n" +
+          "- Shopify : https://www.shopify.com\n" +
+          "- Outlook : https://outlook.live.com\n" +
+          "- Gmail : https://mail.google.com\n\n";
+        const extra = [
+          "Tape le nom du site dans NexSearch pour voir des liens cliquables pertinents.",
+          "Si tu précises le type de site (shopping, mail, vidéo, code), je peux te orienter plus finement.",
+          "Tu peux aussi combiner : « site de recettes », « site de livres », « site de tutoriels code »."
+        ];
+        return base + randomChoice(extra);
+      }
+
+      if (intent === 5) {
+        const base =
+          "Tu poses une question de type « comment / pourquoi / qu’est-ce que ».\n\n" +
+          "Pour comprendre un sujet :\n" +
+          "- Commence par une définition simple.\n" +
+          "- Identifie les éléments importants ou les étapes.\n" +
+          "- Cherche un exemple concret ou une analogie.\n\n";
+        const extra = [
+          "Tu peux taper le mot-clé principal dans NexSearch pour obtenir des liens vers Wikipédia, des tutoriels et des vidéos.",
+          "Si tu me donnes un mot-clé précis, je peux te proposer une façon de le comprendre étape par étape.",
+          "Souvent, combiner lecture (article) + vidéo (YouTube) aide à bien intégrer un concept."
+        ];
+        return base + randomChoice(extra);
+      }
+
+      // fallback si le réseau est peu confiant
+      if (confidence < 0.4) {
         return (
-          "Tu as envie de manger, parfait.\n\n" +
-          "Voici un site qui propose des recettes de gâteaux : Marmiton (https://www.marmiton.org).\n" +
-          "Tu peux aussi chercher « recette de gâteau » dans NexSearch pour plus de résultats.\n\n" +
-          "Je te propose moi-même une recette de cake nature simple :\n" +
-          "- Préchauffe ton four à 180°C.\n" +
-          "- Mélange 3 œufs, 150 g de sucre et 100 g de beurre fondu.\n" +
-          "- Ajoute 200 g de farine, 1 sachet de levure et une pincée de sel.\n" +
-          "- Tu peux incorporer de la vanille, du citron ou des pépites de chocolat.\n" +
-          "- Verse dans un moule beurré et enfourne 35 à 45 minutes.\n\n" +
-          "Avec ça, tu as à la fois un site pour explorer d’autres recettes et une base pour faire ton propre gâteau."
+          "Je ne suis pas sûr de bien comprendre ta demande, mais je peux t’aider sur :\n" +
+          "- des recettes ou idées de cuisine,\n" +
+          "- des sites utiles (shopping, mail, vidéo, code),\n" +
+          "- des livres ou de la lecture,\n" +
+          "- du code ou des tutoriels,\n" +
+          "- des questions « comment / pourquoi ».\n\n" +
+          "Essaie de reformuler ou de préciser un peu ce que tu veux."
         );
       }
 
-      if (last.startsWith("calcule ") || isMathExpression(last)) {
-        const expr = last.replace(/^calcule\s+/i, "");
-        const res = calculateExpression(expr);
-        if (res !== null && !Number.isNaN(res)) {
-          return `Si je calcule « ${expr} », j’obtiens : ${res}. Tu peux aussi taper cette expression directement dans NexSearch pour voir le résultat dans la zone de résultats.`;
-        } else {
-          return "Je n’arrive pas à calculer cette expression. Essaie avec quelque chose comme 3*(5+2) ou « calcule 12*4 ».";
-        }
-      }
-
-      if (/\b(javascript|python|code|programmation|développeur|developer)\b/.test(last)) {
-        return (
-          "Tu t’intéresses à la programmation, bonne idée.\n\n" +
-          "Pour apprendre efficacement :\n" +
-          "- Choisis un langage (JavaScript pour le web, Python pour la polyvalence).\n" +
-          "- Suis un tutoriel structuré étape par étape.\n" +
-          "- Construis de petits projets concrets (un mini site, un script, un outil).\n\n" +
-          "Pour JavaScript, tu peux consulter MDN Web Docs ou W3Schools.\n" +
-          "Pour Python, la documentation officielle et des sites comme Real Python sont utiles.\n\n" +
-          "Tu peux aussi taper « tutoriel JavaScript » ou « apprendre Python » dans NexSearch pour obtenir des liens cliquables vers ces ressources."
-        );
-      }
-
-      if (
-        last.startsWith("comment ") ||
-        last.startsWith("pourquoi ") ||
-        last.startsWith("c'est quoi") ||
-        last.startsWith("c est quoi") ||
-        last.startsWith("qu'est-ce que") ||
-        last.startsWith("qu est ce que")
-      ) {
-        return (
-          "Tu poses une question explicative.\n\n" +
-          "Une bonne façon de comprendre un sujet :\n" +
-          "- Commencer par une définition simple.\n" +
-          "- Identifier les éléments importants ou les étapes.\n" +
-          "- Chercher un exemple concret ou une analogie.\n\n" +
-          "Pour approfondir, tu peux taper ta question ou le mot-clé principal dans NexSearch : tu auras des liens vers Wikipédia, des tutoriels, des vidéos, etc."
-        );
-      }
-
-      if (last.includes("site") || last.includes("sites") || last.includes("marque")) {
-        return (
-          "Si tu cherches des sites précis, tu peux :\n" +
-          "- Taper directement le nom du site dans NexSearch (ex : « shopify », « amazon », « marmiton »).\n" +
-          "- NexSearch essaiera de te proposer des liens cliquables vers les sites les plus pertinents.\n\n" +
-          "Pour des recettes : Marmiton, 750g.\n" +
-          "Pour des tutoriels vidéo : YouTube.\n" +
-          "Pour des définitions : Wikipédia.\n" +
-          "Pour une recherche générale : Bing ou Google."
-        );
-      }
-
-      if (context.hasTalkedFood && !/\b(manger|faim|recette|cuisine|gateau|gâteau|cake)\b/.test(last)) {
-        return (
-          "On a déjà parlé de recettes et de nourriture. Si tu veux, je peux te proposer une autre idée :\n" +
-          "- Un cake salé (avec fromage, jambon, olives).\n" +
-          "- Un gâteau au yaourt très simple.\n\n" +
-          "Tu peux aussi me dire un ingrédient que tu as (ex : chocolat, citron, banane) et je t’inspire une recette rapide."
-        );
-      }
-
-      if (last.includes("livre") || last.includes("lecture")) {
-        return (
-          "Tu cherches des livres ou des idées de lecture.\n\n" +
-          "Tu peux regarder :\n" +
-          "- Amazon Livres (https://www.amazon.fr/livres) pour une grande sélection.\n" +
-          "- Fnac Livres (https://www.fnac.com/Livre) pour des suggestions et des avis.\n" +
-          "- Goodreads (https://www.goodreads.com) pour des critiques et des recommandations.\n\n" +
-          "Tu peux aussi taper « livre » dans NexSearch pour voir des liens cliquables vers ces sites."
-        );
-      }
-
-      return (
-        "Je suis une IA locale, donc je ne peux pas lire les sites en temps réel, " +
-        "mais je peux t’aider à réfléchir, te proposer des idées, des recettes simples, des conseils ou des explications.\n\n" +
-        "Essaie de préciser ce que tu veux : une recette, un site, un tutoriel, un calcul, ou une définition sur un sujet."
-      );
+      return "Je suis une IA locale hybride. Je commence à apprendre de ce que tu écris. Reformule ou précise ta demande pour que je puisse te répondre de façon plus utile.";
     }
   </script>
 </body>

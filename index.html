@@ -4,7 +4,86 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NexSearch</title>
-  <link rel="stylesheet" href="styles.css" />
+
+  <!-- Police propre et moderne -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- GLOBAL --- */
+    body {
+      margin: 0;
+      background: #000000;
+      color: #3B82F6;
+      font-family: "Poppins", system-ui, sans-serif;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* --- HEADER --- */
+    .logo {
+      font-size: 3rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      margin-top: 60px;
+      color: #3B82F6;
+      user-select: none;
+    }
+
+    /* --- MAIN --- */
+    .main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: #60A5FA;
+      opacity: 0.8;
+      user-select: none;
+    }
+
+    .search-form input {
+      width: 480px;
+      max-width: 90vw;
+      padding: 0.9rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid #1F2937;
+      background: #020617;
+      color: #3B82F6;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    .search-form input::placeholder {
+      color: #60A5FA;
+    }
+
+    .search-form input:focus {
+      border-color: #2563EB;
+      box-shadow: 0 0 0 2px #2563EB;
+    }
+
+    /* --- FOOTER --- */
+    .footer {
+      margin-bottom: 40px;
+      font-size: 0.8rem;
+      color: #1E40AF;
+      user-select: none;
+    }
+
+    .powered {
+      opacity: 0.6;
+    }
+  </style>
 </head>
 
 <body>
@@ -32,133 +111,5 @@
     </footer>
 
   </div>
-</body>
-</html>
-/* --- GLOBAL --- */
-body {
-  margin: 0;
-  background: #000000;
-  color: #3B82F6;
-  font-family: "Poppins", system-ui, sans-serif;
-}
-
-.page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-}
-
-/* --- HEADER --- */
-.logo {
-  font-size: 3rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  margin-top: 60px;
-  color: #3B82F6;
-}
-
-/* --- MAIN --- */
-.main {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.tagline {
-  font-size: 1.1rem;
-  color: #60A5FA;
-  opacity: 0.8;
-}
-
-.search-form input {
-  width: 480px;
-  max-width: 90vw;
-  padding: 0.9rem 1.2rem;
-  border-radius: 999px;
-  border: 1px solid #1F2937;
-  background: #020617;
-  color: #3B82F6;
-  font-size: 1rem;
-  outline: none;
-  transition: 0.2s;
-}
-
-.search-form input::placeholder {
-  color: #60A5FA;
-}
-
-.search-form input:focus {
-  border-color: #2563EB;
-  box-shadow: 0 0 0 2px #2563EB;
-}
-
-/* --- FOOTER --- */
-.footer {
-  margin-bottom: 40px;
-  font-size: 0.8rem;
-  color: #1E40AF;
-}
-
-.powered {
-  opacity: 0.6;
-}
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Résultats – NexSearch</title>
-  <link rel="stylesheet" href="styles.css" />
-
-  <style>
-    /* Ajustements pour intégrer le Hosted UI dans ton thème */
-    #bing-results-container {
-      width: 90%;
-      max-width: 900px;
-      margin: 40px auto;
-      color: #3B82F6;
-    }
-
-    /* Forcer fond noir dans l’iframe Bing */
-    iframe {
-      background: #000 !important;
-    }
-  </style>
-</head>
-
-<body>
-  <header class="header">
-    <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer;">
-      NexSearch
-    </div>
-  </header>
-
-  <main>
-    <div id="bing-results-container"></div>
-  </main>
-
-  <script>
-    // Récupération du paramètre q
-    const params = new URLSearchParams(window.location.search);
-    const query = params.get("q") || "";
-
-    // Chargement du Hosted UI Bing
-    (function() {
-      const cx = "YOUR_CUSTOM_CONFIG_ID"; // <<< À remplacer
-      const s = document.createElement("script");
-      s.src = "https://www.bing.com/api/maps/mapcontrol?callback=loadBingUI";
-      document.body.appendChild(s);
-
-      window.loadBingUI = function() {
-        const script = document.createElement("script");
-        script.src = `https://www.bing.com/search?q=${encodeURIComponent(query)}&customconfig=${cx}&form=MYVS01`;
-        document.getElementById("bing-results-container").appendChild(script);
-      };
-    })();
-  </script>
-
 </body>
 </html>

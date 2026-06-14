@@ -3,17 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Résultats-Recherche NexSearch</title>
+  <title>NexSearch – Résultats + NexAI</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
+    html {
+      overflow-y: scroll;
+    }
+
     body {
       margin: 0;
       background: #000;
       color: #3B82F6;
       font-family: "Poppins", sans-serif;
       overflow-x: hidden;
+      scrollbar-width: none; /* Firefox */
+    }
+
+    body::-webkit-scrollbar {
+      display: none; /* Chrome, Edge, Safari */
     }
 
     /* Top search bar */
@@ -187,6 +196,11 @@
       flex-direction: column;
       gap: 10px;
       box-sizing: border-box;
+      scrollbar-width: none;
+    }
+
+    .nexai-messages::-webkit-scrollbar {
+      display: none;
     }
 
     .msg {
@@ -276,11 +290,11 @@
   <!-- PANEL NEXAI -->
   <div class="nexai-panel" id="nexaiPanel">
     <div class="nexai-header">
-      <span>NexAI (IA locale)</span>
+      <span>NexAI (IA locale avancée)</span>
       <span class="nexai-close" id="nexaiClose">×</span>
     </div>
     <div class="nexai-status" id="nexaiStatus">
-      IA locale avancée (sans API) – comprend le contexte et propose des idées.
+      IA locale sans API – comprend le contexte, propose des sites et des idées.
     </div>
     <div class="nexai-messages" id="nexaiMessages"></div>
     <div class="nexai-input-area">
@@ -300,29 +314,104 @@
     const resultsContainer = document.getElementById("results");
 
     /* -----------------------------
-       2. Redirections directes
+       2. Base de sites (200+ possibles)
     ------------------------------ */
-    const siteShortcuts = {
-      "amazon": "https://www.amazon.fr",
-      "shopify": "https://www.shopify.com",
-      "youtube": "https://www.youtube.com",
-      "yt": "https://www.youtube.com",
-      "wikipedia": "https://fr.wikipedia.org",
-      "wiki": "https://fr.wikipedia.org",
-      "bing": "https://www.bing.com",
-      "google": "https://www.google.com",
-      "reddit": "https://www.reddit.com",
-      "twitter": "https://x.com",
-      "x": "https://x.com",
-      "instagram": "https://instagram.com",
-      "github": "https://github.com",
-      "marmiton": "https://www.marmiton.org",
-      "750g": "https://www.750g.com"
-    };
-
-    if (siteShortcuts[query.toLowerCase()]) {
-      window.location.href = siteShortcuts[query.toLowerCase()];
-    }
+    const siteDatabase = [
+      { name: "Amazon", url: "https://www.amazon.fr", tags: ["achat", "shopping", "livre", "produits", "ecommerce"] },
+      { name: "Microsoft", url: "https://www.microsoft.com", tags: ["windows", "office", "logiciels", "cloud"] },
+      { name: "Office", url: "https://www.office.com", tags: ["office", "word", "excel", "powerpoint"] },
+      { name: "Word", url: "https://www.microsoft.com/microsoft-365/word", tags: ["word", "traitement de texte"] },
+      { name: "Excel", url: "https://www.microsoft.com/microsoft-365/excel", tags: ["excel", "tableur", "calcul"] },
+      { name: "PowerPoint", url: "https://www.microsoft.com/microsoft-365/powerpoint", tags: ["powerpoint", "présentation"] },
+      { name: "Outlook", url: "https://outlook.live.com", tags: ["mail", "outlook", "email", "messagerie"] },
+      { name: "Orange Mail", url: "https://mail.orange.fr", tags: ["mail", "orange", "email"] },
+      { name: "Gmail", url: "https://mail.google.com", tags: ["mail", "gmail", "email"] },
+      { name: "Shopify", url: "https://www.shopify.com", tags: ["ecommerce", "boutique", "shopify", "vente en ligne"] },
+      { name: "Bing", url: "https://www.bing.com", tags: ["recherche", "bing", "search"] },
+      { name: "Google", url: "https://www.google.com", tags: ["recherche", "google", "search"] },
+      { name: "YouTube", url: "https://www.youtube.com", tags: ["video", "youtube", "tutoriel"] },
+      { name: "Wikipédia", url: "https://fr.wikipedia.org", tags: ["wikipedia", "encyclopedie", "définition"] },
+      { name: "Marmiton", url: "https://www.marmiton.org", tags: ["recette", "cuisine", "gateau", "gâteau", "cake"] },
+      { name: "750g", url: "https://www.750g.com", tags: ["recette", "cuisine", "gateau"] },
+      { name: "GitHub", url: "https://github.com", tags: ["code", "développement", "github"] },
+      { name: "Stack Overflow", url: "https://stackoverflow.com", tags: ["code", "programmation", "questions"] },
+      { name: "MDN Web Docs", url: "https://developer.mozilla.org", tags: ["javascript", "web", "html", "css"] },
+      { name: "W3Schools", url: "https://www.w3schools.com", tags: ["tutoriel", "web", "html", "css", "javascript"] },
+      { name: "LinkedIn", url: "https://www.linkedin.com", tags: ["emploi", "réseau", "professionnel"] },
+      { name: "Twitter (X)", url: "https://x.com", tags: ["twitter", "x", "réseau social"] },
+      { name: "Instagram", url: "https://www.instagram.com", tags: ["photos", "instagram", "réseau social"] },
+      { name: "Facebook", url: "https://www.facebook.com", tags: ["facebook", "réseau social"] },
+      { name: "Discord", url: "https://discord.com", tags: ["chat", "communauté", "discord"] },
+      { name: "Netflix", url: "https://www.netflix.com", tags: ["films", "séries", "streaming"] },
+      { name: "Prime Video", url: "https://www.primevideo.com", tags: ["films", "séries", "streaming"] },
+      { name: "Canva", url: "https://www.canva.com", tags: ["design", "graphisme", "présentation"] },
+      { name: "Trello", url: "https://trello.com", tags: ["organisation", "projet", "kanban"] },
+      { name: "Notion", url: "https://www.notion.so", tags: ["notes", "organisation", "wiki"] },
+      { name: "Dropbox", url: "https://www.dropbox.com", tags: ["cloud", "fichiers", "stockage"] },
+      { name: "OneDrive", url: "https://onedrive.live.com", tags: ["cloud", "fichiers", "stockage"] },
+      { name: "Google Drive", url: "https://drive.google.com", tags: ["cloud", "fichiers", "stockage"] },
+      { name: "Deezer", url: "https://www.deezer.com", tags: ["musique", "audio"] },
+      { name: "Spotify", url: "https://www.spotify.com", tags: ["musique", "audio"] },
+      { name: "Le Monde", url: "https://www.lemonde.fr", tags: ["actualité", "journal"] },
+      { name: "Le Figaro", url: "https://www.lefigaro.fr", tags: ["actualité", "journal"] },
+      { name: "Numerama", url: "https://www.numerama.com", tags: ["tech", "actualité"] },
+      { name: "01net", url: "https://www.01net.com", tags: ["tech", "tests", "actualité"] },
+      { name: "Fnac", url: "https://www.fnac.com", tags: ["livre", "tech", "culture", "shopping"] },
+      { name: "Cultura", url: "https://www.cultura.com", tags: ["livre", "culture", "loisirs"] },
+      { name: "Decathlon", url: "https://www.decathlon.fr", tags: ["sport", "shopping"] },
+      { name: "Zara", url: "https://www.zara.com", tags: ["vêtements", "mode"] },
+      { name: "H&M", url: "https://www2.hm.com", tags: ["vêtements", "mode"] },
+      { name: "IKEA", url: "https://www.ikea.com", tags: ["meubles", "maison"] },
+      { name: "Darty", url: "https://www.darty.com", tags: ["électroménager", "tech"] },
+      { name: "Boulanger", url: "https://www.boulanger.com", tags: ["électroménager", "tech"] },
+      { name: "Steam", url: "https://store.steampowered.com", tags: ["jeux", "pc", "gaming"] },
+      { name: "Epic Games Store", url: "https://store.epicgames.com", tags: ["jeux", "pc", "gaming"] },
+      { name: "Ubisoft", url: "https://www.ubisoft.com", tags: ["jeux", "gaming"] },
+      { name: "PlayStation", url: "https://www.playstation.com", tags: ["jeux", "console"] },
+      { name: "Xbox", url: "https://www.xbox.com", tags: ["jeux", "console"] },
+      { name: "Nintendo", url: "https://www.nintendo.com", tags: ["jeux", "console"] },
+      { name: "Adobe", url: "https://www.adobe.com", tags: ["photoshop", "pdf", "design"] },
+      { name: "PDF24", url: "https://tools.pdf24.org", tags: ["pdf", "conversion"] },
+      { name: "Google Maps", url: "https://maps.google.com", tags: ["cartes", "itinéraire"] },
+      { name: "Booking", url: "https://www.booking.com", tags: ["voyage", "hotel"] },
+      { name: "Airbnb", url: "https://www.airbnb.com", tags: ["voyage", "logement"] },
+      { name: "Skyscanner", url: "https://www.skyscanner.net", tags: ["vols", "voyage"] },
+      { name: "Kayak", url: "https://www.kayak.com", tags: ["vols", "voyage"] },
+      { name: "OVHcloud", url: "https://www.ovhcloud.com", tags: ["serveur", "cloud", "hébergement"] },
+      { name: "GitLab", url: "https://gitlab.com", tags: ["code", "développement"] },
+      { name: "Bitbucket", url: "https://bitbucket.org", tags: ["code", "développement"] },
+      { name: "Coursera", url: "https://www.coursera.org", tags: ["cours", "formation"] },
+      { name: "Udemy", url: "https://www.udemy.com", tags: ["cours", "formation"] },
+      { name: "OpenClassrooms", url: "https://openclassrooms.com", tags: ["cours", "formation"] },
+      { name: "Khan Academy", url: "https://www.khanacademy.org", tags: ["cours", "maths", "science"] },
+      { name: "Duolingo", url: "https://www.duolingo.com", tags: ["langues", "apprentissage"] },
+      { name: "Reverso", url: "https://www.reverso.net", tags: ["traduction", "langues"] },
+      { name: "DeepL", url: "https://www.deepl.com", tags: ["traduction", "langues"] },
+      { name: "La Poste", url: "https://www.laposte.fr", tags: ["courrier", "colis"] },
+      { name: "Chronopost", url: "https://www.chronopost.fr", tags: ["colis", "livraison"] },
+      { name: "Colissimo", url: "https://www.laposte.fr/colissimo", tags: ["colis", "livraison"] },
+      { name: "Doctolib", url: "https://www.doctolib.fr", tags: ["santé", "rendez-vous"] },
+      { name: "Ameli", url: "https://www.ameli.fr", tags: ["santé", "sécurité sociale"] },
+      { name: "Impots.gouv", url: "https://www.impots.gouv.fr", tags: ["impôts", "administration"] },
+      { name: "Service-Public", url: "https://www.service-public.fr", tags: ["administration", "infos"] },
+      { name: "CAF", url: "https://www.caf.fr", tags: ["aides", "administration"] },
+      { name: "Pôle Emploi", url: "https://www.pole-emploi.fr", tags: ["emploi", "administration"] },
+      { name: "Indeed", url: "https://www.indeed.fr", tags: ["emploi", "job"] },
+      { name: "Monster", url: "https://www.monster.fr", tags: ["emploi", "job"] },
+      { name: "Leboncoin", url: "https://www.leboncoin.fr", tags: ["annonces", "occasion"] },
+      { name: "Vinted", url: "https://www.vinted.fr", tags: ["vêtements", "occasion"] },
+      { name: "Drive Intermarché", url: "https://www.intermarche.com", tags: ["courses", "supermarché"] },
+      { name: "Carrefour", url: "https://www.carrefour.fr", tags: ["courses", "supermarché"] },
+      { name: "Auchan", url: "https://www.auchan.fr", tags: ["courses", "supermarché"] },
+      { name: "Lidl", url: "https://www.lidl.fr", tags: ["courses", "supermarché"] },
+      { name: "Monoprix", url: "https://www.monoprix.fr", tags: ["courses", "supermarché"] },
+      { name: "Picard", url: "https://www.picard.fr", tags: ["surgelés", "cuisine"] },
+      { name: "Allociné", url: "https://www.allocine.fr", tags: ["films", "cinéma"] },
+      { name: "SensCritique", url: "https://www.senscritique.com", tags: ["films", "livres", "critiques"] },
+      { name: "Goodreads", url: "https://www.goodreads.com", tags: ["livres", "lecture"] },
+      { name: "Amazon Livres", url: "https://www.amazon.fr/livres", tags: ["livres", "lecture"] }
+      // Tu peux en rajouter autant que tu veux ici.
+    ];
 
     /* -----------------------------
        3. Module calculatrice
@@ -346,16 +435,12 @@
       const s = str.trim().toLowerCase();
       if (!s) return null;
 
-      if (siteShortcuts[s]) {
-        return siteShortcuts[s];
-      }
-
-      if (s.endsWith(".com") || s.endsWith(".fr") || s.endsWith(".net") || s.endsWith(".org")) {
+      if (s.includes(".fr") || s.includes(".com") || s.includes(".net") || s.includes(".org")) {
+        if (s.startsWith("http")) return s;
         return "https://" + s;
       }
 
       if (/^[a-z0-9\-]+$/i.test(s)) {
-        // tentative : marque ou site simple
         return "https://www." + s + ".com";
       }
 
@@ -363,43 +448,71 @@
     }
 
     /* -----------------------------
-       5. Résultats intelligents
+       5. Moteur de recherche intelligent
     ------------------------------ */
+    function findMatchingSites(q) {
+      const lower = q.toLowerCase();
+      const words = lower.split(/\s+/).filter(Boolean);
+
+      const scored = siteDatabase.map(site => {
+        let score = 0;
+
+        if (site.name.toLowerCase().includes(lower)) score += 5;
+
+        site.tags.forEach(tag => {
+          const t = tag.toLowerCase();
+          if (lower.includes(t)) score += 3;
+          words.forEach(w => {
+            if (t.includes(w)) score += 1;
+          });
+        });
+
+        return { site, score };
+      });
+
+      scored.sort((a, b) => b.score - a.score);
+      return scored.filter(s => s.score > 0).slice(0, 10);
+    }
+
     function buildSmartResults(q) {
       const list = [];
 
-      // Si ça ressemble à un site, on le met en avant
       const siteGuess = looksLikeSite(q);
       if (siteGuess) {
         list.push({
-          name: "Accès direct au site",
+          name: "Accès direct (détection automatique)",
           url: siteGuess,
-          snippet: "Lien direct vers ce site ou cette marque."
+          snippet: "Lien direct vers ce site ou cette marque supposée."
         });
       }
 
-      // Bing
+      const matches = findMatchingSites(q);
+      matches.forEach(m => {
+        list.push({
+          name: m.site.name,
+          url: m.site.url,
+          snippet: "Site susceptible de correspondre à ta recherche."
+        });
+      });
+
       list.push({
         name: "Bing – Résultats pour « " + q + " »",
         url: "https://www.bing.com/search?q=" + encodeURIComponent(q),
         snippet: "Résultats complets (sites, vidéos, actualités, forums) pour ta recherche."
       });
 
-      // YouTube
       list.push({
         name: "YouTube – Vidéos sur « " + q + " »",
         url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(q),
         snippet: "Tutoriels, explications et contenus vidéo liés à ta requête."
       });
 
-      // Wikipédia
       list.push({
         name: "Wikipédia – Article potentiel",
         url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(q),
         snippet: "Si un article existe, tu auras une vue d’ensemble structurée."
       });
 
-      // Cas cuisine / gâteau
       const lower = q.toLowerCase();
       if (
         lower.includes("gateau") ||
@@ -420,6 +533,19 @@
         });
       }
 
+      if (lower.includes("livre") || lower.includes("lecture")) {
+        list.push({
+          name: "Amazon – Livres à petits prix",
+          url: "https://www.amazon.fr/livres",
+          snippet: "Sélection de livres, romans, mangas, BD et plus."
+        });
+        list.push({
+          name: "Fnac – Livres et culture",
+          url: "https://www.fnac.com/Livre",
+          snippet: "Livres, BD, mangas, essais, et plus."
+        });
+      }
+
       return list;
     }
 
@@ -436,7 +562,6 @@
 
       resultsContainer.innerHTML = "";
 
-      // Calcul
       if (isMathExpression(query)) {
         const calc = calculateExpression(query);
         if (calc !== null && calc !== undefined && !Number.isNaN(calc)) {
@@ -450,7 +575,6 @@
         }
       }
 
-      // Résultats intelligents
       const smartResults = buildSmartResults(query);
       resultsContainer.innerHTML += `<div class="section-title">Résultats intelligents</div>`;
       smartResults.forEach(r => {
@@ -484,7 +608,7 @@
       nexaiPanel.classList.add("open");
       nexaiInput.focus();
       if (chatHistory.length === 0) {
-        addAIMessage("Salut ! Je suis NexAI, une IA locale. Tu peux me demander une recette, un conseil, un calcul, ou une explication.");
+        addAIMessage("Salut ! Je suis NexAI, une IA locale. Tu peux me demander une recette, un site utile, un calcul ou une explication.");
       }
     });
 
@@ -528,7 +652,6 @@
       chatHistory.push({ role: "assistant", content: reply });
     }
 
-    // IA locale : moteur d’intentions + contexte
     function localAIReply(history) {
       const lastMsg = history[history.length - 1].content;
       const last = lastMsg.toLowerCase();
@@ -539,7 +662,6 @@
         hasAskedHow: history.some(m => m.role === "user" && /^comment\b/i.test(m.content.toLowerCase()))
       };
 
-      // salutation
       if (/\b(bonjour|salut|yo|hey|coucou)\b/.test(last)) {
         if (context.hasTalkedFood) {
           return "Salut ! On parlait déjà de nourriture, tu veux une autre idée de recette ou quelque chose de différent ?";
@@ -550,12 +672,10 @@
         return "Salut ! Je suis NexAI. Tu peux me demander une recette, un site utile, un calcul ou une explication sur un sujet.";
       }
 
-      // comment ça va
       if (last.includes("comment ça va") || last.includes("comment ca va")) {
         return "Je fonctionne bien, prêt à réfléchir avec toi. Dis-moi ce dont tu as besoin : une recette, un site, un tutoriel, un calcul…";
       }
 
-      // faim / manger / recette
       if (/\b(manger|faim|j'ai faim|je veux manger|recette|cuisine|gateau|gâteau|cake)\b/.test(last)) {
         return (
           "Tu as envie de manger, parfait.\n\n" +
@@ -571,7 +691,6 @@
         );
       }
 
-      // calcul dans le chat
       if (last.startsWith("calcule ") || isMathExpression(last)) {
         const expr = last.replace(/^calcule\s+/i, "");
         const res = calculateExpression(expr);
@@ -582,7 +701,6 @@
         }
       }
 
-      // tutoriel / code
       if (/\b(javascript|python|code|programmation|développeur|developer)\b/.test(last)) {
         return (
           "Tu t’intéresses à la programmation, bonne idée.\n\n" +
@@ -596,7 +714,6 @@
         );
       }
 
-      // questions explicatives
       if (
         last.startsWith("comment ") ||
         last.startsWith("pourquoi ") ||
@@ -615,12 +732,11 @@
         );
       }
 
-      // recherche de site / marque
       if (last.includes("site") || last.includes("sites") || last.includes("marque")) {
         return (
           "Si tu cherches des sites précis, tu peux :\n" +
           "- Taper directement le nom du site dans NexSearch (ex : « shopify », « amazon », « marmiton »).\n" +
-          "- NexSearch essaiera de te proposer un lien direct vers ce site.\n\n" +
+          "- NexSearch essaiera de te proposer des liens cliquables vers les sites les plus pertinents.\n\n" +
           "Pour des recettes : Marmiton, 750g.\n" +
           "Pour des tutoriels vidéo : YouTube.\n" +
           "Pour des définitions : Wikipédia.\n" +
@@ -628,7 +744,6 @@
         );
       }
 
-      // contexte : déjà parlé de nourriture
       if (context.hasTalkedFood && !/\b(manger|faim|recette|cuisine|gateau|gâteau|cake)\b/.test(last)) {
         return (
           "On a déjà parlé de recettes et de nourriture. Si tu veux, je peux te proposer une autre idée :\n" +
@@ -638,7 +753,17 @@
         );
       }
 
-      // fallback générique
+      if (last.includes("livre") || last.includes("lecture")) {
+        return (
+          "Tu cherches des livres ou des idées de lecture.\n\n" +
+          "Tu peux regarder :\n" +
+          "- Amazon Livres (https://www.amazon.fr/livres) pour une grande sélection.\n" +
+          "- Fnac Livres (https://www.fnac.com/Livre) pour des suggestions et des avis.\n" +
+          "- Goodreads (https://www.goodreads.com) pour des critiques et des recommandations.\n\n" +
+          "Tu peux aussi taper « livre » dans NexSearch pour voir des liens cliquables vers ces sites."
+        );
+      }
+
       return (
         "Je suis une IA locale, donc je ne peux pas lire les sites en temps réel, " +
         "mais je peux t’aider à réfléchir, te proposer des idées, des recettes simples, des conseils ou des explications.\n\n" +

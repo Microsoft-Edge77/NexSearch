@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexSearch – Résultats</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    background: #000;
+    color: #3B82F6;
+    font-family: "Poppins", sans-serif;
+  }
+
+  .header {
+    padding: 25px;
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .container {
+    width: 90%;
+    max-width: 900px;
+    margin: auto;
+    margin-top: 20px;
+  }
+
+  .result {
+    background: #020617;
+    border: 1px solid #1E3A8A;
+    padding: 18px;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    transition: 0.2s;
+  }
+
+  .result:hover {
+    border-color: #2563EB;
+    transform: translateX(4px);
+  }
+
+  .title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #60A5FA;
+  }
+
+  .url {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 8px;
+  }
+
+  .snippet {
+    font-size: 1rem;
+    color: #93C5FD;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #3B82F6;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="header" onclick="window.location.href='index.html'">NexSearch</div>
+
+<div class="container">
+  <div id="results"></div>
+</div>
+
+<script>
+/* ------------------------------
+   1. Récupération de la requête
+--------------------------------*/
+const params = new URLSearchParams(window.location.search);
+const query = params.get("q") || "";
+
+/* ------------------------------
+   2. Base de données intelligente
+   (sites connus + IA locale)
+--------------------------------*/
+const smartDB = [
+  {
+    name: "Wikipédia",
+    url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(query),
+    match: ["qui est", "définition", "histoire", "wiki", "wikipédia"],
+    snippet: "Article encyclopédique détaillé sur « " + query + " » avec historique, contexte et informations essentielles."
+  },
+  {
+    name: "YouTube",
+    url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(query),
+    match: ["vidéo", "tutoriel", "music", "musique", "review", "youtube"],
+    snippet: "Vidéos, tutoriels, analyses et contenus populaires liés à « " + query + " »."
+  },
+  {
+    name: "Bing",
+    url: "https://www.bing.com/search?q=" + encodeURIComponent(query),
+    match: ["bing", "search", "recherche", "site"],
+    snippet: "Résultats complets provenant du moteur Bing pour « " + query + " »."
+  },
+  {
+    name: "Amazon",
+    url: "https://www.amazon.fr/s?k=" + encodeURIComponent(query),
+    match: ["acheter", "prix", "amazon", "produit"],
+    snippet: "Produits, prix et avis clients correspondant à « " + query + " »."
+  },
+  {
+    name: "Reddit",
+    url: "https://www.reddit.com/search/?q=" + encodeURIComponent(query),
+    match: ["avis", "discussion", "reddit", "communauté"],
+    snippet: "Discussions, avis et retours d’expérience sur « " + query + " »."
+  }
+];
+
+/* ------------------------------
+   3. Génération IA locale
+--------------------------------*/
+function generateAISnippet(q) {
+  return (
+    "Analyse intelligente de NexSearch : « " +
+    q +
+    " » semble être un sujet populaire. Voici une sélection de sources pertinentes, fiables et variées pour explorer ce thème."
+  );
+}
+
+/* ------------------------------
+   4. Classement intelligent
+--------------------------------*/
+function scoreSite(site, q) {
+  let score = 0;
+  site.match.forEach(keyword => {
+    if (q.toLowerCase().includes(keyword)) score += 10;
+  });
+  return score;
+}
+
+/* ------------------------------
+   5. Génération des résultats
+--------------------------------*/
+function generateResults() {
+  const container = document.getElementById("results");
+
+  // Résultat IA
+  container.innerHTML += `
+    <div class="section-title">Analyse IA</div>
+    <div class="result">
+      <div class="snippet">${generateAISnippet(query)}</div>
+    </div>
+  `;
+
+  // Classement
+  const sorted = smartDB
+    .map(site => ({ ...site, score: scoreSite(site, query) }))
+    .sort((a, b) => b.score - a.score);
+
+  // Résultats
+  container.innerHTML += `<div class="section-title">Résultats intelligents</div>`;
+
+  sorted.forEach(site => {
+    container.innerHTML += `
+      <div class="result">
+        <div class="title">${site.name}</div>
+        <div class="url">${site.url}</div>
+        <div class="snippet">${site.snippet}</div>
+      </div>
+    `;
+  });
+}
+
+generateResults();
+</script>
+
+</body>
+</html>

@@ -109,9 +109,19 @@
 
     .url {
       font-size: 0.9rem;
-      opacity: 0.7;
+      opacity: 0.8;
       margin-bottom: 8px;
       word-break: break-all;
+    }
+
+    .url a {
+      color: #60A5FA;
+      text-decoration: none;
+    }
+
+    .url a:hover {
+      text-decoration: underline;
+      color: #93C5FD;
     }
 
     .snippet {
@@ -262,7 +272,7 @@
       <span class="nexai-close" id="nexaiClose">×</span>
     </div>
     <div class="nexai-status" id="nexaiStatus">
-      Modèle IA connecté via Eden AI (LLM).
+      IA locale NexAI (sans API).
     </div>
     <div class="nexai-messages" id="nexaiMessages"></div>
     <div class="nexai-input-area">
@@ -321,7 +331,6 @@
 
     /* -----------------------------
        4. Résultats intelligents simples
-       (liens externes, pas d'IA ici)
     ------------------------------ */
     const smartResults = [
       {
@@ -374,7 +383,7 @@
         resultsContainer.innerHTML += `
           <div class="result">
             <div class="title">${r.name}</div>
-            <div class="url">${r.url}</div>
+            <div class="url"><a href="${r.url}" target="_blank">${r.url}</a></div>
             <div class="snippet">${r.snippet}</div>
           </div>
         `;
@@ -384,7 +393,7 @@
     renderMain();
 
     /* -----------------------------
-       5. NexAI – vrai chat IA via Eden AI
+       5. NexAI – IA locale (rule-based)
     ------------------------------ */
 
     const nexaiPanel = document.getElementById("nexaiPanel");
@@ -401,7 +410,7 @@
       nexaiPanel.classList.add("open");
       nexaiInput.focus();
       if (chatHistory.length === 0) {
-        addAIMessage("Bonjour ! Je suis NexAI. Pose-moi une question ou dis-moi ce que tu veux faire.");
+        addAIMessage("Salut ! Je suis NexAI, une IA locale. Pose-moi une question ou dis-moi ce que tu veux faire.");
       }
     });
 
@@ -433,74 +442,106 @@
       nexaiMessages.scrollTop = nexaiMessages.scrollHeight;
     }
 
-    async function sendUserMessage() {
+    function sendUserMessage() {
       const text = nexaiInput.value.trim();
       if (!text) return;
       nexaiInput.value = "";
       addUserMessage(text);
-
       chatHistory.push({ role: "user", content: text });
 
-      nexaiStatus.textContent = "NexAI réfléchit...";
-      const reply = await callEdenAI(chatHistory);
-      nexaiStatus.textContent = "Modèle IA connecté via Eden AI (LLM).";
-
-      if (reply) {
-        addAIMessage(reply);
-        chatHistory.push({ role: "assistant", content: reply });
-      } else {
-        addAIMessage("Je n’ai pas pu générer de réponse pour le moment.");
-      }
+      const reply = localAIReply(chatHistory);
+      addAIMessage(reply);
+      chatHistory.push({ role: "assistant", content: reply });
     }
 
-    async function callEdenAI(history) {
-      const API_KEY = "YOUR_EDENAI_API_KEY"; // 🔁 Remplace par ta clé réelle
-      const url = "https://api.edenai.run/v2/text/chat";
+    // IA locale : moteur d’intentions + réponses générées
+    function localAIReply(history) {
+      const last = history[history.length - 1].content.toLowerCase();
 
-      // On convertit l'historique en format messages
-      const messages = history.map(m => ({
-        role: m.role,
-        content: m.content
-      }));
-
-      // On ajoute un message système pour cadrer le comportement
-      messages.unshift({
-        role: "system",
-        content:
-          "Tu es NexAI, une IA générale intégrée dans un moteur de recherche public. " +
-          "Tu réponds en français, de manière claire, concise et utile. " +
-          "Tu ne mentionnes jamais le nom de l'utilisateur. " +
-          "Tu peux proposer des recettes, des idées, des explications, des conseils. " +
-          "Si la question concerne la nourriture, tu peux proposer une recette simple et éventuellement suggérer un site comme Marmiton ou autre, sans inventer d’URL précises."
-      });
-
-      const body = {
-        providers: ["openai"],   // ou autre provider supporté par Eden AI
-        text: messages,          // format chat
-        temperature: 0.4,
-        max_tokens: 256
-      };
-
-      try {
-        const res = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${API_KEY}`
-          },
-          body: JSON.stringify(body)
-        });
-
-        const data = await res.json();
-        // Structure typique : data.openai.generated_text
-        if (data && data.openai && data.openai.generated_text) {
-          return data.openai.generated_text.trim();
-        }
-        return null;
-      } catch (e) {
-        console.error(e);
-        return null;
+      // salutation
+      if (/\b(bonjour|salut|yo|hey|coucou)\b/.test(last)) {
+        return "Salut ! Je suis NexAI. Tu peux me poser des questions, me demander une idée de recette, un conseil, ou même un calcul.";
       }
+
+      // comment ça va
+      if (last.includes("comment ça va") || last.includes("comment ca va")) {
+        return "Je fonctionne bien, prêt à répondre à tes questions. Et toi, qu’est-ce que tu veux faire ?";
+      }
+
+      // faim / manger / recette
+      if (/\b(manger|faim|j'ai faim|je veux manger|recette|cuisine)\b/.test(last)) {
+        return (
+          "Tu as envie de manger, bonne idée.\n\n" +
+          "Voici une recette simple de cake nature :\n" +
+          "- Préchauffe ton four à 180°C.\n" +
+          "- Mélange 3 œufs, 150 g de sucre et 100 g de beurre fondu.\n" +
+          "- Ajoute 200 g de farine, 1 sachet de levure et une pincée de sel.\n" +
+          "- Tu peux ajouter de la vanille, du citron ou des pépites de chocolat.\n" +
+          "- Verse dans un moule beurré et enfourne 35 à 45 minutes.\n\n" +
+          "Pour plus d’idées, tu peux aller voir des sites comme Marmiton ou 750g."
+        );
+      }
+
+      // calcul dans le chat
+      if (last.startsWith("calcule ") || isMathExpression(last)) {
+        const expr = last.replace(/^calcule\s+/i, "");
+        const res = calculateExpression(expr);
+        if (res !== null && !Number.isNaN(res)) {
+          return `Si je calcule « ${expr} », j’obtiens : ${res}.`;
+        } else {
+          return "Je n’arrive pas à calculer cette expression. Essaie avec quelque chose comme 3*(5+2).";
+        }
+      }
+
+      // tutoriel / code
+      if (/\b(javascript|python|code|programmation|développeur|developer)\b/.test(last)) {
+        return (
+          "Tu sembles t’intéresser au code ou à la programmation.\n\n" +
+          "Une bonne approche :\n" +
+          "- Choisir un langage (JavaScript ou Python par exemple).\n" +
+          "- Suivre un tutoriel étape par étape.\n" +
+          "- Pratiquer avec de petits projets concrets.\n\n" +
+          "Pour JavaScript, tu peux regarder MDN Web Docs ou W3Schools. Pour Python, des sites comme Real Python ou la doc officielle sont utiles."
+        );
+      }
+
+      // questions explicatives
+      if (
+        last.startsWith("comment ") ||
+        last.startsWith("pourquoi ") ||
+        last.startsWith("c'est quoi") ||
+        last.startsWith("c est quoi") ||
+        last.startsWith("qu'est-ce que") ||
+        last.startsWith("qu est ce que")
+      ) {
+        return (
+          "Tu poses une question explicative.\n\n" +
+          "Une bonne façon de comprendre un sujet :\n" +
+          "- Commencer par une définition simple.\n" +
+          "- Identifier les éléments importants ou les étapes.\n" +
+          "- Chercher un exemple concret.\n\n" +
+          "Tu peux aussi faire une recherche plus précise dans NexSearch avec des mots-clés comme « définition », « tutoriel », ou « exemple »."
+        );
+      }
+
+      // recherche de site
+      if (last.includes("site") || last.includes("sites")) {
+        return (
+          "Si tu cherches des sites utiles, tu peux essayer :\n" +
+          "- Marmiton pour la cuisine.\n" +
+          "- YouTube pour des tutoriels vidéo.\n" +
+          "- Wikipédia pour des définitions et du contexte.\n" +
+          "- Bing ou Google pour une recherche générale.\n\n" +
+          "Tu peux aussi taper directement le nom du site dans NexSearch (ex : « marmiton », « youtube »)."
+        );
+      }
+
+      // fallback générique
+      return (
+        "Je suis une IA locale, donc je ne peux pas accéder à tout le web en temps réel, " +
+        "mais je peux t’aider à réfléchir, te proposer des idées, des recettes simples, des conseils ou des explications.\n\n" +
+        "Essaie de me dire ce que tu veux : une recette, un tutoriel, un calcul, une définition…"
+      );
     }
   </script>
 </body>

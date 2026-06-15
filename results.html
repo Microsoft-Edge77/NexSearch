@@ -1,28 +1,45 @@
 <!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>NexSearch – Résultats</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{background:#000;color:#3aa7ff;font-family:Arial;margin:0}
-header{padding:20px;font-size:32px;font-weight:bold;color:#3aa7ff;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid #3aa7ff}
-#addressBar{background:#111;border:1px solid #3aa7ff;color:#3aa7ff;padding:6px 10px;width:320px;border-radius:6px;font-size:14px}
+header{padding:20px;font-size:32px;font-weight:bold;color:#3aa7ff;text-align:center;border-bottom:1px solid #3aa7ff}
+#bottomBar{position:fixed;bottom:0;left:0;width:100%;background:#000;border-top:1px solid #3aa7ff;padding:10px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+#logo{color:#3aa7ff;font-size:22px;text-decoration:none;cursor:pointer}
+#addressBar{flex:1;background:#111;border:1px solid #3aa7ff;color:#3aa7ff;padding:8px 12px;border-radius:6px;font-size:16px}
 #bingLink{padding:10px 20px;font-size:16px;border-bottom:1px solid #3aa7ff}
 #bingLink a{color:#7fc7ff;text-decoration:underline}
 #aiSummary{padding:20px;font-size:18px;border-bottom:1px solid #3aa7ff;line-height:1.5}
 .result{padding:15px 20px;border-bottom:1px solid #1a1a1a}
 .result a{color:#3aa7ff;font-size:20px;text-decoration:none;word-break:break-all}
 .result p{margin:5px 0 0;color:#7fc7ff}
-#tabs{display:flex;justify-content:center;gap:20px;padding:20px;border-top:1px solid #3aa7ff}
+#tabs{display:flex;justify-content:center;gap:20px;padding:20px;border-top:1px solid #3aa7ff;margin-bottom:70px}
 #tabs a{color:#3aa7ff;font-size:20px;text-decoration:none}
-.nexai-btn{padding:8px 15px;background:#111;border:1px solid #3aa7ff;color:#3aa7ff;border-radius:6px;cursor:pointer;margin-top:10px}
-.nexai-btn:hover{background:#1a1a1a}
+.nexai-btn{padding:8px 15px;background:#111;border:1px solid:#3aa7ff;color:#3aa7ff;border-radius:6px;cursor:pointer;margin-top:10px}
+@media(max-width:600px){
+header{font-size:26px}
+#logo{font-size:18px}
+#addressBar{font-size:14px}
+.result a{font-size:18px}
+}
 </style></head><body>
 
-<header><div>NexSearch</div><input id="addressBar" placeholder="Adresse ou recherche…"></header>
+<header>NexSearch</header>
+
 <div id="bingLink"><a id="bingResultLink" target="_blank">Voir les résultats Bing</a></div>
 <div id="aiSummary"></div>
 <div id="results"></div>
+
 <div id="tabs"><a id="imgTab" target="_blank">Images</a><a id="mapTab" target="_blank">Maps</a></div>
 
+<div id="bottomBar">
+<a id="logo" href="index.html">NexSearch</a>
+<input id="addressBar" placeholder="Rechercher…">
+</div>
+
 <script>
-const p=new URLSearchParams(location.search),q=(p.get("q")||"").trim();addressBar.value=q;bingResultLink.href="https://www.bing.com/search?q="+encodeURIComponent(q);
+const p=new URLSearchParams(location.search),q=(p.get("q")||"").trim();
+addressBar.value=q;bingResultLink.href="https://www.bing.com/search?q="+encodeURIComponent(q);
+addressBar.addEventListener("keydown",e=>{if(e.key==="Enter")location.href="results.html?q="+encodeURIComponent(addressBar.value)});
 
 function detectCategory(t){
 t=t.toLowerCase();

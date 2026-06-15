@@ -91,6 +91,7 @@
       display: flex;
       flex-direction: column;
       min-height: 0;
+      position: relative;
     }
 
     .panel-header {
@@ -140,6 +141,12 @@
       margin-bottom: 6px;
     }
 
+    .result-item-link {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
     .result-item {
       display: flex;
       gap: 8px;
@@ -148,13 +155,15 @@
       border: 1px solid #111827;
       background: #020617;
       margin-bottom: 5px;
-      transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+      cursor: pointer;
     }
 
     .result-item:hover {
       background: #02081a;
       border-color: #2563eb;
       transform: translateY(-1px);
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.4);
     }
 
     .result-favicon {
@@ -188,15 +197,6 @@
       color: #bfdbfe;
       font-size: 0.88rem;
       margin-bottom: 1px;
-    }
-
-    .result-item-title a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    .result-item-title a:hover {
-      text-decoration: underline;
     }
 
     .result-item-url {
@@ -258,6 +258,7 @@
       flex-direction: column;
       gap: 6px;
       min-height: 0;
+      padding-bottom: 70px; /* espace pour la barre flottante */
     }
 
     #nexai-summary {
@@ -295,14 +296,18 @@
     }
 
     .nexai-input-row {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
       display: flex;
       gap: 6px;
-      margin-top: 4px;
-      padding-top: 6px;
-      border-top: 1px solid #111827;
-      background: linear-gradient(to top, rgba(2,6,23,0.95), rgba(2,6,23,0.7));
-      position: sticky;
-      bottom: 0;
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #1f2937;
+      background: rgba(2,6,23,0.96);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.9);
+      backdrop-filter: blur(10px);
       z-index: 5;
     }
 
@@ -617,11 +622,12 @@
     }
 
     // =========================
-    // 3) NexAI – logique “intelligente”
+    // 3) NexAI – mini-Copilot avec contexte
     // =========================
     const NEXAI_MEMORY = {
       lastQuery: null,
-      lastType: null
+      lastType: null,
+      lastTopic: null
     };
 
     function tryCalcExpression(expr) {
@@ -644,75 +650,29 @@
       const isHello = t.includes("bonjour") || t.includes("salut") || t.includes("hey");
       const isWho = t.includes("qui etes vous") || t.includes("qui es tu") || t.includes("qui etes-vous");
       const isWhat = t.startsWith("c est quoi") || t.startsWith("qu est ce que");
+      const isWhy = t.startsWith("pourquoi") || t.includes("pourquoi ");
+      const isHow = t.startsWith("comment") || t.includes("comment ");
       const isMs = t === "ms" || t.includes("microsoft") || t.includes("windows");
       const isAmazon = t.includes("amazon");
       const isYoutube = t.includes("youtube") || t === "yt";
+      const isFollowUp = t.startsWith("et ") || t.startsWith("et pour") || t.startsWith("et le");
       const isSearchHelp = t.includes("nexsearch") || t.includes("recherche");
-      const isNonsense = t.length <= 3 && !isCalc && !isHello && !isMs && !isAmazon && !isYoutube;
+      const isNonsense = t.length <= 2 && !isCalc && !isHello && !isMs && !isAmazon && !isYoutube;
 
       return {
         isCalc,
         isHello,
         isWho,
         isWhat,
+        isWhy,
+        isHow,
         isMs,
         isAmazon,
         isYoutube,
+        isFollowUp,
         isSearchHelp,
         isNonsense
       };
-    }
-
-    function nexaiAnswer(text, currentQuery) {
-      const trimmed = text.trim();
-      const calcRes = tryCalcExpression(trimmed);
-      const type = nexaiDetectType(trimmed);
-
-      if (calcRes !== null && type.isCalc) {
-        return `Résultat du calcul : ${calcRes}`;
-      }
-
-      if (type.isHello) {
-        return "Bonjour ! Vous pouvez me demander d’expliquer un site (Amazon, Microsoft, YouTube…), de résumer votre recherche ou de faire un calcul.";
-      }
-
-      if (type.isWho) {
-        return "Je suis NexAI, une petite IA intégrée à NexSearch. Je analyse votre requête, corrige les abréviations, détecte le type de recherche (vidéo, produit, site, lieu…) et vous donne un résumé clair.";
-      }
-
-      if (type.isMs) {
-        return "Microsoft est une entreprise américaine qui développe notamment Windows, Office, Xbox et de nombreux services cloud. Si vous cherchez un produit ou un service Microsoft précis, dites-le (par exemple : « Windows 11 », « Excel », « Surface »).";
-      }
-
-      if (type.isAmazon) {
-        return "Amazon est une entreprise américaine spécialisée dans le e‑commerce et les services cloud (AWS). Avec NexSearch, vous pouvez taper un produit (par exemple « clavier ergonomique », « souris Bluetooth ») et je vous proposerai Amazon, Fnac, Cdiscount, etc. pour comparer.";
-      }
-
-      if (type.isYoutube) {
-        return "YouTube est une plateforme de partage de vidéos. Si vous me donnez un titre, un sujet ou un créateur, je peux orienter la recherche vers YouTube et d’autres sites vidéo.";
-      }
-
-      if (type.isWhat) {
-        const after = trimmed.replace(/^c est quoi/i, "").replace(/^qu est ce que/i, "").trim();
-        if (after) {
-          return `Vous me demandez ce que c’est que « ${after} ». NexSearch va chercher des sites pertinents, et moi je peux vous donner un résumé général : nature du service, usage principal, et quelques exemples d’utilisation.`;
-        }
-        return "Vous pouvez me demander : « C’est quoi Amazon ? », « C’est quoi NexSearch ? », « C’est quoi Windows 11 ? », etc.";
-      }
-
-      if (type.isSearchHelp) {
-        return "NexSearch accepte les fautes et les abréviations (ms → Microsoft, yt → YouTube, amz → Amazon…). Tapez simplement ce que vous avez en tête, et je corrige puis j’organise les sites (vidéo, shopping, cartes, images, docs…).";
-      }
-
-      if (type.isNonsense) {
-        return "Je ne reconnais pas ce que vous venez de taper. Essayez un mot-clé plus clair (par exemple un site, un produit, un sujet ou un calcul).";
-      }
-
-      if (currentQuery) {
-        return `Par rapport à votre recherche « ${currentQuery} », vous pouvez me demander un résumé plus détaillé, une explication d’un site précis (Amazon, Microsoft, YouTube…), ou un calcul lié (par exemple un prix total, une remise, etc.).`;
-      }
-
-      return "Je ne suis pas certain de ce que vous attendez. Vous pouvez me demander d’expliquer un site, de résumer une recherche ou de faire un calcul.";
     }
 
     function nexaiBuildSummaryForQuery(q, correctedQ, typeInfo) {
@@ -728,20 +688,20 @@
         base.push(`Requête analysée : « ${q} ».`);
       }
 
-      if (typeInfo.isVideo) base.push("Cela ressemble à une recherche de vidéos.");
-      if (typeInfo.isMusic) base.push("Cela ressemble à une recherche de musique ou d’artiste.");
-      if (typeInfo.isObject) base.push("Cela ressemble à une recherche de produit ou d’objet.");
-      if (typeInfo.isPlace) base.push("Cela ressemble à une recherche de lieu ou d’adresse.");
-      if (typeInfo.isMicrosoft) base.push("Cela semble lié à Microsoft ou Windows.");
+      if (typeInfo.isVideo) base.push("Je privilégie les sites vidéo (YouTube, Twitch, etc.).");
+      if (typeInfo.isMusic) base.push("Je privilégie les sites de musique (Spotify, Deezer, Amazon Music…).");
+      if (typeInfo.isObject) base.push("Je privilégie les sites de shopping (Amazon, Fnac, Cdiscount, AliExpress…).");
+      if (typeInfo.isPlace) base.push("Je privilégie les cartes et les résultats géolocalisés.");
+      if (typeInfo.isMicrosoft) base.push("Je mets en avant l’écosystème Microsoft (Windows, Office, documentation…).");
 
       if (correctedQ.includes("amazon")) {
-        base.push("Amazon est une entreprise de e‑commerce et de services cloud. Je privilégie les sites de shopping pour ce type de requête.");
+        base.push("Amazon est une entreprise de e‑commerce et de services cloud. Les résultats mettent en avant les produits et les comparateurs.");
       }
       if (correctedQ.includes("microsoft")) {
-        base.push("Microsoft développe Windows, Office, Xbox et d’autres services. Je mets en avant les sites Microsoft et la documentation associée.");
+        base.push("Microsoft développe Windows, Office, Xbox et de nombreux services cloud. Les résultats mettent en avant les sites officiels et la documentation.");
       }
       if (correctedQ.includes("youtube")) {
-        base.push("YouTube est une plateforme vidéo. Je mets en avant les sites de vidéos et de streaming.");
+        base.push("YouTube est une plateforme vidéo. Les résultats mettent en avant les vidéos et les plateformes de streaming.");
       }
 
       if (base.length === 0) {
@@ -751,8 +711,100 @@
       return base.join(" ");
     }
 
+    function nexaiGenerateAnswer(text) {
+      const trimmed = text.trim();
+      const calcRes = tryCalcExpression(trimmed);
+      const type = nexaiDetectType(trimmed);
+
+      // Calcul
+      if (calcRes !== null && type.isCalc) {
+        return `Voici le résultat de votre calcul : ${calcRes}. Si vous le souhaitez, je peux aussi expliquer comment on y arrive.`;
+      }
+
+      // Bonjour
+      if (type.isHello) {
+        return "Bonjour ! Vous pouvez me demander d’expliquer un site (Amazon, Microsoft, YouTube…), de résumer votre recherche actuelle ou de faire un calcul rapide.";
+      }
+
+      // Qui suis-je
+      if (type.isWho) {
+        return "Je suis NexAI, une petite IA intégrée à NexSearch. Mon rôle est de comprendre votre requête, corriger les abréviations, analyser le type de recherche (site, produit, vidéo, lieu, calcul…) et vous donner un résumé clair, comme un mini‑Copilot.";
+      }
+
+      // C'est quoi / Qu'est-ce que
+      if (type.isWhat) {
+        const after = trimmed.replace(/^c est quoi/i, "").replace(/^qu est ce que/i, "").trim();
+        if (after) {
+          return `Vous me demandez ce qu’est « ${after} ». En général, je peux vous donner : une définition simple, à quoi cela sert, et quelques exemples d’utilisation. Vous pouvez aussi lancer une recherche avec ce terme pour voir les sites les plus pertinents.`;
+        }
+        return "Vous pouvez me demander : « C’est quoi Amazon ? », « C’est quoi NexSearch ? », « C’est quoi Windows 11 ? », etc.";
+      }
+
+      // Pourquoi
+      if (type.isWhy) {
+        if (NEXAI_MEMORY.lastQuery) {
+          return `Vous posez une question commençant par « pourquoi » en lien avec votre contexte. Par rapport à « ${NEXAI_MEMORY.lastQuery} », je peux vous expliquer les raisons, les avantages ou les limites du sujet que vous explorez.`;
+        }
+        return "Vous posez une question commençant par « pourquoi ». Donnez-moi un peu plus de contexte (par exemple un site, un produit ou une situation) et je vous ferai une explication structurée.";
+      }
+
+      // Comment
+      if (type.isHow) {
+        if (NEXAI_MEMORY.lastQuery) {
+          return `Vous demandez « comment » faire quelque chose. En lien avec « ${NEXAI_MEMORY.lastQuery} », je peux vous proposer des étapes simples, des conseils pratiques et des liens utiles dans les résultats.`;
+        }
+        return "Vous demandez « comment » faire quelque chose. Précisez ce que vous voulez faire (installer, configurer, acheter, comprendre…) et je vous guiderai étape par étape.";
+      }
+
+      // Microsoft
+      if (type.isMs) {
+        NEXAI_MEMORY.lastTopic = "microsoft";
+        return "Microsoft est une entreprise américaine qui développe notamment Windows, Office, Xbox et de nombreux services cloud. Si vous cherchez un produit ou un service Microsoft précis, indiquez-le (par exemple : « Windows 11 », « Excel », « Surface Laptop ») et je vous orienterai vers les bons liens.";
+      }
+
+      // Amazon
+      if (type.isAmazon) {
+        NEXAI_MEMORY.lastTopic = "amazon";
+        return "Amazon est une entreprise américaine spécialisée dans le e‑commerce et les services cloud (AWS). Pour un produit précis, tapez simplement son nom (par exemple « clavier ergonomique », « souris Bluetooth ») et NexSearch mettra en avant Amazon, Fnac, Cdiscount et d’autres sites pour comparer.";
+      }
+
+      // YouTube
+      if (type.isYoutube) {
+        NEXAI_MEMORY.lastTopic = "youtube";
+        return "YouTube est une plateforme de partage de vidéos. Si vous me donnez un sujet, un titre ou un créateur, je peux orienter la recherche vers YouTube et d’autres plateformes vidéo pour que vous trouviez rapidement ce que vous voulez regarder.";
+      }
+
+      // Suivi de conversation
+      if (type.isFollowUp && NEXAI_MEMORY.lastQuery) {
+        return `Vous faites un suivi par rapport à « ${NEXAI_MEMORY.lastQuery} ». Vous pouvez me demander un résumé plus détaillé, une comparaison entre sites (Amazon, Fnac, Cdiscount…), ou un calcul lié (par exemple le prix total avec une remise).`;
+      }
+
+      // Aide sur NexSearch
+      if (type.isSearchHelp) {
+        return "NexSearch accepte les fautes et les abréviations (ms → Microsoft, yt → YouTube, amz → Amazon…). Tapez simplement ce que vous avez en tête, je corrige, j’analyse le type de recherche et j’organise les sites (vidéo, shopping, cartes, images, docs…).";
+      }
+
+      // Entrée très courte / bruit
+      if (type.isNonsense) {
+        return "Je ne reconnais pas ce que vous venez de taper. Essayez un mot‑clé plus clair (un site, un produit, un sujet ou un calcul).";
+      }
+
+      // Contexte de recherche
+      if (NEXAI_MEMORY.lastQuery) {
+        return `Par rapport à votre recherche « ${NEXAI_MEMORY.lastQuery} », vous pouvez me demander : un résumé plus détaillé, une explication d’un site précis (Amazon, Microsoft, YouTube…), ou un calcul lié (par exemple un total, une remise ou une conversion).`;
+      }
+
+      // Fallback général
+      return "Je ne suis pas certain de ce que vous attendez. Vous pouvez me demander d’expliquer un site, de résumer une recherche ou de faire un calcul. Donnez-moi un mot‑clé ou une phrase un peu plus précise et je m’adapterai.";
+    }
+
     async function nexaiChatReply(userText) {
-      return nexaiAnswer(userText, NEXAI_MEMORY.lastQuery);
+      // Ici on simule un réseau de neurones avancé qui combine :
+      // - détection d’intention
+      // - contexte (mémoire courte)
+      // - génération de texte fluide
+      // Le cœur est dans nexaiGenerateAnswer.
+      return nexaiGenerateAnswer(userText);
     }
 
     // =========================
@@ -781,7 +833,7 @@
       { name: "GitHub", url: "https://github.com/search?q={q}", tags: ["dev","code"], weight: 0.9, favicon: "https://github.githubassets.com/favicons/favicon.png" },
       { name: "Stack Overflow", url: "https://stackoverflow.com/search?q={q}", tags: ["dev","questions"], weight: 0.9, favicon: "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico" },
       { name: "MDN Web Docs", url: "https://developer.mozilla.org/fr/search?q={q}", tags: ["dev","docs"], weight: 0.85, favicon: "https://developer.mozilla.org/favicon-32x32.cbbd161b.png" }
-      // → tu peux étendre ici pour aller vers 1000 sites
+      // → extensible jusqu’à 1000 sites
     ];
 
     function detectQueryType(q) {
@@ -926,6 +978,12 @@
       const listDiv = document.getElementById("results-list");
       listDiv.innerHTML = "";
       results.forEach(r => {
+        const linkWrapper = document.createElement("a");
+        linkWrapper.className = "result-item-link";
+        linkWrapper.href = r.url;
+        linkWrapper.target = "_blank";
+        linkWrapper.rel = "noopener noreferrer";
+
         const item = document.createElement("div");
         item.className = "result-item";
 
@@ -949,12 +1007,7 @@
 
         const title = document.createElement("div");
         title.className = "result-item-title";
-        const link = document.createElement("a");
-        link.href = r.url;
-        link.target = "_blank";
-        link.rel = "noopener noreferrer";
-        link.textContent = r.name;
-        title.appendChild(link);
+        title.textContent = r.name;
 
         const url = document.createElement("div");
         url.className = "result-item-url";
@@ -974,8 +1027,9 @@
 
         item.appendChild(fav);
         item.appendChild(content);
+        linkWrapper.appendChild(item);
 
-        listDiv.appendChild(item);
+        listDiv.appendChild(linkWrapper);
       });
 
       const actionsDiv = document.getElementById("results-actions");

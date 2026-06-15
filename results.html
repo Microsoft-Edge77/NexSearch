@@ -1,731 +1,140 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Recherche IA NexSearch</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NexSearch</title>
 
-  <!-- Favicon Copilot+ -->
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://microsoft-edge77.github.io/NexSearchAssets/favicon-copilot-blue.png">
 
+  <!-- Police -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
   <style>
-    :root{
-      --bg:#05060a;
-      --card:#0f1220;
-      --card-soft:#141728;
-      --accent:#4b7dff;
-      --accent-soft:#7fd0ff;
-      --text:#e5f0ff;
-      --sub:#9fb7ff;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Segoe UI,system-ui,-apple-system,sans-serif;
-      overflow:hidden; /* pas de scrollbar globale */
-    }
-    header{
-      height:52px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:20px;
-      font-weight:600;
-      color:var(--text);
-    }
-    .layout{
-      display:flex;
-      height:calc(100vh - 52px - 56px); /* header + bottom bar */
-      width:100%;
-      overflow:hidden;
-    }
-    main{
-      flex:1;
-      padding:10px 12px;
-      max-width:1100px;
-      margin:0 auto;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      overflow-y:auto;
-      scrollbar-width:none;
-    }
-    main::-webkit-scrollbar{display:none}
-
-    .card{
-      background:var(--card);
-      border-radius:16px;
-      padding:14px 16px;
-      backdrop-filter:blur(18px);
-      box-shadow:0 18px 40px rgba(0,0,0,0.55);
-      transition:transform .18s ease,box-shadow .18s ease,background .18s ease;
-    }
-    .card:hover{
-      transform:translateY(-1px);
-      box-shadow:0 22px 50px rgba(0,0,0,0.7);
-      background:var(--card-soft);
-    }
-    .card-title{
-      font-size:16px;
-      font-weight:600;
-      margin-bottom:4px;
-    }
-    .card-sub{
-      font-size:12px;
-      color:var(--sub);
-      margin-bottom:6px;
+    /* GLOBAL */
+    body {
+      margin: 0;
+      background: #000;
+      color: #d0e2ff;
+      font-family: "Poppins", system-ui, sans-serif;
+      overflow-x: hidden;
     }
 
-    #aiSummary{
-      font-size:14px;
-      line-height:1.6;
+    .glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(59,130,246,0.35), transparent 70%);
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: blur(80px);
+      z-index: -1;
     }
 
-    #resultsList{
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-      margin-top:4px;
-    }
-    .result-item{
-      display:flex;
-      align-items:flex-start;
-      gap:10px;
-      padding:9px 11px;
-      border-radius:12px;
-      background:#0a0c14;
-      cursor:pointer;
-      transition:transform .15s ease,box-shadow .15s ease,background .15s ease;
-    }
-    .result-item:hover{
-      transform:translateY(-1px);
-      box-shadow:0 10px 26px rgba(0,0,0,0.6);
-      background:#111425;
-    }
-    .result-logo{
-      width:26px;
-      height:26px;
-      border-radius:50%;
-      background:#111;
-      flex-shrink:0;
-    }
-    .result-main{flex:1}
-    .result-title{
-      font-size:14px;
-      font-weight:600;
-      color:var(--accent-soft);
-    }
-    .result-url{
-      font-size:11px;
-      color:#7fa4ff;
-      margin-top:1px;
-      word-break:break-all;
-    }
-    .result-desc{
-      font-size:12px;
-      color:#c7d6ff;
-      margin-top:3px;
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px 0;
     }
 
-    #tabs{
-      display:flex;
-      justify-content:center;
-      gap:16px;
-      margin-top:6px;
-    }
-    #tabs a{
-      font-size:13px;
-      color:var(--sub);
-      text-decoration:none;
-      transition:color .15s ease,transform .15s ease;
-    }
-    #tabs a:hover{
-      color:var(--accent-soft);
-      transform:translateY(-1px);
+    /* LOGO (doux, premium) */
+    .logo {
+      font-size: 2.8rem;
+      font-weight: 500;
+      letter-spacing: 0.10em;
+      background: linear-gradient(90deg, #6fa3ff, #9cc4ff);
+      -webkit-background-clip: text;
+      color: transparent;
+      opacity: 0.85;
+      text-shadow: 0 0 18px rgba(59,130,246,0.25);
+      transition: 0.3s;
+      user-select: none;
     }
 
-    /* Volet latéral NexAI */
-    #nexaiPanel{
-      width:320px;
-      max-width:80vw;
-      background:rgba(10,12,20,0.98);
-      border-left:1px solid rgba(75,125,255,0.4);
-      box-shadow:-12px 0 30px rgba(0,0,0,0.7);
-      display:flex;
-      flex-direction:column;
-      transform:translateX(100%);
-      opacity:0;
-      pointer-events:none;
-      transition:transform .22s ease,opacity .22s ease;
-    }
-    #nexaiPanel.open{
-      transform:translateX(0);
-      opacity:1;
-      pointer-events:auto;
-    }
-    #nexaiHeader{
-      padding:10px 12px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      border-bottom:1px solid rgba(75,125,255,0.4);
-    }
-    #nexaiTitle{
-      font-size:14px;
-      font-weight:600;
-    }
-    #nexaiClose{
-      border:none;
-      background:transparent;
-      color:var(--sub);
-      font-size:16px;
-      cursor:pointer;
-      padding:4px 6px;
-      border-radius:999px;
-      transition:background .15s ease,color .15s ease,transform .15s ease;
-    }
-    #nexaiClose:hover{
-      background:#15182a;
-      color:var(--accent-soft);
-      transform:translateY(-1px);
-    }
-    #nexaiBody{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      padding:10px 10px 8px;
-      overflow:hidden;
-    }
-    #chatMessages{
-      flex:1;
-      overflow-y:auto;
-      scrollbar-width:none;
-      padding-right:4px;
-      font-size:13px;
-    }
-    #chatMessages::-webkit-scrollbar{display:none}
-    .chat-msg{margin-bottom:8px;display:flex}
-    .chat-user,.chat-ai{
-      display:inline-block;
-      padding:7px 9px;
-      border-radius:14px;
-      max-width:100%;
-      transition:transform .15s ease,background .15s ease;
-    }
-    .chat-user{
-      background:rgba(40,60,120,0.9);
-      color:var(--text);
-      margin-left:auto;
-    }
-    .chat-ai{
-      background:#111425;
-      color:var(--text);
-      border:1px solid rgba(90,130,255,0.4);
-      margin-right:auto;
-    }
-    .chat-user:hover,.chat-ai:hover{transform:translateY(-1px)}
-    #chatInputRow{
-      display:flex;
-      gap:6px;
-      margin-top:6px;
-    }
-    #chatInput{
-      flex:1;
-      border-radius:999px;
-      border:1px solid rgba(90,130,255,0.6);
-      background:#05060a;
-      color:var(--text);
-      padding:7px 10px;
-      font-size:13px;
-      transition:border-color .15s ease,box-shadow .15s ease;
-    }
-    #chatInput:focus{
-      outline:none;
-      border-color:var(--accent-soft);
-      box-shadow:0 0 0 1px rgba(127,208,255,0.6);
-    }
-    #chatSend{
-      border-radius:999px;
-      border:none;
-      background:linear-gradient(135deg,var(--accent),var(--accent-soft));
-      color:#05060a;
-      padding:7px 11px;
-      font-size:13px;
-      font-weight:600;
-      cursor:pointer;
-      transition:transform .15s ease,box-shadow .15s ease,opacity .15s ease;
-    }
-    #chatSend:hover{
-      transform:translateY(-1px);
-      box-shadow:0 8px 20px rgba(75,125,255,0.6);
-    }
-    #chatSend:disabled{
-      opacity:.5;
-      cursor:default;
-      box-shadow:none;
-      transform:none;
+    .logo:hover {
+      opacity: 1;
+      text-shadow: 0 0 30px rgba(59,130,246,0.45);
     }
 
-    /* Barre du bas */
-    #bottomBar{
-      position:fixed;
-      bottom:0;
-      left:0;
-      width:100%;
-      height:56px;
-      background:rgba(5,6,10,0.96);
-      backdrop-filter:blur(16px);
-      padding:8px 10px;
-      display:flex;
-      align-items:center;
-      gap:8px;
-      border-top:1px solid rgba(70,110,255,0.4);
-    }
-    #logo{
-      font-size:15px;
-      font-weight:600;
-      color:var(--text);
-      text-decoration:none;
-      white-space:nowrap;
-      transition:color .15s ease,transform .15s ease;
-    }
-    #logo:hover{
-      color:var(--accent-soft);
-      transform:translateY(-1px);
-    }
-    #addressBar{
-      flex:1;
-      border-radius:999px;
-      border:1px solid rgba(90,130,255,0.7);
-      background:#05060a;
-      color:var(--text);
-      padding:7px 11px;
-      font-size:14px;
-      transition:border-color .15s ease,box-shadow .15s ease;
-    }
-    #addressBar:focus{
-      outline:none;
-      border-color:var(--accent-soft);
-      box-shadow:0 0 0 1px rgba(127,208,255,0.6);
-    }
-    #nexaiToggle{
-      border-radius:999px;
-      border:none;
-      background:rgba(20,26,60,0.9);
-      color:var(--accent-soft);
-      padding:7px 11px;
-      font-size:13px;
-      font-weight:600;
-      cursor:pointer;
-      white-space:nowrap;
-      transition:transform .15s ease,box-shadow .15s ease,background .15s ease,color .15s ease;
-    }
-    #nexaiToggle:hover{
-      transform:translateY(-1px);
-      box-shadow:0 8px 20px rgba(75,125,255,0.6);
-      background:rgba(30,36,80,0.95);
-      color:#ffffff;
+    /* TAGLINE */
+    .tagline {
+      font-size: 1.1rem;
+      color: #9cc4ff;
+      opacity: 0.8;
+      margin-bottom: 10px;
     }
 
-    @media(max-width:800px){
-      .layout{
-        height:calc(100vh - 52px - 56px);
-      }
-      #nexaiPanel{
-        position:fixed;
-        right:0;
-        top:52px;
-        height:calc(100vh - 52px - 56px);
-        z-index:20;
-      }
+    /* SEARCH BOX (liquid glass) */
+    .search-box {
+      backdrop-filter: blur(22px) saturate(200%);
+      background: rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 2px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 0 25px rgba(59,130,246,0.15);
+      transition: 0.25s;
+    }
+
+    .search-box:hover {
+      box-shadow: 0 0 40px rgba(59,130,246,0.25);
+    }
+
+    .search-form input {
+      width: 480px;
+      max-width: 90vw;
+      padding: 1rem 1.4rem;
+      border-radius: 14px;
+      border: none;
+      background: transparent;
+      color: #d0e2ff;
+      font-size: 1.05rem;
+      outline: none;
+    }
+
+    .search-form input::placeholder {
+      color: #9cc4ff;
+      opacity: 0.6;
+    }
+
+    /* FOOTER */
+    .footer {
+      font-size: 0.85rem;
+      color: #4f6fbf;
+      opacity: 0.7;
     }
   </style>
 </head>
+
 <body>
 
-<header>NexSearch</header>
+  <div class="glow"></div>
 
-<div class="layout">
-  <main>
-    <section class="card">
-      <div class="card-title">NexAI – Résumé intelligent</div>
-      <div class="card-sub">Analyse de ta recherche et contexte général</div>
-      <div id="aiSummary"></div>
-    </section>
+  <div class="page">
 
-    <section class="card">
-      <div class="card-title">Sites liés à ta recherche</div>
-      <div class="card-sub">Triés par pertinence (site principal en premier)</div>
-      <div id="resultsList"></div>
-      <div id="tabs">
-        <a id="imgTab" target="_blank">Images</a>
-        <a id="mapTab" target="_blank">Maps</a>
-        <a id="bingTab" target="_blank">Voir sur Bing</a>
+    <header>
+      <div class="logo">NexSearch</div>
+    </header>
+
+    <main class="main">
+      <p class="tagline">Votre moteur de recherche intelligent.</p>
+
+      <div class="search-box">
+        <form class="search-form" action="results.html" method="GET">
+          <input type="text" name="q" placeholder="Rechercher..." autocomplete="off" />
+        </form>
       </div>
-    </section>
-  </main>
+    </main>
 
-  <!-- Volet latéral NexAI -->
-  <aside id="nexaiPanel">
-    <div id="nexaiHeader">
-      <div id="nexaiTitle">NexAI – Chat</div>
-      <button id="nexaiClose">✕</button>
-    </div>
-    <div id="nexaiBody">
-      <div id="chatMessages"></div>
-      <div id="chatInputRow">
-        <input id="chatInput" placeholder="Parle à NexAI… (ex : ça va ?)">
-        <button id="chatSend">Envoyer</button>
-      </div>
-    </div>
-  </aside>
-</div>
+    <footer class="footer">
+      <span class="powered">Powered by Bing</span>
+    </footer>
 
-<div id="bottomBar">
-  <a id="logo" href="index.html">NexSearch</a>
-  <input id="addressBar" placeholder="Rechercher…">
-  <button id="nexaiToggle">NexAI</button>
-</div>
+  </div>
 
-<script>
-/* ========= CONFIG APIFREELLM =========
-   Remplace APIFREELLM_KEY par ta clé.
-   Vérifie dans la doc d’ApiFreeLLM l’URL exacte et le modèle.
-   Ici on suppose une API type OpenAI-compatible.
-*/
-const APIFREELLM_KEY = "apf_s5ve09soqiz19d5qsf26spvk"; // entre guillemets
-const APIFREELLM_URL = "https://api.apifreellm.com/v1/chat/completions"; // adapte si besoin
-const APIFREELLM_MODEL = "gpt-4o-mini"; // ou le modèle proposé par ApiFreeLLM
-
-/* ========= PARAMS RECHERCHE ========= */
-const params = new URLSearchParams(location.search);
-const query = (params.get("q") || "").trim();
-
-const addressBar = document.getElementById("addressBar");
-addressBar.value = query;
-addressBar.addEventListener("keydown", e=>{
-  if(e.key==="Enter"){
-    location.href = "results.html?q="+encodeURIComponent(addressBar.value);
-  }
-});
-
-const imgTab = document.getElementById("imgTab");
-const mapTab = document.getElementById("mapTab");
-const bingTab = document.getElementById("bingTab");
-imgTab.href = "https://www.bing.com/images/search?q="+encodeURIComponent(query);
-mapTab.href = "https://www.bing.com/maps?q="+encodeURIComponent(query);
-bingTab.href = "https://www.bing.com/search?q="+encodeURIComponent(query);
-
-/* ========= UTILITAIRES ========= */
-function blocked(text){
-  return ["porn","porno","viol","gore","snuff","décapitation"].some(w=>text.toLowerCase().includes(w));
-}
-
-function detectCategory(q){
-  q = q.toLowerCase();
-  const cats = {
-    microsoft:["microsoft","windows","office","word","excel","powerpoint","outlook","onedrive","teams","onenote"],
-    education:["scratch","ent","pronote","ecoledirecte","moodle","cours","devoir","parcoursup","geogebra","khan","pix","lumni","openclassrooms"],
-    social:["youtube","tiktok","instagram","facebook","snapchat","twitter","x ","discord","reddit","twitch","pinterest"],
-    shopping:["amazon","fnac","cdiscount","darty","rueducommerce","acheter","prix","promo","deal"],
-    gaming:["xbox","playstation","ps5","nintendo","switch","roblox","minecraft","jeu","gaming","steam","epic"],
-    ai:["copilot","chatgpt","claude","gemini","ia","intelligence artificielle","openai","anthropic","perplexity"],
-    providers:["orange","free","bouygues","sfr","red","sosh"],
-    video:["netflix","prime video","disney","crunchyroll","film","série","serie","streaming"]
-  };
-  for(const k in cats) if(cats[k].some(w=>q.includes(w))) return k;
-  return "general";
-}
-
-function baseSites(query){
-  const q = query.toLowerCase();
-  const cat = detectCategory(q);
-  let sites = [];
-  if(cat==="microsoft"){
-    sites = [
-      {name:"Microsoft (site principal)",url:"https://www.microsoft.com"},
-      {name:"Microsoft 365 / Office",url:"https://www.office.com"},
-      {name:"Outlook (messagerie)",url:"https://outlook.com"},
-      {name:"OneDrive (stockage)",url:"https://onedrive.live.com"},
-      {name:"Teams (collaboration)",url:"https://teams.microsoft.com"},
-      {name:"Word",url:"https://www.microsoft.com/fr-fr/microsoft-365/word"},
-      {name:"Excel",url:"https://www.microsoft.com/fr-fr/microsoft-365/excel"},
-      {name:"PowerPoint",url:"https://www.microsoft.com/fr-fr/microsoft-365/powerpoint"},
-      {name:"Learn Microsoft",url:"https://learn.microsoft.com/fr-fr"},
-      {name:"Support Microsoft",url:"https://support.microsoft.com/fr-fr"}
-    ];
-  }else if(cat==="education"){
-    sites = [
-      {name:"Scratch (programmation visuelle)",url:"https://scratch.mit.edu"},
-      {name:"Pronote / ENT",url:"https://www.index-education.com/fr/pronote.php"},
-      {name:"ÉcoleDirecte",url:"https://www.ecoledirecte.com"},
-      {name:"Moodle",url:"https://moodle.org"},
-      {name:"Khan Academy",url:"https://www.khanacademy.org"},
-      {name:"Pix",url:"https://pix.fr"},
-      {name:"Lumni",url:"https://www.lumni.fr"},
-      {name:"OpenClassrooms",url:"https://openclassrooms.com/fr"},
-      {name:"GeoGebra",url:"https://www.geogebra.org"},
-      {name:"WolframAlpha",url:"https://www.wolframalpha.com"}
-    ];
-  }else if(cat==="social"){
-    sites = [
-      {name:"YouTube",url:"https://www.youtube.com"},
-      {name:"TikTok",url:"https://www.tiktok.com"},
-      {name:"Instagram",url:"https://www.instagram.com"},
-      {name:"Facebook",url:"https://www.facebook.com"},
-      {name:"X (Twitter)",url:"https://twitter.com"},
-      {name:"Snapchat",url:"https://www.snapchat.com"},
-      {name:"Discord",url:"https://discord.com"},
-      {name:"Reddit",url:"https://www.reddit.com"},
-      {name:"Twitch",url:"https://www.twitch.tv"},
-      {name:"Pinterest",url:"https://www.pinterest.fr"}
-    ];
-  }else if(cat==="shopping"){
-    sites = [
-      {name:"Amazon",url:"https://www.amazon.fr"},
-      {name:"Fnac",url:"https://www.fnac.com"},
-      {name:"Cdiscount",url:"https://www.cdiscount.com"},
-      {name:"Darty",url:"https://www.darty.com"},
-      {name:"RueDuCommerce",url:"https://www.rueducommerce.fr"}
-    ];
-  }else if(cat==="gaming"){
-    sites = [
-      {name:"Xbox",url:"https://www.xbox.com"},
-      {name:"PlayStation",url:"https://www.playstation.com"},
-      {name:"Nintendo",url:"https://www.nintendo.com"},
-      {name:"Steam",url:"https://store.steampowered.com"},
-      {name:"Epic Games Store",url:"https://www.epicgames.com/store"},
-      {name:"Roblox",url:"https://www.roblox.com"},
-      {name:"Minecraft",url:"https://www.minecraft.net"},
-      {name:"Micromania",url:"https://www.micromania.fr"}
-    ];
-  }else if(cat==="ai"){
-    sites = [
-      {name:"Microsoft Copilot",url:"https://copilot.microsoft.com"},
-      {name:"ChatGPT",url:"https://chat.openai.com"},
-      {name:"Claude",url:"https://claude.ai"},
-      {name:"Gemini",url:"https://gemini.google.com"},
-      {name:"Perplexity",url:"https://www.perplexity.ai"},
-      {name:"Hugging Face",url:"https://huggingface.co"}
-    ];
-  }else if(cat==="providers"){
-    sites = [
-      {name:"Orange",url:"https://www.orange.fr"},
-      {name:"Free",url:"https://www.free.fr"},
-      {name:"Bouygues Telecom",url:"https://www.bouyguestelecom.fr"},
-      {name:"SFR",url:"https://www.sfr.fr"},
-      {name:"RED by SFR",url:"https://www.red-by-sfr.fr"},
-      {name:"Sosh",url:"https://www.sosh.fr"}
-    ];
-  }else if(cat==="video"){
-    sites = [
-      {name:"YouTube",url:"https://www.youtube.com"},
-      {name:"Netflix",url:"https://www.netflix.com"},
-      {name:"Prime Video",url:"https://www.primevideo.com"},
-      {name:"Disney+",url:"https://www.disneyplus.com"},
-      {name:"Crunchyroll",url:"https://www.crunchyroll.com"}
-    ];
-  }else{
-    sites = [
-      {name:"Bing (recherche générale)",url:"https://www.bing.com/search?q="+encodeURIComponent(query)},
-      {name:"Wikipedia",url:"https://fr.wikipedia.org/wiki/"+encodeURIComponent(query)},
-      {name:"Qwant",url:"https://www.qwant.com/?q="+encodeURIComponent(query)},
-      {name:"DuckDuckGo",url:"https://duckduckgo.com/?q="+encodeURIComponent(query)}
-    ];
-  }
-  return sites;
-}
-
-function faviconUrl(url){
-  try{
-    const u = new URL(url);
-    return "https://www.google.com/s2/favicons?sz=64&domain="+u.hostname;
-  }catch{
-    return "";
-  }
-}
-
-/* ========= RENDU RESULTATS ========= */
-const resultsList = document.getElementById("resultsList");
-
-function renderResults(sites){
-  resultsList.innerHTML = "";
-  sites.forEach(site=>{
-    const div = document.createElement("div");
-    div.className = "result-item";
-    div.onclick = ()=>window.open(site.url,"_blank");
-    div.innerHTML = `
-      <img class="result-logo" src="${faviconUrl(site.url)}" alt="">
-      <div class="result-main">
-        <div class="result-title">${site.name}</div>
-        <div class="result-url">${site.url}</div>
-        <div class="result-desc">${site.desc || "Site lié à ta recherche."}</div>
-      </div>
-    `;
-    resultsList.appendChild(div);
-  });
-}
-
-/* ========= APPEL APIFREELLM ========= */
-async function callApiFreeLLM(systemPrompt,userPrompt){
-  const body = {
-    model: APIFREELLM_MODEL,
-    messages: [
-      {role:"system",content:systemPrompt},
-      {role:"user",content:userPrompt}
-    ]
-  };
-  const res = await fetch(APIFREELLM_URL,{
-    method:"POST",
-    headers:{
-      "Content-Type":"application/json",
-      "Authorization":"Bearer "+APIFREELLM_KEY
-    },
-    body:JSON.stringify(body)
-  });
-  if(!res.ok) throw new Error("HTTP "+res.status);
-  const data = await res.json();
-  const text = data.choices?.[0]?.message?.content || "";
-  return text;
-}
-
-/* ========= RESUME NEXAI ========= */
-const aiSummary = document.getElementById("aiSummary");
-
-async function loadSummary(){
-  if(!query){
-    aiSummary.innerHTML = "<p>Entre une recherche pour que NexAI puisse te répondre.</p>";
-    return;
-  }
-  if(blocked(query)){
-    aiSummary.innerHTML = "<p>Contenu non autorisé pour NexAI.</p>";
-    return;
-  }
-  aiSummary.innerHTML = "<p>Analyse NexAI en cours…</p>";
-  try{
-    const sys = `Tu es NexAI, IA premium NexSearch/Copilot+. 
-Réponds toujours en français, en HTML simple (<p>, <b>, <ul>, <li>).
-Tu dois :
-1) saluer l’utilisateur (style moderne, amical).
-2) expliquer brièvement ce qu’est la requête de recherche.
-3) si la requête ressemble à un calcul (ex : "1+1", "3*5"), donne le résultat du calcul.
-4) annoncer que des sites liés sont listés en dessous.
-Ne produis pas de contenu violent ou pornographique.`;
-    const user = `Requête de recherche : "${query}"`;
-    const text = await callApiFreeLLM(sys,user);
-    aiSummary.innerHTML = text || "<p>Salut ! Voici un résumé intelligent de ta recherche.</p>";
-  }catch(e){
-    aiSummary.innerHTML = "<p>Erreur IA, NexAI a eu un souci temporaire.</p>";
-  }
-}
-
-/* ========= TRI + DESCRIPTION DES SITES PAR IA ========= */
-async function loadSites(){
-  const base = baseSites(query);
-  if(!query || base.length===0){
-    renderResults(base);
-    return;
-  }
-  if(blocked(query)){
-    renderResults(base);
-    return;
-  }
-  // rendu provisoire
-  renderResults(base.map(s=>({...s,desc:"Analyse IA en cours…"})));
-  try{
-    const sys = `Tu es NexAI, IA de tri de résultats pour NexSearch.
-On te donne une requête utilisateur et une liste de sites (nom + URL).
-Tu dois :
-- trier les sites par pertinence pour la requête (site principal en premier),
-- générer pour chaque site une description courte en français (1 phrase),
-- renvoyer UNIQUEMENT du JSON valide de la forme :
-[
-  {"name":"Nom du site","url":"URL","desc":"Description courte"},
-  ...
-]
-Aucun texte autour, aucun commentaire, seulement le JSON.`;
-    const user = `Requête : "${query}"
-Sites :
-${base.map(s=>`- ${s.name} | ${s.url}`).join("\n")}`;
-    const raw = await callApiFreeLLM(sys,user);
-    let parsed;
-    try{
-      parsed = JSON.parse(raw);
-    }catch{
-      parsed = base.map(s=>({...s,desc:"Site lié à ta recherche."}));
-    }
-    // fallback si JSON incorrect
-    if(!Array.isArray(parsed) || !parsed.length){
-      parsed = base.map(s=>({...s,desc:"Site lié à ta recherche."}));
-    }
-    renderResults(parsed);
-  }catch(e){
-    renderResults(base.map(s=>({...s,desc:"Site lié à ta recherche."})));
-  }
-}
-
-/* ========= CHAT NEXAI ========= */
-const nexaiPanel = document.getElementById("nexaiPanel");
-const nexaiToggle = document.getElementById("nexaiToggle");
-const nexaiClose = document.getElementById("nexaiClose");
-const chatMessages = document.getElementById("chatMessages");
-const chatInput = document.getElementById("chatInput");
-const chatSend = document.getElementById("chatSend");
-
-function openPanel(){nexaiPanel.classList.add("open");}
-function closePanel(){nexaiPanel.classList.remove("open");}
-
-nexaiToggle.onclick = openPanel;
-nexaiClose.onclick = closePanel;
-
-function addChatMessage(text,from){
-  const div = document.createElement("div");
-  div.className = "chat-msg";
-  const bubble = document.createElement("div");
-  bubble.className = from==="user" ? "chat-user" : "chat-ai";
-  bubble.innerHTML = text;
-  div.appendChild(bubble);
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-async function sendChat(){
-  const msg = chatInput.value.trim();
-  if(!msg) return;
-  if(blocked(msg)){
-    addChatMessage("<p>Contenu non autorisé.</p>","ai");
-    chatInput.value = "";
-    return;
-  }
-  addChatMessage(msg,"user");
-  chatInput.value = "";
-  chatSend.disabled = true;
-  try{
-    const sys = `Tu es NexAI, IA premium NexSearch/Copilot+.
-Tu es en mode chat conversationnel.
-Contexte de la recherche actuelle : "${query}".
-Réponds toujours en français, en HTML simple (<p>, <b>, <ul>, <li>).
-Style : amical, moderne, parfois complice, mais clair.
-Tu peux répondre à des questions générales (ex : "ça va ?" -> "Oui et toi ?")
-ou donner des explications sur la recherche en cours.
-Ne produis pas de contenu violent ou pornographique.`;
-    const user = msg;
-    const text = await callApiFreeLLM(sys,user);
-    addChatMessage(text || "<p>Je suis NexAI, et je suis là pour discuter avec toi 🙂</p>","ai");
-  }catch(e){
-    addChatMessage("<p>Erreur IA, NexAI a eu un petit souci technique.</p>","ai");
-  }
-  chatSend.disabled = false;
-}
-
-chatSend.addEventListener("click",sendChat);
-chatInput.addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
-
-/* ========= INIT ========= */
-loadSummary();
-loadSites();
-</script>
 </body>
 </html>

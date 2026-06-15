@@ -5,16 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NexSearch</title>
 
-  <!-- Police propre et moderne -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     /* --- GLOBAL --- */
     body {
       margin: 0;
-      background: #000000;
-      color: #3B82F6;
+      background: radial-gradient(circle at 50% 20%, #0a0a0a, #000);
+      color: #d0e2ff;
       font-family: "Poppins", system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    /* Halo lumineux façon Copilot+ */
+    .glow {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(59,130,246,0.35), transparent 70%);
+      top: -150px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
     }
 
     .page {
@@ -23,60 +37,75 @@
       flex-direction: column;
       align-items: center;
       justify-content: space-between;
+      padding: 40px 0;
     }
 
-    /* --- HEADER --- */
+    /* --- LOGO --- */
     .logo {
-      font-size: 3rem;
+      font-size: 3.5rem;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      margin-top: 60px;
-      color: #3B82F6;
+      letter-spacing: 0.12em;
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+      -webkit-background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 25px rgba(59,130,246,0.4);
       user-select: none;
+      transition: 0.3s;
     }
 
-    /* --- MAIN --- */
-    .main {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.5rem;
+    .logo:hover {
+      text-shadow: 0 0 40px rgba(59,130,246,0.7);
+      transform: scale(1.03);
     }
 
+    /* --- TAGLINE --- */
     .tagline {
-      font-size: 1.1rem;
-      color: #60A5FA;
-      opacity: 0.8;
+      font-size: 1.2rem;
+      color: #9cc4ff;
+      opacity: 0.9;
       user-select: none;
+      margin-bottom: 10px;
+    }
+
+    /* --- SEARCH BOX (Glassmorphism) --- */
+    .search-box {
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 18px;
+      padding: 2px;
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 0 25px rgba(59,130,246,0.15);
+      transition: 0.25s;
+    }
+
+    .search-box:hover {
+      box-shadow: 0 0 40px rgba(59,130,246,0.25);
+      transform: translateY(-2px);
     }
 
     .search-form input {
       width: 480px;
       max-width: 90vw;
-      padding: 0.9rem 1.2rem;
-      border-radius: 999px;
-      border: 1px solid #1F2937;
-      background: #020617;
-      color: #3B82F6;
-      font-size: 1rem;
+      padding: 1rem 1.4rem;
+      border-radius: 14px;
+      border: none;
+      background: transparent;
+      color: #d0e2ff;
+      font-size: 1.05rem;
       outline: none;
-      transition: 0.2s;
     }
 
     .search-form input::placeholder {
-      color: #60A5FA;
-    }
-
-    .search-form input:focus {
-      border-color: #2563EB;
-      box-shadow: 0 0 0 2px #2563EB;
+      color: #9cc4ff;
+      opacity: 0.6;
     }
 
     /* --- FOOTER --- */
     .footer {
-      margin-bottom: 40px;
-      font-size: 0.8rem;
-      color: #1E40AF;
+      font-size: 0.85rem;
+      color: #4f6fbf;
+      opacity: 0.7;
       user-select: none;
     }
 
@@ -87,6 +116,9 @@
 </head>
 
 <body>
+
+  <div class="glow"></div>
+
   <div class="page">
 
     <header class="header">
@@ -94,16 +126,18 @@
     </header>
 
     <main class="main">
-      <p class="tagline">Ultra intelligent. Minimaliste. Futuriste.</p>
+      <p class="tagline">Votre moteur de recherche IA.</p>
 
-      <form class="search-form" action="results.html" method="GET">
-        <input 
-          type="text" 
-          name="q" 
-          placeholder="Rechercher avec NexSearch..."
-          autocomplete="off"
-        />
-      </form>
+      <div class="search-box">
+        <form class="search-form" action="results.html" method="GET">
+          <input 
+            type="text" 
+            name="q" 
+            placeholder="Rechercher avec NexSearch..."
+            autocomplete="off"
+          />
+        </form>
+      </div>
     </main>
 
     <footer class="footer">
@@ -111,5 +145,6 @@
     </footer>
 
   </div>
+
 </body>
 </html>

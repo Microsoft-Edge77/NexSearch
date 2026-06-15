@@ -1,873 +1,199 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NexSearch-Recherche IA</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-  <style>
-    html {
-      overflow-y: scroll;
-    }
-
-    body {
-      margin: 0;
-      background: #000;
-      color: #3B82F6;
-      font-family: "Poppins", sans-serif;
-      overflow-x: hidden;
-      scrollbar-width: none; /* Firefox */
-    }
-
-    body::-webkit-scrollbar {
-      display: none; /* Chrome, Edge, Safari */
-    }
-
-    /* Top search bar */
-    .topbar {
-      width: 100%;
-      padding: 20px;
-      background: #020617;
-      border-bottom: 1px solid #1E3A8A;
-      display: flex;
-      justify-content: center;
-      position: relative;
-      box-sizing: border-box;
-    }
-
-    .search-box {
-      width: 600px;
-      max-width: 90%;
-      display: flex;
-      gap: 10px;
-    }
-
-    .search-box input {
-      flex: 1;
-      padding: 0.8rem 1rem;
-      border-radius: 999px;
-      border: 1px solid #1F2937;
-      background: #000;
-      color: #3B82F6;
-      font-size: 1rem;
-      outline: none;
-    }
-
-    .search-box input:focus {
-      border-color: #2563EB;
-      box-shadow: 0 0 0 2px #2563EB;
-    }
-
-    .nexai-toggle {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: #111827;
-      border: 1px solid #1E3A8A;
-      color: #3B82F6;
-      padding: 0.4rem 0.8rem;
-      border-radius: 999px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-
-    .nexai-toggle:hover {
-      border-color: #2563EB;
-    }
-
-    .container {
-      width: 90%;
-      max-width: 900px;
-      margin: auto;
-      margin-top: 25px;
-      padding-bottom: 40px;
-      box-sizing: border-box;
-    }
-
-    .section-title {
-      font-size: 1.4rem;
-      margin-top: 30px;
-      margin-bottom: 15px;
-      font-weight: 600;
-      color: #3B82F6;
-    }
-
-    .result {
-      background: #020617;
-      border: 1px solid #1E3A8A;
-      padding: 18px;
-      border-radius: 10px;
-      margin-bottom: 18px;
-      transition: 0.2s;
-    }
-
-    .result:hover {
-      border-color: #2563EB;
-      transform: translateX(4px);
-    }
-
-    .title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #60A5FA;
-      margin-bottom: 6px;
-    }
-
-    .url {
-      font-size: 0.9rem;
-      opacity: 0.85;
-      margin-bottom: 8px;
-      word-break: break-all;
-    }
-
-    .url a {
-      color: #60A5FA;
-      text-decoration: none;
-    }
-
-    .url a:hover {
-      text-decoration: underline;
-      color: #93C5FD;
-    }
-
-    .snippet {
-      font-size: 1rem;
-      color: #93C5FD;
-      white-space: pre-line;
-    }
-
-    /* NexAI sidebar */
-    .nexai-panel {
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 340px;
-      max-width: 100%;
-      height: 100vh;
-      background: #020617;
-      border-left: 1px solid #1E3A8A;
-      transform: translateX(100%);
-      transition: transform 0.25s ease-out;
-      display: flex;
-      flex-direction: column;
-      z-index: 999;
-      box-sizing: border-box;
-    }
-
-    .nexai-panel.open {
-      transform: translateX(0);
-    }
-
-    .nexai-header {
-      padding: 16px;
-      border-bottom: 1px solid #1E3A8A;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: #3B82F6;
-      font-weight: 600;
-      box-sizing: border-box;
-    }
-
-    .nexai-close {
-      cursor: pointer;
-      font-size: 1.2rem;
-      color: #60A5FA;
-    }
-
-    .nexai-status {
-      font-size: 0.75rem;
-      opacity: 0.7;
-      padding: 0 12px 6px;
-      color: #60A5FA;
-      box-sizing: border-box;
-    }
-
-    .nexai-messages {
-      flex: 1;
-      padding: 12px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      box-sizing: border-box;
-      scrollbar-width: none;
-    }
-
-    .nexai-messages::-webkit-scrollbar {
-      display: none;
-    }
-
-    .msg {
-      max-width: 90%;
-      padding: 8px 10px;
-      border-radius: 10px;
-      font-size: 0.9rem;
-      line-height: 1.4;
-      white-space: pre-wrap;
-      word-wrap: break-word;
-      box-sizing: border-box;
-    }
-
-    .msg-user {
-      align-self: flex-end;
-      background: #111827;
-      color: #93C5FD;
-    }
-
-    .msg-ai {
-      align-self: flex-start;
-      background: #020617;
-      border: 1px solid #1E3A8A;
-      color: #BFDBFE;
-    }
-
-    .nexai-input-area {
-      padding: 10px;
-      border-top: 1px solid #1E3A8A;
-      display: flex;
-      gap: 8px;
-      box-sizing: border-box;
-    }
-
-    .nexai-input-area input {
-      flex: 1;
-      padding: 0.6rem 0.8rem;
-      border-radius: 999px;
-      border: 1px solid #1F2937;
-      background: #000;
-      color: #3B82F6;
-      font-size: 0.9rem;
-      outline: none;
-    }
-
-    .nexai-input-area input:focus {
-      border-color: #2563EB;
-      box-shadow: 0 0 0 1px #2563EB;
-    }
-
-    .nexai-send {
-      padding: 0.5rem 0.9rem;
-      border-radius: 999px;
-      border: 1px solid #1E3A8A;
-      background: #111827;
-      color: #3B82F6;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
-    .nexai-send:hover {
-      border-color: #2563EB;
-    }
-
-    @media (max-width: 768px) {
-      .nexai-panel {
-        width: 100%;
-      }
-    }
-  </style>
-</head>
-<body>
-  <!-- BARRE DE RECHERCHE -->
-  <div class="topbar">
-    <form class="search-box" action="results.html" method="GET">
-      <input type="text" name="q" id="searchInput" placeholder="Rechercher..." autocomplete="off" />
-    </form>
-    <button class="nexai-toggle" id="nexaiToggle">💬 NexAI</button>
-  </div>
-
-  <!-- CONTENU PRINCIPAL -->
-  <div class="container">
-    <div id="results"></div>
-  </div>
-
-  <!-- PANEL NEXAI -->
-  <div class="nexai-panel" id="nexaiPanel">
-    <div class="nexai-header">
-      <span>NexAI (IA locale hybride)</span>
-      <span class="nexai-close" id="nexaiClose">×</span>
-    </div>
-    <div class="nexai-status" id="nexaiStatus">
-      IA locale avec mini réseau de neurones (intentions + génération dynamique).
-    </div>
-    <div class="nexai-messages" id="nexaiMessages"></div>
-    <div class="nexai-input-area">
-      <input type="text" id="nexaiInput" placeholder="Écris un message..." autocomplete="off" />
-      <button class="nexai-send" id="nexaiSend">Envoyer</button>
-    </div>
-  </div>
-  <script>
-    /* -----------------------------
-       1. Récupération de la requête
-    ------------------------------ */
-    const params = new URLSearchParams(window.location.search);
-    const query = (params.get("q") || "").trim();
-    document.getElementById("searchInput").value = query;
-
-    const resultsContainer = document.getElementById("results");
-
-    /* -----------------------------
-       2. Base de sites (extrait, extensible)
-    ------------------------------ */
-    const siteDatabase = [
-      { name: "Amazon", url: "https://www.amazon.fr", tags: ["achat", "shopping", "livre", "produits", "ecommerce"] },
-      { name: "Amazon Livres", url: "https://www.amazon.fr/livres", tags: ["livre", "lecture"] },
-      { name: "Fnac", url: "https://www.fnac.com", tags: ["livre", "tech", "culture", "shopping"] },
-      { name: "Fnac Livres", url: "https://www.fnac.com/Livre", tags: ["livre", "lecture"] },
-      { name: "Microsoft", url: "https://www.microsoft.com", tags: ["windows", "office", "logiciels", "cloud"] },
-      { name: "Office", url: "https://www.office.com", tags: ["office", "word", "excel", "powerpoint"] },
-      { name: "Word", url: "https://www.microsoft.com/microsoft-365/word", tags: ["word", "traitement de texte"] },
-      { name: "Excel", url: "https://www.microsoft.com/microsoft-365/excel", tags: ["excel", "tableur", "calcul"] },
-      { name: "PowerPoint", url: "https://www.microsoft.com/microsoft-365/powerpoint", tags: ["powerpoint", "présentation"] },
-      { name: "Outlook", url: "https://outlook.live.com", tags: ["mail", "outlook", "email", "messagerie"] },
-      { name: "Orange Mail", url: "https://mail.orange.fr", tags: ["mail", "orange", "email"] },
-      { name: "Gmail", url: "https://mail.google.com", tags: ["mail", "gmail", "email"] },
-      { name: "Shopify", url: "https://www.shopify.com", tags: ["ecommerce", "boutique", "shopify", "vente en ligne"] },
-      { name: "Bing", url: "https://www.bing.com", tags: ["recherche", "bing", "search"] },
-      { name: "Google", url: "https://www.google.com", tags: ["recherche", "google", "search"] },
-      { name: "YouTube", url: "https://www.youtube.com", tags: ["video", "youtube", "tutoriel"] },
-      { name: "Wikipédia", url: "https://fr.wikipedia.org", tags: ["wikipedia", "encyclopedie", "définition"] },
-      { name: "Marmiton", url: "https://www.marmiton.org", tags: ["recette", "cuisine", "gateau", "gâteau", "cake"] },
-      { name: "750g", url: "https://www.750g.com", tags: ["recette", "cuisine", "gateau"] },
-      { name: "GitHub", url: "https://github.com", tags: ["code", "développement", "github"] },
-      { name: "Stack Overflow", url: "https://stackoverflow.com", tags: ["code", "programmation", "questions"] },
-      { name: "MDN Web Docs", url: "https://developer.mozilla.org", tags: ["javascript", "web", "html", "css"] },
-      { name: "W3Schools", url: "https://www.w3schools.com", tags: ["tutoriel", "web", "html", "css", "javascript"] },
-      { name: "LinkedIn", url: "https://www.linkedin.com", tags: ["emploi", "réseau", "professionnel"] },
-      { name: "Twitter (X)", url: "https://x.com", tags: ["twitter", "x", "réseau social"] },
-      { name: "Instagram", url: "https://www.instagram.com", tags: ["photos", "instagram", "réseau social"] },
-      { name: "Facebook", url: "https://www.facebook.com", tags: ["facebook", "réseau social"] },
-      { name: "Discord", url: "https://discord.com", tags: ["chat", "communauté", "discord"] },
-      { name: "Netflix", url: "https://www.netflix.com", tags: ["films", "séries", "streaming"] },
-      { name: "Prime Video", url: "https://www.primevideo.com", tags: ["films", "séries", "streaming"] },
-      { name: "Canva", url: "https://www.canva.com", tags: ["design", "graphisme", "présentation"] },
-      { name: "Notion", url: "https://www.notion.so", tags: ["notes", "organisation", "wiki"] },
-      { name: "Dropbox", url: "https://www.dropbox.com", tags: ["cloud", "fichiers", "stockage"] },
-      { name: "OneDrive", url: "https://onedrive.live.com", tags: ["cloud", "fichiers", "stockage"] },
-      { name: "Google Drive", url: "https://drive.google.com", tags: ["cloud", "fichiers", "stockage"] },
-      { name: "Spotify", url: "https://www.spotify.com", tags: ["musique", "audio"] },
-      { name: "Deezer", url: "https://www.deezer.com", tags: ["musique", "audio"] },
-      { name: "Allociné", url: "https://www.allocine.fr", tags: ["films", "cinéma"] },
-      { name: "Goodreads", url: "https://www.goodreads.com", tags: ["livres", "lecture"] }
-      // Tu peux continuer à en rajouter.
-    ];
-
-    /* -----------------------------
-       3. Calculatrice
-    ------------------------------ */
-    function isMathExpression(str) {
-      return /^[0-9+\-*/().\s]+$/.test(str) && /[0-9]/.test(str);
-    }
-
-    function calculateExpression(str) {
-      try {
-        return Function("return " + str)();
-      } catch {
-        return null;
-      }
-    }
-
-    /* -----------------------------
-       4. Moteur de recherche intelligent
-    ------------------------------ */
-    function findMatchingSites(q) {
-      const lower = q.toLowerCase();
-      const words = lower.split(/\s+/).filter(Boolean);
-
-      const scored = siteDatabase.map(site => {
-        let score = 0;
-        if (site.name.toLowerCase().includes(lower)) score += 5;
-        site.tags.forEach(tag => {
-          const t = tag.toLowerCase();
-          if (lower.includes(t)) score += 3;
-          words.forEach(w => {
-            if (t.includes(w)) score += 1;
-          });
-        });
-        return { site, score };
-      });
-
-      scored.sort((a, b) => b.score - a.score);
-      return scored.filter(s => s.score > 0).slice(0, 10);
-    }
-
-    function buildSmartResults(q) {
-      const list = [];
-      const matches = findMatchingSites(q);
-
-      matches.forEach(m => {
-        list.push({
-          name: m.site.name,
-          url: m.site.url,
-          snippet: "Site susceptible de correspondre à ta recherche."
-        });
-      });
-
-      list.push({
-        name: "Bing – Résultats pour « " + q + " »",
-        url: "https://www.bing.com/search?q=" + encodeURIComponent(q),
-        snippet: "Résultats complets (sites, vidéos, actualités, forums) pour ta recherche."
-      });
-
-      list.push({
-        name: "YouTube – Vidéos sur « " + q + " »",
-        url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(q),
-        snippet: "Tutoriels, explications et contenus vidéo liés à ta requête."
-      });
-
-      list.push({
-        name: "Wikipédia – Article potentiel",
-        url: "https://fr.wikipedia.org/wiki/" + encodeURIComponent(q),
-        snippet: "Si un article existe, tu auras une vue d’ensemble structurée."
-      });
-
-      const lower = q.toLowerCase();
-      if (
-        lower.includes("gateau") ||
-        lower.includes("gâteau") ||
-        lower.includes("cake") ||
-        lower.includes("recette") ||
-        lower.includes("cuisine")
-      ) {
-        list.push({
-          name: "Marmiton – Recettes de gâteaux",
-          url: "https://www.marmiton.org/recettes/recherche.aspx?aqt=" + encodeURIComponent(q),
-          snippet: "Des dizaines de recettes de gâteaux notées et commentées."
-        });
-        list.push({
-          name: "750g – Idées de gâteaux",
-          url: "https://www.750g.com/recherche?q=" + encodeURIComponent(q),
-          snippet: "Autres variantes de gâteaux, astuces de cuisson et idées originales."
-        });
-      }
-
-      if (lower.includes("livre") || lower.includes("lecture")) {
-        list.push({
-          name: "Amazon – Livres à petits prix",
-          url: "https://www.amazon.fr/livres",
-          snippet: "Sélection de livres, romans, mangas, BD et plus."
-        });
-        list.push({
-          name: "Fnac – Livres et culture",
-          url: "https://www.fnac.com/Livre",
-          snippet: "Livres, BD, mangas, essais, et plus."
-        });
-      }
-
-      return list;
-    }
-
-    function renderMain() {
-      if (!query) {
-        resultsContainer.innerHTML = `
-          <div class="section-title">Aucune requête</div>
-          <div class="result">
-            <div class="snippet">Tape quelque chose dans la barre de recherche pour lancer NexSearch.</div>
-          </div>
-        `;
-        return;
-      }
-
-      resultsContainer.innerHTML = "";
-
-      if (isMathExpression(query)) {
-        const calc = calculateExpression(query);
-        if (calc !== null && calc !== undefined && !Number.isNaN(calc)) {
-          resultsContainer.innerHTML += `
-            <div class="section-title">Calcul</div>
-            <div class="result">
-              <div class="title">${query} = ${calc}</div>
-              <div class="snippet">Résultat calculé directement par NexSearch.</div>
-            </div>
-          `;
-        }
-      }
-
-      const smartResults = buildSmartResults(query);
-      resultsContainer.innerHTML += `<div class="section-title">Résultats intelligents</div>`;
-      smartResults.forEach(r => {
-        resultsContainer.innerHTML += `
-          <div class="result">
-            <div class="title">${r.name}</div>
-            <div class="url"><a href="${r.url}" target="_blank">${r.url}</a></div>
-            <div class="snippet">${r.snippet}</div>
-          </div>
-        `;
-      });
-    }
-
-    renderMain();
-
-    /* -----------------------------
-       5. Mini réseau de neurones + NexAI
-    ------------------------------ */
-
-    // Encodage simple de texte en vecteur (bag-of-words réduit)
-    const intentWords = [
-      "bonjour","salut","hey",
-      "manger","faim","recette","cuisine","gateau","gâteau","cake",
-      "livre","lecture",
-      "code","programmation","javascript","python",
-      "site","marque","lien",
-      "comment","pourquoi","qu est ce que","c est quoi",
-      "calcul","calcule"
-    ];
-
-    function encodeText(text) {
-      const lower = text.toLowerCase();
-      const vec = new Array(intentWords.length).fill(0);
-      intentWords.forEach((w, i) => {
-        if (lower.includes(w)) vec[i] = 1;
-      });
-      return vec;
-    }
-
-    // MLP simple (input -> hidden -> output)
-    const inputSize = intentWords.length;
-    const hiddenSize = 16;
-    const outputSize = 6; // 0: smalltalk, 1: food, 2: books, 3: code, 4: sites, 5: explain
-
-    function randWeight() {
-      return (Math.random() - 0.5) * 0.2;
-    }
-
-    let W1 = [];
-    let b1 = [];
-    let W2 = [];
-    let b2 = [];
-
-    function initNetwork() {
-      const saved = localStorage.getItem("nexai_weights");
-      if (saved) {
-        try {
-          const obj = JSON.parse(saved);
-          W1 = obj.W1;
-          b1 = obj.b1;
-          W2 = obj.W2;
-          b2 = obj.b2;
-          return;
-        } catch {}
-      }
-
-      W1 = Array.from({ length: hiddenSize }, () =>
-        Array.from({ length: inputSize }, () => randWeight())
-      );
-      b1 = Array.from({ length: hiddenSize }, () => randWeight());
-      W2 = Array.from({ length: outputSize }, () =>
-        Array.from({ length: hiddenSize }, () => randWeight())
-      );
-      b2 = Array.from({ length: outputSize }, () => randWeight());
-
-      // petit pré-entraînement sur des exemples simples
-      const examples = [
-        { text: "bonjour salut hey", label: 0 },
-        { text: "je veux manger un gateau recette cuisine", label: 1 },
-        { text: "je cherche un livre pour lire", label: 2 },
-        { text: "je veux apprendre le code javascript programmation", label: 3 },
-        { text: "je cherche un site shopify amazon lien", label: 4 },
-        { text: "comment ça marche qu est ce que pourquoi", label: 5 }
-      ];
-      trainNetwork(examples, 50, 0.05);
-
-      localStorage.setItem("nexai_weights", JSON.stringify({ W1, b1, W2, b2 }));
-    }
-
-    function relu(x) {
-      return x > 0 ? x : 0;
-    }
-
-    function softmax(arr) {
-      const max = Math.max(...arr);
-      const exps = arr.map(v => Math.exp(v - max));
-      const sum = exps.reduce((a, b) => a + b, 0);
-      return exps.map(v => v / sum);
-    }
-
-    function forward(vec) {
-      const h = new Array(hiddenSize).fill(0);
-      for (let i = 0; i < hiddenSize; i++) {
-        let s = b1[i];
-        for (let j = 0; j < inputSize; j++) {
-          s += W1[i][j] * vec[j];
-        }
-        h[i] = relu(s);
-      }
-      const o = new Array(outputSize).fill(0);
-      for (let k = 0; k < outputSize; k++) {
-        let s = b2[k];
-        for (let i = 0; i < hiddenSize; i++) {
-          s += W2[k][i] * h[i];
-        }
-        o[k] = s;
-      }
-      const probs = softmax(o);
-      return { h, o: probs };
-    }
-
-    function trainNetwork(examples, epochs, lr) {
-      for (let e = 0; e < epochs; e++) {
-        examples.forEach(ex => {
-          const x = encodeText(ex.text);
-          const y = ex.label;
-          const { h, o } = forward(x);
-
-          const target = new Array(outputSize).fill(0);
-          target[y] = 1;
-
-          const dO = o.map((p, i) => p - target[i]);
-
-          const dW2 = Array.from({ length: outputSize }, () =>
-            new Array(hiddenSize).fill(0)
-          );
-          const db2 = new Array(outputSize).fill(0);
-
-          for (let k = 0; k < outputSize; k++) {
-            db2[k] = dO[k];
-            for (let i = 0; i < hiddenSize; i++) {
-              dW2[k][i] = dO[k] * h[i];
-            }
-          }
-
-          const dH = new Array(hiddenSize).fill(0);
-          for (let i = 0; i < hiddenSize; i++) {
-            let s = 0;
-            for (let k = 0; k < outputSize; k++) {
-              s += dO[k] * W2[k][i];
-            }
-            dH[i] = h[i] > 0 ? s : 0;
-          }
-
-          const dW1 = Array.from({ length: hiddenSize }, () =>
-            new Array(inputSize).fill(0)
-          );
-          const db1 = new Array(hiddenSize).fill(0);
-
-          for (let i = 0; i < hiddenSize; i++) {
-            db1[i] = dH[i];
-            for (let j = 0; j < inputSize; j++) {
-              dW1[i][j] = dH[i] * x[j];
-            }
-          }
-
-          for (let k = 0; k < outputSize; k++) {
-            b2[k] -= lr * db2[k];
-            for (let i = 0; i < hiddenSize; i++) {
-              W2[k][i] -= lr * dW2[k][i];
-            }
-          }
-
-          for (let i = 0; i < hiddenSize; i++) {
-            b1[i] -= lr * db1[i];
-            for (let j = 0; j < inputSize; j++) {
-              W1[i][j] -= lr * dW1[i][j];
-            }
-          }
-        });
-      }
-    }
-
-    initNetwork();
-
-    function predictIntent(text) {
-      const vec = encodeText(text);
-      const { o } = forward(vec);
-      let best = 0;
-      let idx = 0;
-      for (let i = 0; i < o.length; i++) {
-        if (o[i] > best) {
-          best = o[i];
-          idx = i;
-        }
-      }
-      return { intent: idx, confidence: best };
-    }
-
-    /* -----------------------------
-       6. NexAI UI + génération dynamique
-    ------------------------------ */
-
-    const nexaiPanel = document.getElementById("nexaiPanel");
-    const nexaiToggle = document.getElementById("nexaiToggle");
-    const nexaiClose = document.getElementById("nexaiClose");
-    const nexaiMessages = document.getElementById("nexaiMessages");
-    const nexaiInput = document.getElementById("nexaiInput");
-    const nexaiSend = document.getElementById("nexaiSend");
-
-    let chatHistory = [];
-
-    nexaiToggle.addEventListener("click", () => {
-      nexaiPanel.classList.add("open");
-      nexaiInput.focus();
-      if (chatHistory.length === 0) {
-        addAIMessage("Salut ! Je suis NexAI, une IA locale hybride. Pose-moi une question, demande une recette, un site ou un calcul.");
-      }
-    });
-
-    nexaiClose.addEventListener("click", () => {
-      nexaiPanel.classList.remove("open");
-    });
-
-    nexaiSend.addEventListener("click", sendUserMessage);
-    nexaiInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        sendUserMessage();
-      }
-    });
-
-    function addUserMessage(text) {
-      const div = document.createElement("div");
-      div.className = "msg msg-user";
-      div.textContent = text;
-      nexaiMessages.appendChild(div);
-      nexaiMessages.scrollTop = nexaiMessages.scrollHeight;
-    }
-
-    function addAIMessage(text) {
-      const div = document.createElement("div");
-      div.className = "msg msg-ai";
-      div.textContent = text;
-      nexaiMessages.appendChild(div);
-      nexaiMessages.scrollTop = nexaiMessages.scrollHeight;
-    }
-
-    function sendUserMessage() {
-      const text = nexaiInput.value.trim();
-      if (!text) return;
-      nexaiInput.value = "";
-      addUserMessage(text);
-      chatHistory.push({ role: "user", content: text });
-
-      const reply = generateHybridReply(text);
-      addAIMessage(reply);
-      chatHistory.push({ role: "assistant", content: reply });
-
-      // apprentissage léger en continu
-      const intent = predictIntent(text).intent;
-      trainNetwork([{ text, label: intent }], 1, 0.01);
-      localStorage.setItem("nexai_weights", JSON.stringify({ W1, b1, W2, b2 }));
-    }
-
-    function randomChoice(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function generateHybridReply(text) {
-      const { intent, confidence } = predictIntent(text);
-      const lower = text.toLowerCase();
-
-      // mini bruit pour varier
-      const variation = Math.random();
-
-      if (intent === 0) {
-        const openings = [
-          "Salut !",
-          "Hey !",
-          "Coucou !",
-          "Yo !"
-        ];
-        const follow = [
-          "Tu peux me demander une recette, un site, un tutoriel ou un calcul.",
-          "Dis-moi ce que tu veux : manger, apprendre, trouver un site, ou juste discuter.",
-          "Je suis là pour t’inspirer : recettes, sites utiles, idées de lecture, code…"
-        ];
-        return randomChoice(openings) + " " + randomChoice(follow);
-      }
-
-      if (intent === 1) {
-        const base =
-          "Tu parles de nourriture ou de recettes.\n\n" +
-          "Voici quelques sites utiles :\n" +
-          "- Marmiton : https://www.marmiton.org\n" +
-          "- 750g : https://www.750g.com\n\n";
-        const recipeVariants = [
-          "Recette rapide de cake nature :\n- 3 œufs\n- 150 g de sucre\n- 100 g de beurre fondu\n- 200 g de farine\n- 1 sachet de levure\n- une pincée de sel\nMélange, verse dans un moule beurré, 35–45 min à 180°C.",
-          "Recette simple de gâteau au yaourt :\n- 1 pot de yaourt\n- 2 pots de sucre\n- 3 pots de farine\n- 1/2 pot d’huile\n- 1 sachet de levure\nMélange, four à 180°C environ 30–35 min.",
-          "Tu peux aussi inventer ton propre cake : prends une base (œufs, farine, sucre, beurre) et ajoute ce que tu aimes (chocolat, citron, fruits)."
-        ];
-        return base + randomChoice(recipeVariants);
-      }
-
-      if (intent === 2) {
-        const base =
-          "Tu sembles parler de livres ou de lecture.\n\n" +
-          "Sites pour trouver des livres :\n" +
-          "- Amazon Livres : https://www.amazon.fr/livres\n" +
-          "- Fnac Livres : https://www.fnac.com/Livre\n" +
-          "- Goodreads : https://www.goodreads.com\n\n";
-        const extra = [
-          "Tu peux chercher par genre (SF, fantasy, polar, manga) pour trouver quelque chose qui te plaît.",
-          "Une bonne approche : lire les avis, regarder les notes, puis choisir un livre qui correspond à ton humeur.",
-          "Si tu me dis ton style préféré (SF, fantasy, polar, manga), je peux te suggérer un type de lecture."
-        ];
-        return base + randomChoice(extra);
-      }
-
-      if (intent === 3) {
-        const base =
-          "Tu parles de code ou de programmation.\n\n" +
-          "Sites utiles :\n" +
-          "- MDN Web Docs : https://developer.mozilla.org\n" +
-          "- W3Schools : https://www.w3schools.com\n" +
-          "- Stack Overflow : https://stackoverflow.com\n\n";
-        const extra = [
-          "Commence par des petits projets : une page web, un script simple, un mini outil.",
-          "Choisis un langage (JavaScript pour le web, Python pour la polyvalence) et suis un tutoriel étape par étape.",
-          "Tu peux taper « tutoriel JavaScript » ou « apprendre Python » dans NexSearch pour des liens cliquables."
-        ];
-        return base + randomChoice(extra);
-      }
-
-      if (intent === 4) {
-        const base =
-          "Tu sembles chercher des sites ou des marques.\n\n" +
-          "Quelques exemples :\n" +
-          "- Amazon : https://www.amazon.fr\n" +
-          "- Microsoft : https://www.microsoft.com\n" +
-          "- Shopify : https://www.shopify.com\n" +
-          "- Outlook : https://outlook.live.com\n" +
-          "- Gmail : https://mail.google.com\n\n";
-        const extra = [
-          "Tape le nom du site dans NexSearch pour voir des liens cliquables pertinents.",
-          "Si tu précises le type de site (shopping, mail, vidéo, code), je peux te orienter plus finement.",
-          "Tu peux aussi combiner : « site de recettes », « site de livres », « site de tutoriels code »."
-        ];
-        return base + randomChoice(extra);
-      }
-
-      if (intent === 5) {
-        const base =
-          "Tu poses une question de type « comment / pourquoi / qu’est-ce que ».\n\n" +
-          "Pour comprendre un sujet :\n" +
-          "- Commence par une définition simple.\n" +
-          "- Identifie les éléments importants ou les étapes.\n" +
-          "- Cherche un exemple concret ou une analogie.\n\n";
-        const extra = [
-          "Tu peux taper le mot-clé principal dans NexSearch pour obtenir des liens vers Wikipédia, des tutoriels et des vidéos.",
-          "Si tu me donnes un mot-clé précis, je peux te proposer une façon de le comprendre étape par étape.",
-          "Souvent, combiner lecture (article) + vidéo (YouTube) aide à bien intégrer un concept."
-        ];
-        return base + randomChoice(extra);
-      }
-
-      // fallback si le réseau est peu confiant
-      if (confidence < 0.4) {
-        return (
-          "Je ne suis pas sûr de bien comprendre ta demande, mais je peux t’aider sur :\n" +
-          "- des recettes ou idées de cuisine,\n" +
-          "- des sites utiles (shopping, mail, vidéo, code),\n" +
-          "- des livres ou de la lecture,\n" +
-          "- du code ou des tutoriels,\n" +
-          "- des questions « comment / pourquoi ».\n\n" +
-          "Essaie de reformuler ou de préciser un peu ce que tu veux."
-        );
-      }
-
-      return "Je suis une IA locale hybride. Je commence à apprendre de ce que tu écris. Reformule ou précise ta demande pour que je puisse te répondre de façon plus utile.";
-    }
-  </script>
-</body>
-</html>
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>NexSearch – Résultats</title>
+<style>
+body{background:#000;color:#3aa7ff;font-family:Arial;margin:0}
+header{padding:20px;font-size:32px;font-weight:bold;color:#3aa7ff;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid #3aa7ff}
+#addressBar{background:#111;border:1px solid #3aa7ff;color:#3aa7ff;padding:6px 10px;width:320px;border-radius:6px;font-size:14px}
+#bingLink{padding:10px 20px;font-size:16px;border-bottom:1px solid #3aa7ff}
+#bingLink a{color:#7fc7ff;text-decoration:underline}
+#aiSummary{padding:20px;font-size:18px;border-bottom:1px solid #3aa7ff;line-height:1.5}
+.result{padding:15px 20px;border-bottom:1px solid #1a1a1a}
+.result a{color:#3aa7ff;font-size:20px;text-decoration:none;word-break:break-all}
+.result p{margin:5px 0 0;color:#7fc7ff}
+#tabs{display:flex;justify-content:center;gap:20px;padding:20px;border-top:1px solid #3aa7ff}
+#tabs a{color:#3aa7ff;font-size:20px;text-decoration:none}
+.nexai-btn{padding:8px 15px;background:#111;border:1px solid #3aa7ff;color:#3aa7ff;border-radius:6px;cursor:pointer;margin-top:10px}
+.nexai-btn:hover{background:#1a1a1a}
+</style></head><body>
+
+<header><div>NexSearch</div><input id="addressBar" placeholder="Adresse ou recherche…"></header>
+<div id="bingLink"><a id="bingResultLink" target="_blank">Voir les résultats Bing</a></div>
+<div id="aiSummary"></div>
+<div id="results"></div>
+<div id="tabs"><a id="imgTab" target="_blank">Images</a><a id="mapTab" target="_blank">Maps</a></div>
+
+<script>
+const p=new URLSearchParams(location.search),q=(p.get("q")||"").trim();addressBar.value=q;bingResultLink.href="https://www.bing.com/search?q="+encodeURIComponent(q);
+
+function detectCategory(t){
+t=t.toLowerCase();
+const c={
+gaming:["xbox","ps5","playstation","nintendo","switch","jeu","gaming","steam","epic","roblox","minecraft"],
+ai:["chatgpt","copilot","claude","ia","intelligence artificielle","openai","anthropic","gemini","perplexity"],
+cooking:["recette","gâteau","gateau","cuisine","manger","pâte","pizza","poulet"],
+shopping:["acheter","prix","amazon","fnac","deal","promo","acheter en ligne"],
+education:["scratch","ent","pronote","ecoledirecte","moodle","geogebra","khan","pix","lumni","mooc","cours","devoir","parcoursup","openclassrooms","wolfram","code.org"],
+microsoft:["microsoft","office","word","excel","powerpoint","outlook","onedrive","teams","onenote","windows"],
+providers:["orange","free","bouygues","sfr","red","sosh"],
+social:["youtube","tiktok","instagram","facebook","snapchat","twitter","x ","discord","reddit","twitch","pinterest"],
+tech:["pc","ordinateur","cpu","gpu","iphone","android","linux","samsung","apple","asus","lenovo"],
+video:["netflix","prime video","disney","crunchyroll","film","série","serie","streaming"]
+};
+for(const k in c)if(c[k].some(w=>t.includes(w)))return k;
+return"general";
+}
+
+const siteCategories={
+gaming:[
+"https://www.amazon.fr/s?k=",
+"https://www.fnac.com/SearchResult/ResultList.aspx?Search=",
+"https://store.steampowered.com/search/?term=",
+"https://www.epicgames.com/store/fr/search?q=",
+"https://www.micromania.fr/catalogsearch/result/?q=",
+"https://www.roblox.com/discover?keyword=",
+"https://www.minecraft.net/fr-fr/search?q="
+],
+ai:[
+"https://copilot.microsoft.com/?q=",
+"https://chat.openai.com",
+"https://claude.ai",
+"https://perplexity.ai/search?q=",
+"https://gemini.google.com/?q=",
+"https://huggingface.co/search?q="
+],
+cooking:[
+"https://www.marmiton.org/recettes/recherche.aspx?aqt=",
+"https://www.750g.com/recherche.htm?q=",
+"https://www.cuisineaz.com/recherche?q=",
+"https://www.hervecuisine.com/?s=",
+"https://www.ptitchef.com/recherche?q="
+],
+shopping:[
+"https://www.amazon.fr/s?k=",
+"https://www.fnac.com/SearchResult/ResultList.aspx?Search=",
+"https://www.cdiscount.com/search/10/",
+"https://www.darty.com/nav/recherche?text=",
+"https://www.rueducommerce.fr/rayon/recherche?q="
+],
+education:[
+"https://scratch.mit.edu/search?q=",
+"https://www.geogebra.org/search?query=",
+"https://www.khanacademy.org/search?page_search_query=",
+"https://pix.fr",
+"https://www.lumni.fr",
+"https://www.fun-mooc.fr/fr/cours/?q=",
+"https://openclassrooms.com/fr/search?q=",
+"https://www.wolframalpha.com/input?i=",
+"https://www.code.org",
+"https://www.ecoledirecte.com",
+"https://www.index-education.com/fr/pronote.php",
+"https://moodle.org"
+],
+microsoft:[
+"https://www.microsoft.com/fr-fr/search?q=",
+"https://www.office.com",
+"https://www.microsoft.com/fr-fr/microsoft-365/word",
+"https://www.microsoft.com/fr-fr/microsoft-365/excel",
+"https://www.microsoft.com/fr-fr/microsoft-365/powerpoint",
+"https://outlook.com",
+"https://www.onedrive.com",
+"https://teams.microsoft.com",
+"https://www.onenote.com",
+"https://learn.microsoft.com/fr-fr/search/?terms=",
+"https://support.microsoft.com/fr-fr/search/results?query="
+],
+providers:[
+"https://www.orange.fr",
+"https://www.free.fr",
+"https://www.sfr.fr",
+"https://www.bouyguestelecom.fr",
+"https://www.red-by-sfr.fr",
+"https://www.sosh.fr"
+],
+social:[
+"https://www.youtube.com/results?search_query=",
+"https://www.tiktok.com/search?q=",
+"https://www.instagram.com",
+"https://www.facebook.com/search/top?q=",
+"https://twitter.com/search?q=",
+"https://www.snapchat.com",
+"https://discord.com",
+"https://www.reddit.com/search/?q=",
+"https://www.twitch.tv/search?term=",
+"https://www.pinterest.fr/search/pins/?q="
+],
+tech:[
+"https://www.microsoft.com/fr-fr/search?q=",
+"https://www.apple.com/fr/search/",
+"https://www.samsung.com/fr/search/?searchTerm=",
+"https://www.lenovo.com/fr/fr/search?fq=",
+"https://www.asus.com/fr/search?q=",
+"https://www.tomshardware.com/search?q="
+],
+video:[
+"https://www.youtube.com/results?search_query=",
+"https://www.netflix.com/search?q=",
+"https://www.primevideo.com/search/ref=atv_nb_sr?phrase=",
+"https://www.disneyplus.com/search/",
+"https://www.crunchyroll.com/search?q="
+],
+general:[
+"https://www.bing.com/search?q=",
+"https://fr.wikipedia.org/wiki/",
+"https://www.qwant.com/?q=",
+"https://duckduckgo.com/?q="
+]
+};
+
+const intro=["Voici ce que j’ai trouvé : ","Analyse terminée : ","Après réflexion : ","J’ai analysé ta demande : ","Voici une réponse adaptée : ","J’ai généré ceci : "];
+const extra=["J’ai vérifié plusieurs pistes.","J’ai comparé différentes interprétations.","J’ai pris en compte le contexte.","J’ai simulé un raisonnement.","J’ai cherché une réponse claire."];
+
+function block(t){return["porn","porno","viol","gore","snuff","décapitation"].some(w=>t.toLowerCase().includes(w))}
+function calc(t){t=t.toLowerCase().replace("calcule","").replace("calcul","").replace("=","").trim();if(/^[0-9+\-*/().\s]+$/.test(t)){try{let r=Function("return "+t)();if(typeof r==="number"&&isFinite(r))return"Résultat du calcul : "+r}catch{}}return null}
+function trad(t){
+const d={manger:{en:"eat",es:"comer",de:"essen"},livre:{en:"book",es:"libro",de:"buch"},chat:{en:"cat",es:"gato",de:"katze"},chien:{en:"dog",es:"perro",de:"hund"},maison:{en:"house",es:"casa",de:"haus"},ordinateur:{en:"computer",es:"ordenador",de:"computer"},voiture:{en:"car",es:"coche",de:"auto"}};
+t=t.toLowerCase();
+if(t.includes("traduire")||t.includes("comment dit-on")){
+for(const w in d){
+if(t.includes(w)){
+if(t.includes("anglais"))return`Traduction en anglais de "${w}" : ${d[w].en}`;
+if(t.includes("espagnol"))return`Traduction en espagnol de "${w}" : ${d[w].es}`;
+if(t.includes("allemand"))return`Traduction en allemand de "${w}" : ${d[w].de}`;
+if(t.includes("français"))return`Traduction en français : ${w}`;
+}}
+return"Mot inconnu pour NexAI.";
+}
+return null}
+
+function catSum(c){
+return{
+gaming:"Recherche liée au gaming.",
+ai:"Recherche liée à l’IA.",
+cooking:"Recherche culinaire.",
+shopping:"Recherche d’achat.",
+education:"Recherche scolaire/éducative.",
+microsoft:"Recherche Microsoft.",
+providers:"Recherche opérateur.",
+social:"Recherche réseau social.",
+tech:"Recherche technologique.",
+video:"Recherche vidéo/streaming.",
+general:"Recherche générale."
+}[c]}
+
+function gen(){
+if(!q)return"Entre une recherche.";
+if(block(q))return"Contenu non autorisé.";
+let r=calc(q);if(r)return r;
+let t=trad(q);if(t)return t;
+let c=detectCategory(q);
+return intro[Math.random()*intro.length|0]+q+". "+catSum(c)+" "+extra[Math.random()*extra.length|0];
+}
+
+function refresh(){aiSummary.innerHTML="<b>Réponse de NEXAI :</b><br>"+gen()+"<br><br><button class='nexai-btn' onclick='refresh()'>Réessayer</button>"}
+refresh();
+
+const cat=detectCategory(q),res=document.getElementById("results"),list=siteCategories[cat]||siteCategories.general;
+list.forEach(u=>{let f=u+(u.endsWith("=")||u.includes("?")?"":"/")+encodeURIComponent(q);res.innerHTML+=`<div class='result'><a href='${f}' target='_blank'>${f}</a><p>Site correspondant.</p></div>`});
+
+imgTab.href="https://www.bing.com/images/search?q="+encodeURIComponent(q);
+mapTab.href="https://www.bing.com/maps?q="+encodeURIComponent(q);
+</script></body></html>

@@ -6,15 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
-      --bg-main: #020617;
-      --bg-glass: rgba(15, 23, 42, 0.7);
-      --border-glass: rgba(148, 163, 184, 0.25);
+      --bg-main: #02040a;
+      --bg-panel: #050816;
+      --border-panel: #111827;
       --accent: #2563eb;
-      --accent-soft: rgba(37, 99, 235, 0.25);
+      --accent-soft: #1d4ed8;
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
       --text-soft: #6b7280;
-      --danger: #f97373;
       --success: #22c55e;
     }
 
@@ -25,29 +24,27 @@
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+      background: radial-gradient(circle at top, #020617 0, #000 55%, #020617 100%);
       color: var(--text-main);
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     #app {
       display: flex;
       flex-direction: column;
-      height: 100vh;
+      min-height: 100vh;
       position: relative;
     }
 
-    /* Top bar avec grand logo NexSearch */
+    /* Top bar */
     .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 16px;
-      backdrop-filter: blur(20px);
-      background: linear-gradient(to right, rgba(15,23,42,0.9), rgba(15,23,42,0.6));
-      border-bottom: 1px solid var(--border-glass);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-      z-index: 10;
+      padding: 6px 14px;
+      background: #020617;
+      border-bottom: 1px solid #111827;
     }
 
     .top-left {
@@ -58,27 +55,31 @@
     }
 
     .logo-main {
-      width: 32px;
-      height: 32px;
-      border-radius: 10px;
-      background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 800;
-      font-size: 1.1rem;
-      box-shadow: 0 0 20px rgba(37,99,235,0.7);
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8 60%, #020617 100%);
+      box-shadow: 0 0 16px rgba(37,99,235,0.9);
+      position: relative;
+    }
+
+    .logo-main::after {
+      content: "";
+      position: absolute;
+      inset: 4px;
+      border-radius: 50%;
+      border: 1px solid rgba(15,23,42,0.9);
+      box-shadow: inset 0 0 10px rgba(15,23,42,0.9);
     }
 
     .logo-text {
       font-weight: 700;
-      font-size: 1.1rem;
-      letter-spacing: 0.03em;
+      font-size: 1rem;
+      letter-spacing: 0.04em;
     }
 
     .top-right {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text-soft);
     }
 
@@ -86,19 +87,17 @@
     .main-layout {
       flex: 1;
       display: grid;
-      grid-template-columns: 2.2fr 1.2fr;
-      gap: 12px;
-      padding: 12px 16px 72px 16px; /* place pour la barre en bas */
-      position: relative;
+      grid-template-columns: 2.1fr 1.1fr;
+      gap: 10px;
+      padding: 10px 14px 80px 14px;
     }
 
     .panel {
-      background: var(--bg-glass);
-      border-radius: 18px;
-      border: 1px solid var(--border-glass);
-      backdrop-filter: blur(24px);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
-      padding: 10px;
+      background: var(--bg-panel);
+      border: 1px solid var(--border-panel);
+      border-radius: 8px; /* plus carré / Metro */
+      box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+      padding: 8px;
       display: flex;
       flex-direction: column;
       min-height: 0;
@@ -108,11 +107,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     .panel-title {
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 600;
       color: #bfdbfe;
     }
@@ -122,26 +121,25 @@
       color: var(--text-soft);
     }
 
-    /* Résultats NexSearch */
+    /* Résultats */
     .results-panel {
       overflow: hidden;
     }
 
     #results-meta {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text-soft);
       margin-bottom: 4px;
     }
 
     #results-summary {
-      margin-bottom: 8px;
-      padding: 8px;
-      border-radius: 12px;
-      background: radial-gradient(circle at top left, rgba(37,99,235,0.25), rgba(15,23,42,0.9));
-      border: 1px solid rgba(37,99,235,0.4);
-      font-size: 0.85rem;
-      color: #e5e7eb;
-      max-height: 120px;
+      margin-bottom: 6px;
+      padding: 6px;
+      border-radius: 6px;
+      background: #020617;
+      border: 1px solid #1f2937;
+      font-size: 0.82rem;
+      max-height: 110px;
       overflow-y: auto;
     }
 
@@ -149,30 +147,30 @@
       flex: 1;
       overflow-y: auto;
       padding-right: 4px;
+      margin-bottom: 6px;
     }
 
     .result-item {
       display: flex;
       gap: 8px;
-      padding: 8px;
-      border-radius: 12px;
-      border: 1px solid rgba(148,163,184,0.25);
-      background: radial-gradient(circle at top left, rgba(15,23,42,0.9), rgba(15,23,42,0.7));
-      margin-bottom: 6px;
-      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+      padding: 7px;
+      border-radius: 6px;
+      border: 1px solid #111827;
+      background: #020617;
+      margin-bottom: 5px;
+      transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
     }
 
     .result-item:hover {
+      background: #02081a;
+      border-color: #2563eb;
       transform: translateY(-1px);
-      box-shadow: 0 10px 25px rgba(15,23,42,0.8);
-      border-color: rgba(96,165,250,0.7);
-      background: radial-gradient(circle at top left, rgba(37,99,235,0.25), rgba(15,23,42,0.9));
     }
 
     .result-favicon {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
       background: #020617;
       display: flex;
       align-items: center;
@@ -187,7 +185,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 4px;
     }
 
     .result-content {
@@ -198,8 +196,8 @@
     .result-item-title {
       font-weight: 600;
       color: #bfdbfe;
-      font-size: 0.9rem;
-      margin-bottom: 2px;
+      font-size: 0.88rem;
+      margin-bottom: 1px;
     }
 
     .result-item-title a {
@@ -212,9 +210,9 @@
     }
 
     .result-item-url {
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       color: var(--text-muted);
-      margin-bottom: 2px;
+      margin-bottom: 1px;
       word-break: break-all;
     }
 
@@ -228,20 +226,25 @@
       color: #a5b4fc;
     }
 
+    /* Actions globales (en bas du panneau résultats) */
+    .results-actions-wrapper {
+      border-top: 1px solid #111827;
+      padding-top: 4px;
+    }
+
     .actions-bar {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-top: 6px;
     }
 
     .action-btn {
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.4);
-      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,0.7));
+      border: 1px solid #1f2937;
+      background: #020617;
       color: var(--text-main);
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -249,11 +252,11 @@
     }
 
     .action-btn:hover {
-      background: radial-gradient(circle at top, rgba(37,99,235,0.35), rgba(15,23,42,0.9));
-      border-color: rgba(96,165,250,0.8);
+      background: #0b1120;
+      border-color: #2563eb;
     }
 
-    /* NexAI panel */
+    /* NexAI */
     .nexai-panel {
       overflow: hidden;
     }
@@ -267,27 +270,27 @@
     }
 
     #nexai-summary {
-      padding: 8px;
-      border-radius: 12px;
-      background: radial-gradient(circle at top right, rgba(34,197,94,0.25), rgba(15,23,42,0.9));
-      border: 1px solid rgba(34,197,94,0.4);
-      font-size: 0.85rem;
-      max-height: 110px;
+      padding: 6px;
+      border-radius: 6px;
+      background: #020617;
+      border: 1px solid #14532d;
+      font-size: 0.82rem;
+      max-height: 90px;
       overflow-y: auto;
     }
 
     #nexai-log {
       flex: 1;
       overflow-y: auto;
-      border-radius: 12px;
-      border: 1px solid rgba(148,163,184,0.25);
-      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(15,23,42,0.8));
-      padding: 8px;
-      font-size: 0.85rem;
+      border-radius: 6px;
+      border: 1px solid #111827;
+      background: #020617;
+      padding: 6px;
+      font-size: 0.82rem;
     }
 
     .nexai-msg {
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       white-space: pre-wrap;
     }
 
@@ -302,78 +305,77 @@
     .nexai-input-row {
       display: flex;
       gap: 6px;
-      margin-top: 4px;
+      margin-top: 2px;
     }
 
     .nexai-input-row input {
       flex: 1;
       padding: 6px 8px;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.5);
-      background: rgba(15,23,42,0.9);
+      border-radius: 4px;
+      border: 1px solid #1f2937;
+      background: #020617;
       color: var(--text-main);
-      font-size: 0.85rem;
+      font-size: 0.82rem;
     }
 
     .nexai-input-row button {
-      padding: 6px 12px;
-      border-radius: 999px;
+      padding: 6px 10px;
+      border-radius: 4px;
       border: none;
       background: var(--success);
       color: #022c22;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       cursor: pointer;
       font-weight: 600;
+      white-space: nowrap;
     }
 
     .nexai-input-row button:hover {
       filter: brightness(1.05);
     }
 
-    /* Barre de recherche en bas (dock) */
+    /* Barre de recherche en bas */
     .bottom-dock {
-      position: absolute;
+      position: fixed;
       left: 0;
       right: 0;
       bottom: 8px;
       display: flex;
       justify-content: center;
       pointer-events: none;
+      z-index: 20;
     }
 
     .bottom-bar {
-      width: min(900px, 100% - 32px);
+      width: min(900px, 100% - 24px);
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(15,23,42,0.85));
-      border: 1px solid rgba(148,163,184,0.4);
-      box-shadow: 0 18px 40px rgba(0,0,0,0.8);
-      backdrop-filter: blur(24px);
+      padding: 7px 9px;
+      border-radius: 6px;
+      background: #020617;
+      border: 1px solid #111827;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.9);
       pointer-events: auto;
     }
 
     .bottom-logo {
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
-      background: #f9fafb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      font-weight: 800;
-      color: #1d4ed8;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8 60%, #020617 100%);
+      box-shadow: 0 0 14px rgba(37,99,235,0.9);
       cursor: pointer;
-      transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+      position: relative;
     }
 
-    .bottom-logo:hover {
-      background: #1d4ed8;
-      color: #e5e7eb;
-      box-shadow: 0 0 18px rgba(37,99,235,0.9);
+    .bottom-logo::after {
+      content: "";
+      position: absolute;
+      inset: 3px;
+      border-radius: 50%;
+      border: 1px solid rgba(15,23,42,0.9);
+      box-shadow: inset 0 0 8px rgba(15,23,42,0.9);
     }
 
     .bottom-input {
@@ -381,10 +383,10 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: rgba(15,23,42,0.9);
-      border-radius: 999px;
-      padding: 4px 8px;
-      border: 1px solid rgba(148,163,184,0.4);
+      background: #020617;
+      border-radius: 4px;
+      padding: 3px 6px;
+      border: 1px solid #1f2937;
     }
 
     .bottom-input input {
@@ -393,29 +395,22 @@
       outline: none;
       background: transparent;
       color: var(--text-main);
-      font-size: 0.9rem;
+      font-size: 0.86rem;
     }
 
     .bottom-input button {
       padding: 4px 10px;
-      border-radius: 999px;
+      border-radius: 4px;
       border: none;
       background: var(--accent);
       color: #f9fafb;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       cursor: pointer;
       font-weight: 600;
     }
 
     .bottom-input button:hover {
       filter: brightness(1.05);
-    }
-
-    /* Petit badge calcul */
-    .calc-badge {
-      font-size: 0.7rem;
-      color: var(--text-soft);
-      margin-left: 4px;
     }
 
     /* Scrollbars */
@@ -427,17 +422,17 @@
       background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(148,163,184,0.5);
+      background: #1f2937;
       border-radius: 999px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: rgba(148,163,184,0.8);
+      background: #374151;
     }
 
     @media (max-width: 900px) {
       .main-layout {
         grid-template-columns: 1fr;
-        padding-bottom: 80px;
+        padding-bottom: 90px;
       }
       .nexai-panel {
         order: -1;
@@ -450,11 +445,11 @@
     <!-- Top bar -->
     <header class="top-bar" id="home-link-top">
       <div class="top-left">
-        <div class="logo-main">N</div>
+        <div class="logo-main"></div>
         <div class="logo-text">NexSearch</div>
       </div>
       <div class="top-right">
-        IA locale · moteur hybride Copilot+
+        IA locale · Metro / Copilot hybride
       </div>
     </header>
 
@@ -473,8 +468,10 @@
         <div id="results-summary"></div>
         <div id="results-list"></div>
 
-        <h4 style="margin:6px 0 2px 0;font-size:0.8rem;color:#9ca3af;">Actions intelligentes</h4>
-        <div id="results-actions" class="actions-bar"></div>
+        <div class="results-actions-wrapper">
+          <div style="font-size:0.78rem;color:#9ca3af;margin-bottom:2px;">Actions rapides</div>
+          <div id="results-actions" class="actions-bar"></div>
+        </div>
       </section>
 
       <!-- Panel NexAI -->
@@ -500,12 +497,11 @@
     <!-- Barre de recherche en bas -->
     <div class="bottom-dock">
       <div class="bottom-bar">
-        <div class="bottom-logo" id="home-link-bottom">N</div>
+        <div class="bottom-logo" id="home-link-bottom"></div>
         <div class="bottom-input">
           <input id="search-input" type="text" placeholder="Rechercher avec NexSearch (abrévs, fautes, tout accepté)...">
           <button id="search-btn">Rechercher</button>
         </div>
-        <div class="calc-badge">calc: 2+2, 42*13, etc.</div>
       </div>
     </div>
   </div>
@@ -514,7 +510,6 @@
     // =========================
     // 1) Utilitaires
     // =========================
-
     function normalizeText(str) {
       return str
         .toLowerCase()
@@ -525,7 +520,6 @@
         .trim();
     }
 
-    // Levenshtein simple pour fautes de frappes
     function levenshtein(a, b) {
       const m = a.length;
       const n = b.length;
@@ -548,7 +542,6 @@
     // =========================
     // 2) Abréviations / corrections avancées
     // =========================
-
     const ADVANCED_ABBREV_MAP = {
       "ms": "microsoft",
       "msoft": "microsoft",
@@ -567,7 +560,6 @@
       "fnc": "fnac",
       "cdisc": "cdiscount",
       "ali": "aliexpress",
-      "gog": "gog",
       "gh": "github",
       "so": "stack overflow",
       "mdn": "mdn web docs",
@@ -634,7 +626,6 @@
     // =========================
     // 3) NexAI – réseau de neurones ~150k paramètres
     // =========================
-
     const NEXAI_VOCAB = "abcdefghijklmnopqrstuvwxyz0123456789 ?!.,";
     const EMBED_DIM = 256;
     const HIDDEN_DIM1 = 512;
@@ -889,6 +880,11 @@
 
     function nexaiBuildSummaryForQuery(q, correctedQ, typeInfo) {
       const base = [];
+
+      if (!q.trim()) {
+        return "Tape une requête en bas, même avec des abréviations ou des fautes : je corrige, j’analyse et je résume ce que tu cherches.";
+      }
+
       if (correctedQ !== q) {
         base.push(`J’ai corrigé ta requête en : « ${correctedQ} ».`);
       } else {
@@ -911,67 +907,59 @@
         base.push("YouTube est une plateforme de partage de vidéos appartenant à Google.");
       }
 
+      if (base.length === 0) {
+        base.push("Je n’ai pas détecté de type particulier, mais j’ai classé les sites les plus pertinents pour ta requête.");
+      }
+
       return base.join(" ");
     }
 
     // =========================
     // 4) NexSearch – moteur IA local
     // =========================
-
     const SITES_DB = [
-      // Général / moteurs
       { name: "Bing", url: "https://www.bing.com/search?q={q}", tags: ["search","general"], weight: 0.95, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" },
       { name: "Copilot", url: "https://copilot.microsoft.com/?q={q}", tags: ["ai","assistant"], weight: 0.98, favicon: "https://copilot.microsoft.com/favicon.ico" },
 
-      // Vidéo
-      { name: "YouTube", url: "https://www.youtube.com/results?search_query={q}", tags: ["video","music"], weight: 0.97, favicon: "https://www.youtube.com/s/desktop/fe2e6e8b/img/favicon_32x32.png" },
+      { name: "YouTube", url: "https://www.youtube.com/results?search_query={q}", tags: ["video","music"], weight: 0.97, favicon: "https://www.youtube.com/favicon.ico" },
       { name: "Twitch", url: "https://www.twitch.tv/search?term={q}", tags: ["video","gaming","live"], weight: 0.85, favicon: "https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png" },
 
-      // Musique
       { name: "Spotify", url: "https://open.spotify.com/search/{q}", tags: ["music"], weight: 0.9, favicon: "https://open.spotifycdn.com/cdn/images/favicon32.b64ecc03.png" },
       { name: "Deezer", url: "https://www.deezer.com/search/{q}", tags: ["music"], weight: 0.85, favicon: "https://e-cdns-files.dzcdn.net/cache/images/common/favicon/favicon-32x32.1c0c1c4c.png" },
       { name: "Amazon Music", url: "https://music.amazon.fr/search/{q}", tags: ["music","shopping"], weight: 0.82, favicon: "https://music.amazon.fr/favicon.ico" },
 
-      // Shopping
       { name: "Amazon", url: "https://www.amazon.fr/s?k={q}", tags: ["shopping","object"], weight: 0.97, favicon: "https://www.amazon.fr/favicon.ico" },
       { name: "Fnac", url: "https://www.fnac.com/SearchResult/ResultList.aspx?Search={q}", tags: ["shopping","object"], weight: 0.9, favicon: "https://www.fnac.com/favicon.ico" },
       { name: "Cdiscount", url: "https://www.cdiscount.com/search/10/{q}.html", tags: ["shopping","object"], weight: 0.88, favicon: "https://www.cdiscount.com/favicon-32x32.png" },
       { name: "AliExpress", url: "https://www.aliexpress.com/wholesale?SearchText={q}", tags: ["shopping","object"], weight: 0.84, favicon: "https://www.aliexpress.com/favicon.ico" },
 
-      // Maps / images
       { name: "Bing Maps", url: "https://www.bing.com/maps?q={q}", tags: ["maps","place"], weight: 0.9, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" },
       { name: "Bing Images", url: "https://www.bing.com/images/search?q={q}", tags: ["images"], weight: 0.9, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" },
 
-      // Microsoft / logiciels
       { name: "Microsoft", url: "https://www.microsoft.com/search?q={q}", tags: ["microsoft","software"], weight: 0.95, favicon: "https://www.microsoft.com/favicon.ico" },
       { name: "Excel", url: "https://www.microsoft.com/search?q=Excel", tags: ["microsoft","excel","software"], weight: 0.98, favicon: "https://www.microsoft.com/favicon.ico" },
       { name: "Word", url: "https://www.microsoft.com/search?q=Word", tags: ["microsoft","word","software"], weight: 0.96, favicon: "https://www.microsoft.com/favicon.ico" },
       { name: "PowerPoint", url: "https://www.microsoft.com/search?q=PowerPoint", tags: ["microsoft","powerpoint","software"], weight: 0.96, favicon: "https://www.microsoft.com/favicon.ico" },
 
-      // Réseaux sociaux
       { name: "X (Twitter)", url: "https://twitter.com/search?q={q}", tags: ["social","news"], weight: 0.82, favicon: "https://abs.twimg.com/favicons/twitter.2.ico" },
       { name: "Facebook", url: "https://www.facebook.com/search/top?q={q}", tags: ["social"], weight: 0.78, favicon: "https://www.facebook.com/favicon.ico" },
       { name: "Instagram", url: "https://www.instagram.com/explore/tags/{q}/", tags: ["social","images"], weight: 0.78, favicon: "https://www.instagram.com/static/images/ico/favicon-200.png/ab6eff595bb1.png" },
       { name: "Reddit", url: "https://www.reddit.com/search/?q={q}", tags: ["social","forum"], weight: 0.82, favicon: "https://www.redditstatic.com/desktop2x/img/favicon/favicon-32x32.png" },
 
-      // Dev / tech
       { name: "GitHub", url: "https://github.com/search?q={q}", tags: ["dev","code"], weight: 0.9, favicon: "https://github.githubassets.com/favicons/favicon.png" },
       { name: "Stack Overflow", url: "https://stackoverflow.com/search?q={q}", tags: ["dev","questions"], weight: 0.9, favicon: "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico" },
       { name: "MDN Web Docs", url: "https://developer.mozilla.org/fr/search?q={q}", tags: ["dev","docs"], weight: 0.85, favicon: "https://developer.mozilla.org/favicon-32x32.cbbd161b.png" },
 
-      // Jeux
       { name: "Steam", url: "https://store.steampowered.com/search/?term={q}", tags: ["games","shopping"], weight: 0.86, favicon: "https://store.steampowered.com/favicon.ico" },
       { name: "Epic Games Store", url: "https://store.epicgames.com/fr/browse?q={q}", tags: ["games","shopping"], weight: 0.8, favicon: "https://static-assets-prod.epicgames.com/epic-store/static/favicon.ico" },
 
-      // News
       { name: "Le Monde", url: "https://www.lemonde.fr/recherche/?search_keywords={q}", tags: ["news"], weight: 0.75, favicon: "https://www.lemonde.fr/favicon.ico" },
       { name: "Le Figaro", url: "https://recherche.lefigaro.fr/recherche/{q}", tags: ["news"], weight: 0.73, favicon: "https://www.lefigaro.fr/favicon.ico" },
       { name: "France Info", url: "https://www.francetvinfo.fr/recherche/?query={q}", tags: ["news"], weight: 0.73, favicon: "https://www.francetvinfo.fr/favicon.ico" },
 
-      // Cloud / fichiers
       { name: "Google Drive", url: "https://drive.google.com/drive/search?q={q}", tags: ["cloud","files"], weight: 0.7, favicon: "https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png" },
       { name: "OneDrive", url: "https://onedrive.live.com/?q={q}", tags: ["cloud","files"], weight: 0.7, favicon: "https://onedrive.live.com/favicon.ico" }
-      // → tu peux continuer à ajouter des sites ici pour atteindre 1000+
+      // → tu peux continuer ici pour monter à 1000+ sites
     ];
 
     function detectQueryType(q) {
@@ -1065,7 +1053,6 @@
 
       buttons.push({ label: "Voir sur Bing", url: "https://www.bing.com/search?q=" + encodeURIComponent(correctedQ) });
       buttons.push({ label: "Copilot Search", url: "https://copilot.microsoft.com/?q=" + encodeURIComponent(correctedQ) });
-
       buttons.push({ label: "Images", url: "https://www.bing.com/images/search?q=" + encodeURIComponent(correctedQ) });
       buttons.push({ label: "Maps", url: "https://www.bing.com/maps?q=" + encodeURIComponent(correctedQ) });
 
@@ -1090,7 +1077,6 @@
     // =========================
     // 5) Intégration UI
     // =========================
-
     function appendNexAIMsg(text, from) {
       const log = document.getElementById("nexai-log");
       const div = document.createElement("div");
@@ -1214,7 +1200,15 @@
       };
 
       document.getElementById("nexai-summary").textContent =
-        "Tape une requête en bas (même avec abréviations ou fautes), je corrige, j’analyse et je résume ce que tu cherches.";
+        "Tape une requête en bas (abrévs, fautes, tout accepté) : je corrige, j’analyse et je résume ce que tu cherches.";
+
+      // Recherche auto si ?q=... dans l’URL (depuis la page d’accueil)
+      const params = new URLSearchParams(window.location.search);
+      const qParam = params.get("q");
+      if (qParam) {
+        searchInput.value = qParam;
+        runNexSearch(qParam);
+      }
     }
 
     window.addEventListener("DOMContentLoaded", initUI);

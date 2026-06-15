@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>NexSearch – Résultats</title>
+  <title>Recherche NexSearch</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- Favicon Copilot+ -->
@@ -24,7 +24,7 @@
       background:var(--bg);
       color:var(--text);
       font-family:Segoe UI,system-ui,-apple-system,sans-serif;
-      overflow:hidden; /* pas de scrollbar globale */
+      overflow:hidden;
     }
     header{
       height:52px;
@@ -37,7 +37,7 @@
     }
     .layout{
       display:flex;
-      height:calc(100vh - 52px - 56px); /* header + bottom bar */
+      height:calc(100vh - 52px - 56px);
       width:100%;
       overflow:hidden;
     }
@@ -350,8 +350,8 @@
 <div class="layout">
   <main>
     <section class="card">
-      <div class="card-title">NexAI – Résumé intelligent</div>
-      <div class="card-sub">Analyse locale de ta recherche (sans API)</div>
+      <div class="card-title">NexAI – Résumé intelligent (local)</div>
+      <div class="card-sub">Analyse de ta recherche, calculs et contexte, sans API</div>
       <div id="aiSummary"></div>
     </section>
 
@@ -413,6 +413,9 @@ bingTab.href = "https://www.bing.com/search?q="+encodeURIComponent(query);
 function blocked(text){
   return ["porn","porno","viol","gore","snuff","décapitation"].some(w=>text.toLowerCase().includes(w));
 }
+function pickRandom(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
 
 function detectCategory(q){
   q = q.toLowerCase();
@@ -430,20 +433,32 @@ function detectCategory(q){
   return "general";
 }
 
+function detectIntent(q){
+  const l = q.toLowerCase();
+  if(isCalc(q)) return "calc";
+  if(l.startsWith("comment ") || l.startsWith("pourquoi ") || l.includes("explication")) return "explain";
+  if(l.includes("acheter") || l.includes("prix") || l.includes("promo")) return "shopping";
+  if(l.includes("qui est") || l.includes("qui sont")) return "who";
+  if(l.includes("tutoriel") || l.includes("tuto") || l.includes("apprendre")) return "learn";
+  return "search";
+}
+
+/* ========= SITES DE BASE ========= */
 function baseSites(query){
   const q = query.toLowerCase();
   const cat = detectCategory(q);
   let sites = [];
+
   if(cat==="microsoft"){
     sites = [
       {name:"Microsoft (site principal)",url:"https://www.microsoft.com"},
       {name:"Microsoft 365 / Office",url:"https://www.office.com"},
-      {name:"Outlook (messagerie)",url:"https://outlook.com"},
-      {name:"OneDrive (stockage)",url:"https://onedrive.live.com"},
-      {name:"Teams (collaboration)",url:"https://teams.microsoft.com"},
       {name:"Word",url:"https://www.microsoft.com/fr-fr/microsoft-365/word"},
       {name:"Excel",url:"https://www.microsoft.com/fr-fr/microsoft-365/excel"},
       {name:"PowerPoint",url:"https://www.microsoft.com/fr-fr/microsoft-365/powerpoint"},
+      {name:"Outlook (messagerie)",url:"https://outlook.com"},
+      {name:"OneDrive (stockage)",url:"https://onedrive.live.com"},
+      {name:"Teams (collaboration)",url:"https://teams.microsoft.com"},
       {name:"Learn Microsoft",url:"https://learn.microsoft.com/fr-fr"},
       {name:"Support Microsoft",url:"https://support.microsoft.com/fr-fr"}
     ];
@@ -529,6 +544,38 @@ function baseSites(query){
   return sites;
 }
 
+/* score de pertinence : exact match, début, inclusion, catégorie */
+function scoreSite(site, q){
+  const name = site.name.toLowerCase();
+  const query = q.toLowerCase();
+  let score = 0;
+
+  if(name === query) score += 100;
+  if(name.startsWith(query)) score += 60;
+  if(name.includes(query)) score += 40;
+
+  // cas Excel / Word / Outlook / OneDrive / PowerPoint
+  const strongMap = {
+    "excel":["excel"],
+    "word":["word"],
+    "outlook":["outlook"],
+    "onedrive":["onedrive"],
+    "powerpoint":["powerpoint","power point"],
+    "teams":["teams"]
+  };
+  for(const key in strongMap){
+    if(strongMap[key].some(w=>query.includes(w)) && name.includes(key)) score += 80;
+  }
+
+  // site principal Microsoft si query = microsoft
+  if(query.includes("microsoft") && name.includes("microsoft (site principal)")) score += 90;
+
+  // petit bonus pour “site principal”
+  if(name.includes("site principal")) score += 10;
+
+  return score;
+}
+
 function faviconUrl(url){
   try{
     const u = new URL(url);
@@ -538,7 +585,7 @@ function faviconUrl(url){
   }
 }
 
-/* ========= NEXAI LOCAL : RÉSUMÉ ========= */
+/* ========= NEXAI LOCAL : CALCUL + RÉSUMÉ ========= */
 const aiSummary = document.getElementById("aiSummary");
 
 function isCalc(str){
@@ -547,7 +594,6 @@ function isCalc(str){
 function safeCalc(str){
   try{
     if(!isCalc(str)) return null;
-    // très simple, pas sécurisé pour tout, mais suffisant ici
     // eslint-disable-next-line no-eval
     const r = eval(str);
     if(typeof r==="number" && isFinite(r)) return r;
@@ -559,15 +605,39 @@ function summarizeQuery(q){
   if(!q) return "<p>Entre une recherche pour que NexAI puisse te répondre.</p>";
   if(blocked(q)) return "<p>Contenu non autorisé pour NexAI.</p>";
 
-  const lower = q.toLowerCase();
   const calc = safeCalc(q);
-  let intro = "<p><b>Salut !</b> Tu as recherché <b>"+q+"</b>.</p>";
+  const cat = detectCategory(q);
+  const intent = detectIntent(q);
+
+  const intros = [
+    "<p><b>Salut !</b> Tu as recherché <b>"+q+"</b>.</p>",
+    "<p><b>Hey !</b> Je vois que tu t’intéresses à <b>"+q+"</b>.</p>",
+    "<p><b>Bienvenue sur NexSearch.</b> Ta requête actuelle : <b>"+q+"</b>.</p>"
+  ];
+  let intro = pickRandom(intros);
   let core = "";
+
   if(calc!==null){
-    core += "<p>Ça ressemble à un calcul. Résultat : <b>"+calc+"</b>.</p>";
+    const calcVariants = [
+      "<p>Ta requête ressemble à un calcul. Résultat : <b>"+calc+"</b>.</p>",
+      "<p>Je détecte un calcul. Si on le fait, on obtient <b>"+calc+"</b>.</p>",
+      "<p>Côté maths, ça donne : <b>"+calc+"</b>.</p>"
+    ];
+    core += pickRandom(calcVariants);
+  }else{
+    if(intent==="explain"){
+      core += "<p>Tu sembles chercher une explication ou un “pourquoi”. NexAI peut t’aider à clarifier les idées autour de ce sujet.</p>";
+    }else if(intent==="shopping"){
+      core += "<p>Ta recherche est orientée shopping : produits, prix, promos. Les sites listés en dessous te donneront des options concrètes.</p>";
+    }else if(intent==="who"){
+      core += "<p>Tu veux probablement savoir qui est une personne ou une organisation. Les sites proposés pourront t’apporter des infos plus détaillées.</p>";
+    }else if(intent==="learn"){
+      core += "<p>Tu sembles vouloir apprendre quelque chose ou trouver un tutoriel. NexSearch te propose des sites utiles pour progresser.</p>";
+    }else{
+      core += "<p>C’est une recherche générale. NexAI essaie de comprendre le contexte et de te proposer des sites pertinents.</p>";
+    }
   }
 
-  const cat = detectCategory(q);
   if(cat==="microsoft"){
     core += "<p>Microsoft est une multinationale fondée en 1975 par Bill Gates et Paul Allen, connue pour Windows, Office, Xbox et de nombreux services cloud.</p>";
   }else if(cat==="education"){
@@ -588,7 +658,12 @@ function summarizeQuery(q){
     core += "<p>C’est une recherche assez générale. NexSearch te propose des sites utiles et variés autour de ce sujet.</p>";
   }
 
-  const outro = "<p>Juste en dessous, tu as une sélection de sites liés à ta recherche, triés par pertinence.</p>";
+  const outros = [
+    "<p>Juste en dessous, tu as une sélection de sites liés à ta recherche, triés par pertinence.</p>",
+    "<p>Fais défiler un peu pour voir les sites que NexSearch a sélectionnés pour toi.</p>",
+    "<p>Tu peux aussi ouvrir le volet NexAI pour discuter et poser des questions plus précises.</p>"
+  ];
+  const outro = pickRandom(outros);
   return intro+core+outro;
 }
 
@@ -606,6 +681,13 @@ function describeSite(site, q){
     if(name.includes("support")) return "Centre d’aide et de support officiel Microsoft.";
     return "Site principal de Microsoft, avec produits, services et informations officielles.";
   }
+
+  if(name.includes("excel")) return "Tableur de Microsoft pour gérer des données, faire des calculs et des graphiques.";
+  if(name.includes("word")) return "Traitement de texte de Microsoft pour rédiger des documents.";
+  if(name.includes("powerpoint")) return "Outil de présentation de Microsoft pour créer des diaporamas.";
+  if(name.includes("teams")) return "Outil de collaboration et de visioconférence de Microsoft.";
+  if(name.includes("outlook")) return "Messagerie et agenda de Microsoft.";
+  if(name.includes("onedrive")) return "Stockage cloud de Microsoft pour tes fichiers.";
 
   if(name.includes("scratch")) return "Plateforme pour apprendre la programmation visuelle avec des blocs, idéale pour débuter.";
   if(name.includes("pronote") || name.includes("ent")) return "Outil scolaire pour suivre les notes, devoirs et la vie de classe.";
@@ -660,7 +742,6 @@ function describeSite(site, q){
   if(name.includes("qwant")) return "Moteur de recherche européen axé sur la vie privée.";
   if(name.includes("duckduckgo")) return "Moteur de recherche qui met en avant la confidentialité.";
 
-  // fallback
   if(query.includes("microsoft") && !name.includes("microsoft")){
     return "Site en rapport avec l’écosystème Microsoft ou des services associés.";
   }
@@ -677,8 +758,10 @@ function renderResults(){
   const base = baseSites(query);
   const enriched = base.map(s=>({
     ...s,
-    desc: describeSite(s, query)
-  }));
+    desc: describeSite(s, query),
+    _score: scoreSite(s, query)
+  })).sort((a,b)=>b._score - a._score);
+
   resultsList.innerHTML = "";
   enriched.forEach(site=>{
     const div = document.createElement("div");
@@ -696,7 +779,7 @@ function renderResults(){
   });
 }
 
-/* ========= NEXAI LOCAL : CHAT ========= */
+/* ========= NEXAI LOCAL : CHAT AVEC “MEMOIRE” + VARIÉTÉ ========= */
 const nexaiPanel = document.getElementById("nexaiPanel");
 const nexaiToggle = document.getElementById("nexaiToggle");
 const nexaiClose = document.getElementById("nexaiClose");
@@ -721,46 +804,140 @@ function addChatMessage(text,from){
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
+/* “Mémoire” simple : dernières intentions + humeur */
+const nexaiState = {
+  lastUserMessages: [],
+  mood: "neutral", // "neutral", "curious", "playful"
+  topicHint: query || ""
+};
+
+function updateMood(msg){
+  const m = msg.toLowerCase();
+  if(m.includes("merci") || m.includes("cool") || m.includes("super")) nexaiState.mood = "playful";
+  else if(m.includes("pourquoi") || m.includes("comment")) nexaiState.mood = "curious";
+  else nexaiState.mood = "neutral";
+}
+
 function nexaiChatReply(msg){
   const m = msg.toLowerCase().trim();
   if(blocked(m)) return "<p>Contenu non autorisé.</p>";
 
+  nexaiState.lastUserMessages.push(m);
+  if(nexaiState.lastUserMessages.length>10) nexaiState.lastUserMessages.shift();
+  updateMood(m);
+
+  const calc = safeCalc(msg);
+  const cat = detectCategory(query || m);
+  const intent = detectIntent(m);
+
   // small talk
   if(m.includes("ça va") || m.includes("ca va")){
-    return "<p>Oui, ça va super, merci ! Et toi ? 😄</p>";
+    const variants = [
+      "<p>Oui, ça va super, merci 😄 Et toi, comment tu te sens ?</p>",
+      "<p>Je tourne bien, merci de demander ! Prêt à explorer ta recherche avec toi.</p>",
+      "<p>Plutôt en forme pour une IA locale ! Et toi, ça roule ?</p>"
+    ];
+    return pickRandom(variants);
   }
   if(m==="salut" || m==="bonjour" || m==="yo" || m==="cc" || m==="coucou"){
-    return "<p>Salut ! Je suis NexAI, ton IA locale NexSearch. Tu veux qu’on parle de <b>"+(query||"quelque chose")+"</b> ?</p>";
+    const variants = [
+      "<p>Salut ! Je suis <b>NexAI</b>, ton mini chatbot local dans NexSearch. De quoi tu veux parler ?</p>",
+      "<p>Hey 👋 Ici NexAI. Tu peux me poser des questions sur ta recherche ou juste discuter.</p>",
+      "<p>Coucou ! NexAI au rapport. On explore <b>"+(query||"ta recherche")+"</b> ensemble ?</p>"
+    ];
+    return pickRandom(variants);
   }
   if(m.includes("tu es qui") || m.includes("t'es qui") || m.includes("qui es-tu") || m.includes("qui es tu")){
-    return "<p>Je suis <b>NexAI</b>, une IA locale intégrée à NexSearch. Je t’aide à comprendre ta recherche et à explorer les sites proposés.</p>";
+    const variants = [
+      "<p>Je suis <b>NexAI</b>, une IA locale intégrée à NexSearch. Je ne vais pas sur internet, mais j’utilise des règles, du contexte et un peu de logique pour t’aider.</p>",
+      "<p>On peut dire que je suis le petit cerveau de NexSearch : je commente ta recherche et les sites proposés.</p>",
+      "<p>Je suis NexAI, une sorte de mini‑assistant IA maison, qui tourne directement dans ton navigateur.</p>"
+    ];
+    return pickRandom(variants);
   }
 
   // calcul
-  const calc = safeCalc(msg);
   if(calc!==null){
-    return "<p>Si je calcule <b>"+msg+"</b>, j’obtiens <b>"+calc+"</b>.</p>";
+    const variants = [
+      "<p>Si je calcule <b>"+msg+"</b>, j’obtiens <b>"+calc+"</b>.</p>",
+      "<p>Côté maths, <b>"+msg+"</b> donne <b>"+calc+"</b>.</p>",
+      "<p>En faisant le calcul, on tombe sur <b>"+calc+"</b>.</p>"
+    ];
+    return pickRandom(variants);
   }
 
-  // contexte recherche
+  // questions “pourquoi / comment”
+  if(intent==="explain"){
+    const variants = [
+      "<p>Tu cherches une explication. Précise un peu ce que tu veux comprendre, et je te répondrai de façon plus ciblée.</p>",
+      "<p>Bonne question. Dis‑moi exactement ce que tu veux que je t’explique, et je structure ça avec toi.</p>",
+      "<p>Ok, mode “explication” activé. Reformule avec un peu plus de détails, et je te fais une réponse claire.</p>"
+    ];
+    return pickRandom(variants);
+  }
+
+  // contexte selon catégorie
   if(query){
-    const cat = detectCategory(query);
     if(cat==="microsoft"){
-      return "<p>On est sur une recherche autour de <b>Microsoft</b>. Tu peux me demander des infos sur Windows, Office, Xbox, ou même des conseils pour choisir un service.</p>";
+      const variants = [
+        "<p>On est sur une recherche autour de <b>Microsoft</b>. Tu peux me demander des infos sur Windows, Office, Xbox, ou comment choisir entre OneDrive, Outlook, Teams, etc.</p>",
+        "<p>Ton sujet tourne autour de Microsoft. Si tu veux, je peux t’orienter vers les bons outils (Word, Excel, PowerPoint…).</p>"
+      ];
+      return pickRandom(variants);
     }
     if(cat==="education"){
-      return "<p>Ta recherche tourne autour de l’école ou des outils éducatifs. Je peux t’orienter vers des plateformes de cours, des ENT ou des outils pour réviser.</p>";
+      const variants = [
+        "<p>Ta recherche touche à l’école ou aux outils éducatifs. Tu peux me demander des idées pour réviser ou des plateformes utiles.</p>",
+        "<p>On est dans le domaine de l’éducation. Tu veux parler de cours, d’ENT, de révisions ?</p>"
+      ];
+      return pickRandom(variants);
     }
     if(cat==="gaming"){
-      return "<p>On est dans le gaming. Tu peux me demander des infos sur des consoles, des jeux, ou des plateformes comme Steam ou Xbox.</p>";
+      const variants = [
+        "<p>On est clairement dans le gaming. Tu peux me parler de consoles, de jeux, ou me demander des pistes pour explorer Steam, Xbox, PlayStation…</p>",
+        "<p>Gaming détecté 🎮 Tu veux discuter d’un jeu en particulier ou plutôt des plateformes ?</p>"
+      ];
+      return pickRandom(variants);
     }
     if(cat==="ai"){
-      return "<p>Tu explores l’IA. Je peux t’expliquer les différences entre Copilot, ChatGPT, Gemini, etc., ou comment les utiliser au quotidien.</p>";
+      const variants = [
+        "<p>Tu explores l’IA. Je peux t’expliquer les grandes différences entre Copilot, ChatGPT, Gemini, etc.</p>",
+        "<p>On est dans le monde de l’IA. Tu veux parler d’assistants, de modèles, ou d’idées d’utilisation ?</p>"
+      ];
+      return pickRandom(variants);
     }
+    if(cat==="shopping"){
+      const variants = [
+        "<p>Tu sembles en mode shopping. Dis‑moi ce que tu cherches (type de produit, budget) et je t’aide à raisonner.</p>",
+        "<p>Recherche orientée achats. Tu veux comparer des sites, des types de produits, ou juste explorer ?</p>"
+      ];
+      return pickRandom(variants);
+    }
+  }
+
+  // humeur
+  if(nexaiState.mood==="playful"){
+    const variants = [
+      "<p>J’aime bien ta façon de poser les questions 😄 On continue sur <b>"+(query||"ta recherche")+"</b> ou tu veux changer de sujet ?</p>",
+      "<p>Tu mets une bonne ambiance ici 😁 Si tu veux, lance‑moi un calcul, une question “pourquoi”, ou parle d’un site en particulier.</p>"
+    ];
+    return pickRandom(variants);
+  }
+  if(nexaiState.mood==="curious"){
+    const variants = [
+      "<p>Tu poses des questions intéressantes. Essaie d’être un peu plus précis, et je te répondrai de façon plus ciblée.</p>",
+      "<p>Je sens que tu veux creuser. Reformule avec un exemple concret, et on voit ça ensemble.</p>"
+    ];
+    return pickRandom(variants);
   }
 
   // fallback
-  return "<p>Bonne question ! Je suis une version locale de NexAI, donc je ne vais pas chercher sur internet, mais je peux t’aider à réfléchir, expliquer des concepts simples ou te guider parmi les sites listés.</p>";
+  const fallbacks = [
+    "<p>Bonne question ! Je suis une version locale de NexAI, donc je ne vais pas chercher sur internet, mais je peux t’aider à réfléchir et à comprendre le contexte de ta recherche.</p>",
+    "<p>Je ne peux pas tout savoir, mais je peux t’aider à structurer tes idées et à exploiter les sites listés.</p>",
+    "<p>Je reste une IA locale assez simple, mais avec un peu de contexte et des exemples, je peux déjà t’être utile.</p>"
+  ];
+  return pickRandom(fallbacks);
 }
 
 function sendChat(){

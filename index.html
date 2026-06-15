@@ -5,13 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NexSearch</title>
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://microsoft-edge77.github.io/NexSearchAssets/favicon-copilot-blue.png">
+
+  <!-- Police -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
-    /* --- GLOBAL --- */
+    /* GLOBAL */
     body {
       margin: 0;
-      background: radial-gradient(circle at 50% 20%, #0a0a0a, #000);
+      background: #000;
       color: #d0e2ff;
       font-family: "Poppins", system-ui, sans-serif;
       overflow-x: hidden;
@@ -27,7 +31,6 @@
       transform: translateX(-50%);
       filter: blur(80px);
       z-index: -1;
-      pointer-events: none;
     }
 
     .page {
@@ -39,39 +42,37 @@
       padding: 40px 0;
     }
 
-    /* --- LOGO (moins agressif) --- */
+    /* LOGO (doux, premium) */
     .logo {
-      font-size: 3rem;
+      font-size: 2.8rem;
       font-weight: 500;
       letter-spacing: 0.10em;
-      background: linear-gradient(90deg, #5f8df6, #8ab8ff);
+      background: linear-gradient(90deg, #6fa3ff, #9cc4ff);
       -webkit-background-clip: text;
       color: transparent;
-      opacity: 0.9;
+      opacity: 0.85;
       text-shadow: 0 0 18px rgba(59,130,246,0.25);
-      user-select: none;
       transition: 0.3s;
+      user-select: none;
     }
 
     .logo:hover {
       opacity: 1;
       text-shadow: 0 0 30px rgba(59,130,246,0.45);
-      transform: scale(1.02);
     }
 
-    /* --- TAGLINE --- */
+    /* TAGLINE */
     .tagline {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       color: #9cc4ff;
-      opacity: 0.9;
-      user-select: none;
+      opacity: 0.8;
       margin-bottom: 10px;
     }
 
-    /* --- SEARCH BOX (Glass) --- */
+    /* SEARCH BOX (liquid glass) */
     .search-box {
-      backdrop-filter: blur(18px) saturate(180%);
-      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(22px) saturate(200%);
+      background: rgba(255,255,255,0.05);
       border-radius: 18px;
       padding: 2px;
       border: 1px solid rgba(255,255,255,0.08);
@@ -81,7 +82,6 @@
 
     .search-box:hover {
       box-shadow: 0 0 40px rgba(59,130,246,0.25);
-      transform: translateY(-2px);
     }
 
     .search-form input {
@@ -101,99 +101,11 @@
       opacity: 0.6;
     }
 
-    /* --- FOOTER --- */
+    /* FOOTER */
     .footer {
       font-size: 0.85rem;
       color: #4f6fbf;
       opacity: 0.7;
-      user-select: none;
-    }
-
-    /* --- NEXAI BUTTON --- */
-    .nexai-btn {
-      position: fixed;
-      left: 20px;
-      bottom: 20px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(12px);
-      padding: 12px 18px;
-      border-radius: 12px;
-      color: #9cc4ff;
-      cursor: pointer;
-      transition: 0.25s;
-      z-index: 20;
-    }
-
-    .nexai-btn:hover {
-      background: rgba(255,255,255,0.12);
-      transform: translateY(-2px);
-    }
-
-    /* --- NEXAI PANEL (Liquid Glass) --- */
-    .nexai-panel {
-      position: fixed;
-      top: 0;
-      left: -380px;
-      width: 360px;
-      height: 100vh;
-      backdrop-filter: blur(30px) saturate(200%);
-      background: rgba(255,255,255,0.06);
-      border-right: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 8px 0 40px rgba(0,0,0,0.4);
-      transition: 0.35s cubic-bezier(.25,.1,.25,1);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      z-index: 50;
-    }
-
-    .nexai-panel.open {
-      left: 0;
-    }
-
-    .nexai-title {
-      font-size: 1.4rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-      color: #bcd6ff;
-    }
-
-    .nexai-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding-right: 5px;
-      margin-bottom: 10px;
-      color: #dce7ff;
-    }
-
-    .nexai-input {
-      display: flex;
-      gap: 8px;
-    }
-
-    .nexai-input input {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: none;
-      background: rgba(255,255,255,0.08);
-      color: #dce7ff;
-      outline: none;
-    }
-
-    .nexai-input button {
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: none;
-      background: #3b82f6;
-      color: white;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .nexai-input button:hover {
-      background: #2563eb;
     }
   </style>
 </head>
@@ -204,7 +116,7 @@
 
   <div class="page">
 
-    <header class="header">
+    <header>
       <div class="logo">NexSearch</div>
     </header>
 
@@ -213,7 +125,7 @@
 
       <div class="search-box">
         <form class="search-form" action="results.html" method="GET">
-          <input type="text" name="q" placeholder="Rechercher avec NexSearch..." autocomplete="off" />
+          <input type="text" name="q" placeholder="Rechercher..." autocomplete="off" />
         </form>
       </div>
     </main>
@@ -223,60 +135,6 @@
     </footer>
 
   </div>
-
-  <!-- Bouton NexAI -->
-  <div class="nexai-btn" onclick="toggleNexAI()">💬 NexAI</div>
-
-  <!-- Panneau NexAI -->
-  <div class="nexai-panel" id="nexaiPanel">
-    <div class="nexai-title">NexAI</div>
-
-    <div class="nexai-messages" id="nexaiMessages"></div>
-
-    <div class="nexai-input">
-      <input id="nexaiInput" type="text" placeholder="Demander à NexAI..." />
-      <button onclick="sendToNexAI()">→</button>
-    </div>
-  </div>
-
-  <script>
-    function toggleNexAI() {
-      document.getElementById("nexaiPanel").classList.toggle("open");
-    }
-
-    async function sendToNexAI() {
-      const input = document.getElementById("nexaiInput");
-      const messages = document.getElementById("nexaiMessages");
-
-      if (!input.value.trim()) return;
-
-      // Affiche le message utilisateur
-      messages.innerHTML += `<div><b>Vous :</b> ${input.value}</div>`;
-
-      const userMessage = input.value;
-      input.value = "";
-
-      // --- APPEL API GEMINI FLASH 1.5 ---
-      const API_KEY = "AIzaSyAAa2qc6Gjr3BMiMSAOP5aTKAD7VvRIP4I"; // ← MET TA CLÉ ICI
-
-      const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + API_KEY,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ role: "user", parts: [{ text: userMessage }] }]
-          })
-        }
-      );
-
-      const data = await response.json();
-      const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur IA";
-
-      messages.innerHTML += `<div><b>NexAI :</b> ${aiText}</div>`;
-      messages.scrollTop = messages.scrollHeight;
-    }
-  </script>
 
 </body>
 </html>

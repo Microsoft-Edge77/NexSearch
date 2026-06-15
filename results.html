@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Recherche NexSearch</title>
+<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>NexSearch-Recherche NexSearch</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 body{background:#000;color:#3aa7ff;font-family:Arial;margin:0}
@@ -29,7 +29,7 @@ header{font-size:26px}
 <div id="aiSummary"></div>
 <div id="results"></div>
 
-<div id="tabs"><a id="imgTab" target="_blank">Images</a><a id="mapTab" target="_blank">Maps</a></div>
+<div id="tabs"><a id="imgTab" target="_blank">Images</a><a id="mapTab" target="_blank">NexMaps</a></div>
 
 <div id="bottomBar">
 <a id="logo" href="index.html">NexSearch</a>
@@ -37,6 +37,8 @@ header{font-size:26px}
 </div>
 
 <script>
+const GEMINI_KEY=AIzaSyAAa2qc6Gjr3BMiMSAOP5aTKAD7VvRIP4I;
+
 const p=new URLSearchParams(location.search),q=(p.get("q")||"").trim();
 addressBar.value=q;bingResultLink.href="https://www.bing.com/search?q="+encodeURIComponent(q);
 addressBar.addEventListener("keydown",e=>{if(e.key==="Enter")location.href="results.html?q="+encodeURIComponent(addressBar.value)});
@@ -161,52 +163,73 @@ general:[
 ]
 };
 
-const intro=["Voici ce que j’ai trouvé : ","Analyse terminée : ","Après réflexion : ","J’ai analysé ta demande : ","Voici une réponse adaptée : ","J’ai généré ceci : "];
+const intro=["Voici ce que j’ai trouvé : ","Analyse NexAI : ","Après réflexion : ","J’ai analysé ta demande : ","Réponse NexSearch+ : ","Synthèse intelligente : "];
 const extra=["J’ai vérifié plusieurs pistes.","J’ai comparé différentes interprétations.","J’ai pris en compte le contexte.","J’ai simulé un raisonnement.","J’ai cherché une réponse claire."];
 
 function block(t){return["porn","porno","viol","gore","snuff","décapitation"].some(w=>t.toLowerCase().includes(w))}
-function calc(t){t=t.toLowerCase().replace("calcule","").replace("calcul","").replace("=","").trim();if(/^[0-9+\-*/().\s]+$/.test(t)){try{let r=Function("return "+t)();if(typeof r==="number"&&isFinite(r))return"Résultat du calcul : "+r}catch{}}return null}
+function calc(t){t=t.toLowerCase().replace("calcule","").replace("calcul","").replace("=","").trim();if(/^[0-9+\-*/().\s]+$/.test(t)){try{let r=Function("return "+t)();if(typeof r==="number"&&isFinite(r))return"<p><b>Résultat du calcul :</b> "+r+"</p>";}catch{}}
+return null}
 function trad(t){
 const d={manger:{en:"eat",es:"comer",de:"essen"},livre:{en:"book",es:"libro",de:"buch"},chat:{en:"cat",es:"gato",de:"katze"},chien:{en:"dog",es:"perro",de:"hund"},maison:{en:"house",es:"casa",de:"haus"},ordinateur:{en:"computer",es:"ordenador",de:"computer"},voiture:{en:"car",es:"coche",de:"auto"}};
 t=t.toLowerCase();
 if(t.includes("traduire")||t.includes("comment dit-on")){
 for(const w in d){
 if(t.includes(w)){
-if(t.includes("anglais"))return`Traduction en anglais de "${w}" : ${d[w].en}`;
-if(t.includes("espagnol"))return`Traduction en espagnol de "${w}" : ${d[w].es}`;
-if(t.includes("allemand"))return`Traduction en allemand de "${w}" : ${d[w].de}`;
-if(t.includes("français"))return`Traduction en français : ${w}`;
+if(t.includes("anglais"))return`<p><b>Traduction en anglais de "${w}" :</b> ${d[w].en}</p>`;
+if(t.includes("espagnol"))return`<p><b>Traduction en espagnol de "${w}" :</b> ${d[w].es}</p>`;
+if(t.includes("allemand"))return`<p><b>Traduction en allemand de "${w}" :</b> ${d[w].de}</p>`;
+if(t.includes("français"))return`<p><b>Traduction en français :</b> ${w}</p>`;
 }}
-return"Mot inconnu pour NexAI.";
+return"<p>Mot inconnu pour NexAI.</p>";
 }
 return null}
 
 function catSum(c){
 return{
-gaming:"Recherche liée au gaming.",
-ai:"Recherche liée à l’IA.",
-cooking:"Recherche culinaire.",
-shopping:"Recherche d’achat.",
-education:"Recherche scolaire/éducative.",
-microsoft:"Recherche Microsoft.",
-providers:"Recherche opérateur.",
-social:"Recherche réseau social.",
-tech:"Recherche technologique.",
-video:"Recherche vidéo/streaming.",
-general:"Recherche générale."
+gaming:"<p><b>Contexte détecté :</b> gaming, jeux, plateformes et contenus associés.</p>",
+ai:"<p><b>Contexte détecté :</b> intelligence artificielle, assistants et outils avancés.</p>",
+cooking:"<p><b>Contexte détecté :</b> cuisine, recettes et idées de plats.</p>",
+shopping:"<p><b>Contexte détecté :</b> achat, comparaison de prix et boutiques en ligne.</p>",
+education:"<p><b>Contexte détecté :</b> scolaire, éducation, outils numériques.</p>",
+microsoft:"<p><b>Contexte détecté :</b> écosystème Microsoft, Office, Windows.</p>",
+providers:"<p><b>Contexte détecté :</b> opérateurs et fournisseurs d’accès.</p>",
+social:"<p><b>Contexte détecté :</b> réseaux sociaux et plateformes communautaires.</p>",
+tech:"<p><b>Contexte détecté :</b> matériel, logiciels et technologies.</p>",
+video:"<p><b>Contexte détecté :</b> vidéo, streaming et plateformes multimédia.</p>",
+general:"<p><b>Contexte détecté :</b> requête générale, analyse polyvalente.</p>"
 }[c]}
 
-function gen(){
-if(!q)return"Entre une recherche.";
-if(block(q))return"Contenu non autorisé.";
+function localGen(){
+if(!q)return"<p>Entre une recherche pour que NexAI puisse répondre.</p>";
+if(block(q))return"<p>Contenu non autorisé.</p>";
 let r=calc(q);if(r)return r;
 let t=trad(q);if(t)return t;
 let c=detectCategory(q);
-return intro[Math.random()*intro.length|0]+q+". "+catSum(c)+" "+extra[Math.random()*extra.length|0];
+return"<p><b>"+intro[Math.random()*intro.length|0]+q+"</b></p>"+catSum(c)+"<p>"+extra[Math.random()*extra.length|0]+"</p>";
 }
 
-function refresh(){aiSummary.innerHTML="<b>Réponse de NEXAI :</b><br>"+gen()+"<br><br><button class='nexai-btn' onclick='refresh()'>Réessayer</button>"}
-refresh();
+async function callGemini(){
+if(!q){aiSummary.innerHTML="<b>Réponse de NEXAI :</b><br>"+localGen()+"<br><br><button class='nexai-btn' onclick='refresh()'>Réessayer</button>";return;}
+if(block(q)){aiSummary.innerHTML="<b>Réponse de NEXAI :</b><br><p>Contenu non autorisé.</p><br><button class='nexai-btn' onclick='refresh()'>Réessayer</button>";return;}
+aiSummary.innerHTML="<b>Réponse de NEXAI :</b><br><p>Analyse en cours avec Gemini 1.5 Flash…</p>";
+try{
+const prompt=`Tu es NexAI, IA premium NexSearch/Copilot+. Réponds en HTML enrichi (<p>, <ul>, <li>, <b>) en français, avec un ton clair, moderne, légèrement technique. Donne un résumé, des explications, des suggestions de sites ou d’actions, en te basant sur la requête suivante : "${q}". Ne produis pas de contenu violent, pornographique ou choquant.`;
+const res=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key="+GEMINI_KEY,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
+});
+const data=await res.json();
+let text=data?.candidates?.[0]?.content?.parts?.[0]?.text||null;
+if(!text)text=localGen();
+aiSummary.innerHTML="<b>Réponse de NEXAI :</b><br>"+text+"<br><br><button class='nexai-btn' onclick='refresh()'>Réessayer</button>";
+}catch(e){
+aiSummary.innerHTML="<b>Réponse de NEXAI :</b><br>"+localGen()+"<br><br><button class='nexai-btn' onclick='refresh()'>Réessayer</button>";
+}
+}
+
+function refresh(){callGemini()}
+callGemini();
 
 const cat=detectCategory(q),res=document.getElementById("results"),list=siteCategories[cat]||siteCategories.general;
 list.forEach(u=>{let f=u+(u.endsWith("=")||u.includes("?")?"":"/")+encodeURIComponent(q);res.innerHTML+=`<div class='result'><a href='${f}' target='_blank'>${f}</a><p>Site correspondant.</p></div>`});

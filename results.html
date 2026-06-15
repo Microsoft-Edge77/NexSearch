@@ -41,16 +41,11 @@
     .top-bar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-start;
+      gap: 10px;
       padding: 6px 14px;
       background: #020617;
       border-bottom: 1px solid #111827;
-    }
-
-    .top-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
       cursor: pointer;
     }
 
@@ -78,11 +73,6 @@
       letter-spacing: 0.04em;
     }
 
-    .top-right {
-      font-size: 0.78rem;
-      color: var(--text-soft);
-    }
-
     /* Layout principal */
     .main-layout {
       flex: 1;
@@ -95,7 +85,7 @@
     .panel {
       background: var(--bg-panel);
       border: 1px solid var(--border-panel);
-      border-radius: 8px; /* plus carré / Metro */
+      border-radius: 8px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.7);
       padding: 8px;
       display: flex;
@@ -226,7 +216,7 @@
       color: #a5b4fc;
     }
 
-    /* Actions globales (en bas du panneau résultats) */
+    /* Actions globales */
     .results-actions-wrapper {
       border-top: 1px solid #111827;
       padding-top: 4px;
@@ -240,7 +230,7 @@
 
     .action-btn {
       padding: 5px 9px;
-      border-radius: 999px;
+      border-radius: 4px;
       border: 1px solid #1f2937;
       background: #020617;
       color: var(--text-main);
@@ -259,6 +249,7 @@
     /* NexAI */
     .nexai-panel {
       overflow: hidden;
+      position: relative;
     }
 
     .nexai-body {
@@ -273,10 +264,11 @@
       padding: 6px;
       border-radius: 6px;
       background: #020617;
-      border: 1px solid #14532d;
+      border: 1px solid #1d4ed8;
       font-size: 0.82rem;
       max-height: 90px;
       overflow-y: auto;
+      color: #dbeafe;
     }
 
     #nexai-log {
@@ -284,7 +276,7 @@
       overflow-y: auto;
       border-radius: 6px;
       border: 1px solid #111827;
-      background: #020617;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000 100%);
       padding: 6px;
       font-size: 0.82rem;
     }
@@ -299,13 +291,19 @@
     }
 
     .nexai-msg-ai {
-      color: #a7f3d0;
+      color: #e5f2ff;
     }
 
     .nexai-input-row {
       display: flex;
       gap: 6px;
-      margin-top: 2px;
+      margin-top: 4px;
+      padding-top: 6px;
+      border-top: 1px solid #111827;
+      background: linear-gradient(to top, rgba(2,6,23,0.95), rgba(2,6,23,0.7));
+      position: sticky;
+      bottom: 0;
+      z-index: 5;
     }
 
     .nexai-input-row input {
@@ -322,8 +320,8 @@
       padding: 6px 10px;
       border-radius: 4px;
       border: none;
-      background: var(--success);
-      color: #022c22;
+      background: var(--accent);
+      color: #f9fafb;
       font-size: 0.82rem;
       cursor: pointer;
       font-weight: 600;
@@ -352,7 +350,7 @@
       align-items: center;
       gap: 8px;
       padding: 7px 9px;
-      border-radius: 6px;
+      border-radius: 8px;
       background: #020617;
       border: 1px solid #111827;
       box-shadow: 0 12px 30px rgba(0,0,0,0.9);
@@ -444,13 +442,8 @@
   <div id="app">
     <!-- Top bar -->
     <header class="top-bar" id="home-link-top">
-      <div class="top-left">
-        <div class="logo-main"></div>
-        <div class="logo-text">NexSearch</div>
-      </div>
-      <div class="top-right">
-        IA locale · Metro / Copilot hybride
-      </div>
+      <div class="logo-main"></div>
+      <div class="logo-text">NexSearch</div>
     </header>
 
     <!-- Layout principal -->
@@ -460,7 +453,7 @@
         <div class="panel-header">
           <div>
             <div class="panel-title">Résultats NexSearch</div>
-            <div class="panel-sub">Organisation IA dynamique des liens</div>
+            <div class="panel-sub">Organisation intelligente des liens</div>
           </div>
         </div>
 
@@ -478,7 +471,7 @@
       <aside class="panel nexai-panel">
         <div class="panel-header">
           <div>
-            <div class="panel-title">NexAI – IA locale</div>
+            <div class="panel-title">NexAI</div>
             <div class="panel-sub">Résumé IA + chat + calcul</div>
           </div>
         </div>
@@ -499,7 +492,7 @@
       <div class="bottom-bar">
         <div class="bottom-logo" id="home-link-bottom"></div>
         <div class="bottom-input">
-          <input id="search-input" type="text" placeholder="Rechercher avec NexSearch (abrévs, fautes, tout accepté)...">
+          <input id="search-input" type="text" placeholder="Rechercher avec NexSearch (abréviations, fautes, tout accepté)...">
           <button id="search-btn">Rechercher</button>
         </div>
       </div>
@@ -624,223 +617,12 @@
     }
 
     // =========================
-    // 3) NexAI – réseau de neurones ~150k paramètres
+    // 3) NexAI – logique “intelligente”
     // =========================
-    const NEXAI_VOCAB = "abcdefghijklmnopqrstuvwxyz0123456789 ?!.,";
-    const EMBED_DIM = 256;
-    const HIDDEN_DIM1 = 512;
-    const HIDDEN_DIM2 = 256;
-    const N_INTENTS = 18;
-
-    function randn() {
-      return (Math.random() * 2 - 1) * 0.08;
-    }
-
-    const W_embed = Array.from({ length: NEXAI_VOCAB.length }, () =>
-      Array.from({ length: EMBED_DIM }, randn)
-    );
-
-    const W_h1 = Array.from({ length: EMBED_DIM }, () =>
-      Array.from({ length: HIDDEN_DIM1 }, randn)
-    );
-    const b_h1 = Array.from({ length: HIDDEN_DIM1 }, randn);
-
-    const W_h2 = Array.from({ length: HIDDEN_DIM1 }, () =>
-      Array.from({ length: HIDDEN_DIM2 }, randn)
-    );
-    const b_h2 = Array.from({ length: HIDDEN_DIM2 }, randn);
-
-    const W_out = Array.from({ length: HIDDEN_DIM2 }, () =>
-      Array.from({ length: N_INTENTS }, randn)
-    );
-    const b_out = Array.from({ length: N_INTENTS }, randn);
-
-    function textToIndices(text) {
-      text = text.toLowerCase();
-      const idxs = [];
-      for (const ch of text) {
-        const i = NEXAI_VOCAB.indexOf(ch);
-        if (i >= 0) idxs.push(i);
-      }
-      return idxs;
-    }
-
-    function embedAverage(text) {
-      const idxs = textToIndices(text);
-      if (idxs.length === 0) return Array(EMBED_DIM).fill(0);
-      const v = Array(EMBED_DIM).fill(0);
-      for (const i of idxs) {
-        for (let d = 0; d < EMBED_DIM; d++) {
-          v[d] += W_embed[i][d];
-        }
-      }
-      for (let d = 0; d < EMBED_DIM; d++) v[d] /= idxs.length;
-      return v;
-    }
-
-    function relu(v) {
-      return v.map(x => Math.max(0, x));
-    }
-
-    function matVec(W, v, b) {
-      const out = Array(W[0].length).fill(0);
-      for (let j = 0; j < W[0].length; j++) {
-        let s = b ? b[j] : 0;
-        for (let i = 0; i < W.length; i++) {
-          s += W[i][j] * v[i];
-        }
-        out[j] = s;
-      }
-      return out;
-    }
-
-    function softmax(logits) {
-      const m = Math.max(...logits);
-      const exps = logits.map(x => Math.exp(x - m));
-      const sum = exps.reduce((a, b) => a + b, 0);
-      return exps.map(x => x / sum);
-    }
-
-    function nexaiInferIntents(text) {
-      const emb = embedAverage(text);
-      const h1 = relu(matVec(W_h1, emb, b_h1));
-      const h2 = relu(matVec(W_h2, h1, b_h2));
-      const logits = matVec(W_out, h2, b_out);
-      return softmax(logits);
-    }
-
-    const NEXAI_INTENTS = [
-      "system_help",
-      "os_windows",
-      "recipe",
-      "definition",
-      "search_help",
-      "tech_general",
-      "smalltalk",
-      "music",
-      "video",
-      "shopping",
-      "object_info",
-      "place",
-      "software",
-      "web_general",
-      "greeting",
-      "calc",
-      "about_site",
-      "fallback"
-    ];
-
-    const NEXAI_KB = {
-      os_windows: [
-        "Windows est un système d’exploitation développé par Microsoft, utilisé sur la plupart des PC. Il gère les fichiers, les programmes, les pilotes et l’interface graphique.",
-        "Windows est le système qui fait tourner ton PC : il gère la mémoire, les applications, les périphériques et l’affichage."
-      ],
-      system_help: [
-        "Je suis NexAI, une petite IA locale intégrée à NexSearch. Je combine un mini réseau de neurones, des règles et une base de connaissances pour analyser ta requête.",
-        "Je fonctionne entièrement côté navigateur : pas d’API externe, juste un réseau de neurones simplifié + des heuristiques pour t’aider à comprendre ce que tu cherches."
-      ],
-      recipe: [
-        "Recette de cake simple : 3 œufs, 150g de sucre, 150g de beurre fondu, 200g de farine, 1 sachet de levure, un peu de lait. Mélange, verse dans un moule beurré, enfourne à 180°C pendant 30–40 minutes.",
-        "Pour un cake basique : mélange œufs + sucre, ajoute beurre fondu, puis farine + levure. Tu peux ajouter du chocolat, des fruits ou des épices selon tes goûts."
-      ],
-      definition: [
-        "Tu me demandes une définition. Reformule avec : « c’est quoi X ? » et je vais essayer de détailler le concept.",
-        "Pour une définition claire, précise ce que tu veux : « c’est quoi Windows ? », « c’est quoi Amazon ? », « c’est quoi NexSearch ? », etc."
-      ],
-      search_help: [
-        "Tu peux taper ce que tu veux dans NexSearch, même avec des abréviations ou des fautes. Je corrige et je classe les résultats pour toi.",
-        "NexSearch détecte si tu cherches des vidéos, de la musique, des objets, des lieux ou des logiciels, et te propose les meilleurs sites pour ça."
-      ],
-      tech_general: [
-        "En informatique, tout tourne autour de systèmes d’exploitation, de logiciels, de matériel et de réseaux. Les navigateurs comme Edge ou les IA comme Copilot s’appuient sur ces couches.",
-        "Le monde numérique repose sur des OS (Windows, Linux, macOS), des navigateurs, des applis, des services en ligne et des protocoles réseau."
-      ],
-      smalltalk: [
-        "On peut discuter de tech, de Windows, de sites web, de jeux, de musique… ou de comment tu construis NexSearch.",
-        "Tu peux me poser des questions sur la technologie, les systèmes, les outils, ou juste parler de ce que tu construis."
-      ],
-      music: [
-        "Tu sembles parler de musique. NexSearch peut te proposer YouTube, Spotify, Deezer ou Amazon Music pour écouter ou découvrir des titres.",
-        "Pour la musique, tape un artiste, un titre ou un album, et NexSearch te proposera des liens vers les plateformes adaptées."
-      ],
-      video: [
-        "Tu sembles parler de vidéos. NexSearch peut te proposer YouTube, Twitch ou Bing Vidéos pour trouver ce que tu veux.",
-        "Pour les vidéos, indique le nom d’une chaîne, d’un clip, d’un film ou d’un streamer, et NexSearch te donnera les bons liens."
-      ],
-      shopping: [
-        "Tu sembles chercher un produit. NexSearch peut te proposer Amazon, Fnac, Cdiscount, AliExpress et d’autres sites pour comparer les prix.",
-        "Pour acheter un objet, précise la catégorie (souris, clavier, casque, écran, smartphone…) et NexSearch te proposera plusieurs boutiques."
-      ],
-      object_info: [
-        "Tu sembles parler d’un objet. Tu peux préciser la marque, le modèle ou l’usage pour que je t’aide mieux.",
-        "Pour un objet précis, NexSearch peut te proposer des fiches produits, des comparateurs et des avis."
-      ],
-      place: [
-        "Tu sembles parler d’un lieu. NexSearch peut t’envoyer vers Bing Maps pour voir l’emplacement, les itinéraires et les infos locales.",
-        "Pour les lieux, indique une ville, une adresse ou un type d’endroit (restaurant, hôtel, etc.) et NexSearch te proposera des cartes."
-      ],
-      software: [
-        "Tu sembles parler d’un logiciel. NexSearch peut te proposer des liens vers Microsoft, des docs, des téléchargements ou des tutoriels.",
-        "Pour les logiciels, précise le nom (par ex. Excel, Word, PowerPoint) et NexSearch te proposera les bons liens et ressources."
-      ],
-      web_general: [
-        "Tu sembles faire une recherche générale. NexSearch combine plusieurs sites (Bing, Copilot, etc.) pour te donner des points de départ pertinents.",
-        "Pour une recherche générale, NexSearch te propose des moteurs, des sites populaires, des outils et parfois des docs techniques."
-      ],
-      greeting: [
-        "Salut ! Tu peux me poser des questions sur Windows, la tech, les sites, les objets, la musique… ou me demander un résumé.",
-        "Hey ! Dis-moi ce que tu veux chercher ou comprendre, et je t’explique ce que NexSearch et NexAI peuvent faire."
-      ],
-      about_site: [
-        "Tu sembles demander des infos sur un site (par ex. Amazon, YouTube, Microsoft). NexAI peut te donner un mini résumé et NexSearch te propose les liens.",
-        "Pour un site précis, tu peux taper son nom (ex : Amazon, YouTube, Microsoft) et je t’expliquerai rapidement ce que c’est."
-      ],
-      fallback: [
-        "Je ne suis pas sûr de bien comprendre. Reformule ta question ou sois un peu plus précis.",
-        "Là tu me poses une colle. Essaie de détailler ce que tu veux savoir ou ce que tu cherches."
-      ]
+    const NEXAI_MEMORY = {
+      lastQuery: null,
+      lastType: null
     };
-
-    function pickRandom(arr) {
-      return arr[Math.floor(Math.random() * arr.length)];
-    }
-
-    function nexaiClassifyIntent(text) {
-      const probs = nexaiInferIntents(text);
-      let bestIdx = 0;
-      let bestVal = probs[0];
-      for (let i = 1; i < probs.length; i++) {
-        if (probs[i] > bestVal) {
-          bestVal = probs[i];
-          bestIdx = i;
-        }
-      }
-      return { intent: NEXAI_INTENTS[bestIdx], confidence: bestVal };
-    }
-
-    function nexaiRuleIntentOverride(text, intent) {
-      const t = normalizeText(text);
-
-      if (t.includes("bonjour") || t.includes("salut") || t.includes("hey")) return "greeting";
-      if (t.includes("windows")) return "os_windows";
-      if (t.includes("recette") || t.includes("cake") || t.includes("gateau")) return "recipe";
-      if (t.startsWith("c est quoi") || t.startsWith("qu est ce que")) return "definition";
-      if (t.includes("comment tu marche") || t.includes("comment tu marches") || t.includes("qui es tu")) return "system_help";
-      if (t.includes("nexsearch") || t.includes("recherche")) return "search_help";
-
-      if (t.includes("musique") || t.includes("song") || t.includes("lyrics") || t.includes("album")) return "music";
-      if (t.includes("youtube") || t.includes("video") || t.includes("clip")) return "video";
-      if (t.includes("acheter") || t.includes("prix") || t.includes("euros") || t.includes("€")) return "shopping";
-      if (t.includes("souris") || t.includes("clavier") || t.includes("casque") || t.includes("ecran") || t.includes("tele") || t.includes("smartphone")) return "object_info";
-      if (t.includes("adresse") || t.includes("ville") || t.includes("restaurant") || t.includes("hotel")) return "place";
-      if (t.includes("excel") || t.includes("word") || t.includes("powerpoint") || t.includes("logiciel")) return "software";
-
-      if (t.includes("amazon") || t.includes("youtube") || t.includes("microsoft") || t.includes("spotify") || t.includes("deezer")) return "about_site";
-
-      if (/[0-9+\-*/()%]/.test(text) && /[0-9]/.test(text)) return "calc";
-
-      return intent;
-    }
 
     function tryCalcExpression(expr) {
       try {
@@ -856,66 +638,125 @@
       }
     }
 
-    function nexaiAnswer(text) {
-      const { intent, confidence } = nexaiClassifyIntent(text);
-      const finalIntent = nexaiRuleIntentOverride(text, intent);
+    function nexaiDetectType(text) {
+      const t = normalizeText(text);
+      const isCalc = /[0-9]/.test(text) && /[+\-*/]/.test(text);
+      const isHello = t.includes("bonjour") || t.includes("salut") || t.includes("hey");
+      const isWho = t.includes("qui etes vous") || t.includes("qui es tu") || t.includes("qui etes-vous");
+      const isWhat = t.startsWith("c est quoi") || t.startsWith("qu est ce que");
+      const isMs = t === "ms" || t.includes("microsoft") || t.includes("windows");
+      const isAmazon = t.includes("amazon");
+      const isYoutube = t.includes("youtube") || t === "yt";
+      const isSearchHelp = t.includes("nexsearch") || t.includes("recherche");
+      const isNonsense = t.length <= 3 && !isCalc && !isHello && !isMs && !isAmazon && !isYoutube;
 
-      if (finalIntent === "calc") {
-        const calcRes = tryCalcExpression(text);
-        if (calcRes !== null) {
-          return `Résultat du calcul : ${calcRes}\n\n[Intent=calc, conf=${confidence.toFixed(2)}]`;
-        }
-      }
-
-      let bucket = NEXAI_KB[finalIntent] || NEXAI_KB.fallback;
-      let answer = pickRandom(bucket);
-
-      const meta = `\n\n[Intent=${finalIntent}, conf=${confidence.toFixed(2)}]`;
-      return answer + meta;
+      return {
+        isCalc,
+        isHello,
+        isWho,
+        isWhat,
+        isMs,
+        isAmazon,
+        isYoutube,
+        isSearchHelp,
+        isNonsense
+      };
     }
 
-    async function nexaiChatReply(userText) {
-      return nexaiAnswer(userText);
+    function nexaiAnswer(text, currentQuery) {
+      const trimmed = text.trim();
+      const calcRes = tryCalcExpression(trimmed);
+      const type = nexaiDetectType(trimmed);
+
+      if (calcRes !== null && type.isCalc) {
+        return `Résultat du calcul : ${calcRes}`;
+      }
+
+      if (type.isHello) {
+        return "Bonjour ! Vous pouvez me demander d’expliquer un site (Amazon, Microsoft, YouTube…), de résumer votre recherche ou de faire un calcul.";
+      }
+
+      if (type.isWho) {
+        return "Je suis NexAI, une petite IA intégrée à NexSearch. Je analyse votre requête, corrige les abréviations, détecte le type de recherche (vidéo, produit, site, lieu…) et vous donne un résumé clair.";
+      }
+
+      if (type.isMs) {
+        return "Microsoft est une entreprise américaine qui développe notamment Windows, Office, Xbox et de nombreux services cloud. Si vous cherchez un produit ou un service Microsoft précis, dites-le (par exemple : « Windows 11 », « Excel », « Surface »).";
+      }
+
+      if (type.isAmazon) {
+        return "Amazon est une entreprise américaine spécialisée dans le e‑commerce et les services cloud (AWS). Avec NexSearch, vous pouvez taper un produit (par exemple « clavier ergonomique », « souris Bluetooth ») et je vous proposerai Amazon, Fnac, Cdiscount, etc. pour comparer.";
+      }
+
+      if (type.isYoutube) {
+        return "YouTube est une plateforme de partage de vidéos. Si vous me donnez un titre, un sujet ou un créateur, je peux orienter la recherche vers YouTube et d’autres sites vidéo.";
+      }
+
+      if (type.isWhat) {
+        const after = trimmed.replace(/^c est quoi/i, "").replace(/^qu est ce que/i, "").trim();
+        if (after) {
+          return `Vous me demandez ce que c’est que « ${after} ». NexSearch va chercher des sites pertinents, et moi je peux vous donner un résumé général : nature du service, usage principal, et quelques exemples d’utilisation.`;
+        }
+        return "Vous pouvez me demander : « C’est quoi Amazon ? », « C’est quoi NexSearch ? », « C’est quoi Windows 11 ? », etc.";
+      }
+
+      if (type.isSearchHelp) {
+        return "NexSearch accepte les fautes et les abréviations (ms → Microsoft, yt → YouTube, amz → Amazon…). Tapez simplement ce que vous avez en tête, et je corrige puis j’organise les sites (vidéo, shopping, cartes, images, docs…).";
+      }
+
+      if (type.isNonsense) {
+        return "Je ne reconnais pas ce que vous venez de taper. Essayez un mot-clé plus clair (par exemple un site, un produit, un sujet ou un calcul).";
+      }
+
+      if (currentQuery) {
+        return `Par rapport à votre recherche « ${currentQuery} », vous pouvez me demander un résumé plus détaillé, une explication d’un site précis (Amazon, Microsoft, YouTube…), ou un calcul lié (par exemple un prix total, une remise, etc.).`;
+      }
+
+      return "Je ne suis pas certain de ce que vous attendez. Vous pouvez me demander d’expliquer un site, de résumer une recherche ou de faire un calcul.";
     }
 
     function nexaiBuildSummaryForQuery(q, correctedQ, typeInfo) {
       const base = [];
 
       if (!q.trim()) {
-        return "Tape une requête en bas, même avec des abréviations ou des fautes : je corrige, j’analyse et je résume ce que tu cherches.";
+        return "Tapez une requête en bas, même avec des abréviations ou des fautes : je corrige, j’analyse et je résume ce que vous cherchez.";
       }
 
       if (correctedQ !== q) {
-        base.push(`J’ai corrigé ta requête en : « ${correctedQ} ».`);
+        base.push(`Requête corrigée en : « ${correctedQ} ».`);
       } else {
         base.push(`Requête analysée : « ${q} ».`);
       }
 
-      if (typeInfo.isVideo) base.push("Ça ressemble à une recherche de vidéos.");
-      if (typeInfo.isMusic) base.push("Ça ressemble à une recherche de musique ou d’artiste.");
-      if (typeInfo.isObject) base.push("Ça ressemble à une recherche de produit ou d’objet.");
-      if (typeInfo.isPlace) base.push("Ça ressemble à une recherche de lieu ou d’adresse.");
-      if (typeInfo.isMicrosoft) base.push("Ça semble lié à Microsoft ou Windows.");
+      if (typeInfo.isVideo) base.push("Cela ressemble à une recherche de vidéos.");
+      if (typeInfo.isMusic) base.push("Cela ressemble à une recherche de musique ou d’artiste.");
+      if (typeInfo.isObject) base.push("Cela ressemble à une recherche de produit ou d’objet.");
+      if (typeInfo.isPlace) base.push("Cela ressemble à une recherche de lieu ou d’adresse.");
+      if (typeInfo.isMicrosoft) base.push("Cela semble lié à Microsoft ou Windows.");
 
       if (correctedQ.includes("amazon")) {
-        base.push("Amazon est une entreprise américaine spécialisée dans le e-commerce et les services cloud (AWS).");
+        base.push("Amazon est une entreprise de e‑commerce et de services cloud. Je privilégie les sites de shopping pour ce type de requête.");
       }
       if (correctedQ.includes("microsoft")) {
-        base.push("Microsoft est une entreprise américaine qui développe Windows, Office, Xbox et de nombreux services cloud.");
+        base.push("Microsoft développe Windows, Office, Xbox et d’autres services. Je mets en avant les sites Microsoft et la documentation associée.");
       }
       if (correctedQ.includes("youtube")) {
-        base.push("YouTube est une plateforme de partage de vidéos appartenant à Google.");
+        base.push("YouTube est une plateforme vidéo. Je mets en avant les sites de vidéos et de streaming.");
       }
 
       if (base.length === 0) {
-        base.push("Je n’ai pas détecté de type particulier, mais j’ai classé les sites les plus pertinents pour ta requête.");
+        base.push("Je n’ai pas détecté de type particulier, mais j’ai classé les sites les plus pertinents pour votre requête.");
       }
 
       return base.join(" ");
     }
 
+    async function nexaiChatReply(userText) {
+      return nexaiAnswer(userText, NEXAI_MEMORY.lastQuery);
+    }
+
     // =========================
-    // 4) NexSearch – moteur IA local
+    // 4) NexSearch – moteur IA local (version courte)
     // =========================
     const SITES_DB = [
       { name: "Bing", url: "https://www.bing.com/search?q={q}", tags: ["search","general"], weight: 0.95, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" },
@@ -937,29 +778,10 @@
       { name: "Bing Images", url: "https://www.bing.com/images/search?q={q}", tags: ["images"], weight: 0.9, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" },
 
       { name: "Microsoft", url: "https://www.microsoft.com/search?q={q}", tags: ["microsoft","software"], weight: 0.95, favicon: "https://www.microsoft.com/favicon.ico" },
-      { name: "Excel", url: "https://www.microsoft.com/search?q=Excel", tags: ["microsoft","excel","software"], weight: 0.98, favicon: "https://www.microsoft.com/favicon.ico" },
-      { name: "Word", url: "https://www.microsoft.com/search?q=Word", tags: ["microsoft","word","software"], weight: 0.96, favicon: "https://www.microsoft.com/favicon.ico" },
-      { name: "PowerPoint", url: "https://www.microsoft.com/search?q=PowerPoint", tags: ["microsoft","powerpoint","software"], weight: 0.96, favicon: "https://www.microsoft.com/favicon.ico" },
-
-      { name: "X (Twitter)", url: "https://twitter.com/search?q={q}", tags: ["social","news"], weight: 0.82, favicon: "https://abs.twimg.com/favicons/twitter.2.ico" },
-      { name: "Facebook", url: "https://www.facebook.com/search/top?q={q}", tags: ["social"], weight: 0.78, favicon: "https://www.facebook.com/favicon.ico" },
-      { name: "Instagram", url: "https://www.instagram.com/explore/tags/{q}/", tags: ["social","images"], weight: 0.78, favicon: "https://www.instagram.com/static/images/ico/favicon-200.png/ab6eff595bb1.png" },
-      { name: "Reddit", url: "https://www.reddit.com/search/?q={q}", tags: ["social","forum"], weight: 0.82, favicon: "https://www.redditstatic.com/desktop2x/img/favicon/favicon-32x32.png" },
-
       { name: "GitHub", url: "https://github.com/search?q={q}", tags: ["dev","code"], weight: 0.9, favicon: "https://github.githubassets.com/favicons/favicon.png" },
       { name: "Stack Overflow", url: "https://stackoverflow.com/search?q={q}", tags: ["dev","questions"], weight: 0.9, favicon: "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico" },
-      { name: "MDN Web Docs", url: "https://developer.mozilla.org/fr/search?q={q}", tags: ["dev","docs"], weight: 0.85, favicon: "https://developer.mozilla.org/favicon-32x32.cbbd161b.png" },
-
-      { name: "Steam", url: "https://store.steampowered.com/search/?term={q}", tags: ["games","shopping"], weight: 0.86, favicon: "https://store.steampowered.com/favicon.ico" },
-      { name: "Epic Games Store", url: "https://store.epicgames.com/fr/browse?q={q}", tags: ["games","shopping"], weight: 0.8, favicon: "https://static-assets-prod.epicgames.com/epic-store/static/favicon.ico" },
-
-      { name: "Le Monde", url: "https://www.lemonde.fr/recherche/?search_keywords={q}", tags: ["news"], weight: 0.75, favicon: "https://www.lemonde.fr/favicon.ico" },
-      { name: "Le Figaro", url: "https://recherche.lefigaro.fr/recherche/{q}", tags: ["news"], weight: 0.73, favicon: "https://www.lefigaro.fr/favicon.ico" },
-      { name: "France Info", url: "https://www.francetvinfo.fr/recherche/?query={q}", tags: ["news"], weight: 0.73, favicon: "https://www.francetvinfo.fr/favicon.ico" },
-
-      { name: "Google Drive", url: "https://drive.google.com/drive/search?q={q}", tags: ["cloud","files"], weight: 0.7, favicon: "https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png" },
-      { name: "OneDrive", url: "https://onedrive.live.com/?q={q}", tags: ["cloud","files"], weight: 0.7, favicon: "https://onedrive.live.com/favicon.ico" }
-      // → tu peux continuer ici pour monter à 1000+ sites
+      { name: "MDN Web Docs", url: "https://developer.mozilla.org/fr/search?q={q}", tags: ["dev","docs"], weight: 0.85, favicon: "https://developer.mozilla.org/favicon-32x32.cbbd161b.png" }
+      // → tu peux étendre ici pour aller vers 1000 sites
     ];
 
     function detectQueryType(q) {
@@ -1081,7 +903,7 @@
       const log = document.getElementById("nexai-log");
       const div = document.createElement("div");
       div.className = "nexai-msg " + (from === "user" ? "nexai-msg-user" : "nexai-msg-ai");
-      div.textContent = (from === "user" ? "Tu: " : "NexAI: ") + text;
+      div.textContent = (from === "user" ? "Vous : " : "NexAI : ") + text;
       log.appendChild(div);
       log.scrollTop = log.scrollHeight;
     }
@@ -1091,6 +913,9 @@
 
       const { typeInfo, correctedQ, results } = buildResultsForQuery(q);
       const actions = buildActionButtons(q, typeInfo, correctedQ);
+
+      NEXAI_MEMORY.lastQuery = correctedQ;
+      NEXAI_MEMORY.lastType = typeInfo;
 
       const metaDiv = document.getElementById("results-meta");
       metaDiv.textContent = `Requête : "${q}"` + (correctedQ !== q ? ` → corrigée en : "${correctedQ}"` : "");
@@ -1110,6 +935,10 @@
           const img = document.createElement("img");
           img.src = r.favicon;
           img.alt = r.name;
+          img.onerror = () => {
+            img.style.display = "none";
+            fav.textContent = r.name[0] || "?";
+          };
           fav.appendChild(img);
         } else {
           fav.textContent = r.name[0] || "?";
@@ -1200,9 +1029,9 @@
       };
 
       document.getElementById("nexai-summary").textContent =
-        "Tape une requête en bas (abrévs, fautes, tout accepté) : je corrige, j’analyse et je résume ce que tu cherches.";
+        "Tapez une requête en bas (abréviations, fautes, tout accepté) : je corrige, j’analyse et je résume ce que vous cherchez.";
 
-      // Recherche auto si ?q=... dans l’URL (depuis la page d’accueil)
+      // Recherche auto si ?q=... dans l’URL
       const params = new URLSearchParams(window.location.search);
       const qParam = params.get("q");
       if (qParam) {

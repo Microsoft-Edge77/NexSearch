@@ -18,9 +18,87 @@
       background: #000;
       color: #d0e2ff;
       font-family: "Poppins", system-ui, sans-serif;
-      overflow-x: hidden;
+      overflow: hidden; /* important pour le loader */
     }
 
+    /* ===== LOADER FULLSCREEN ===== */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeOut 0.8s ease forwards;
+      animation-delay: 2.4s; /* loader visible 3s total */
+    }
+
+    #loader.hidden {
+      display: none;
+    }
+
+    .loader-logo {
+      font-size: 3.4rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      background: linear-gradient(90deg, #6fa3ff, #9cc4ff);
+      -webkit-background-clip: text;
+      color: transparent;
+      opacity: 0.9;
+      text-shadow: 0 0 25px rgba(59,130,246,0.35);
+      user-select: none;
+    }
+
+    .dots {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #6fa3ff;
+      opacity: 0.4;
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; transform: scale(0.8); }
+      50% { opacity: 1; transform: scale(1.2); }
+    }
+
+    @keyframes fadeOut {
+      to { opacity: 0; visibility: hidden; }
+    }
+
+    /* ===== PAGE PRINCIPALE ===== */
+    .page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px 0;
+      opacity: 0;
+      transform: translateY(40px) scale(0.96);
+      filter: brightness(0.6);
+      transition: 1s ease;
+    }
+
+    .page.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      filter: brightness(1);
+    }
+
+    /* GLOW */
     .glow {
       position: fixed;
       width: 600px;
@@ -31,16 +109,6 @@
       transform: translateX(-50%);
       filter: blur(80px);
       z-index: -1;
-    }
-
-    .page {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      padding: 40px 0;
-      position: relative;
     }
 
     /* TOP RIGHT NAV */
@@ -142,9 +210,19 @@
 
 <body>
 
+  <!-- LOADER -->
+  <div id="loader">
+    <div class="loader-logo">NexSearch</div>
+    <div class="dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
   <div class="glow"></div>
 
-  <div class="page">
+  <div class="page" id="page">
 
     <!-- BOUTONS EN HAUT À DROITE -->
     <div class="top-right">
@@ -171,6 +249,15 @@
     </footer>
 
   </div>
+
+<script>
+  /* Transition loader → site */
+  setTimeout(() => {
+    document.getElementById("loader").classList.add("hidden");
+    document.getElementById("page").classList.add("visible");
+    document.body.style.overflow = "auto";
+  }, 3000);
+</script>
 
 </body>
 </html>

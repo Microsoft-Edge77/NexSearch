@@ -1,586 +1,298 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>À propos – NexSearch</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>À propos – NexSearch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        /* ===== RESET RAPIDE ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<style>
+/* ===== RESET ===== */
+*{margin:0;padding:0;box-sizing:border-box}
 
-        :root {
-            --bg-main: #02040a;
-            --matrix-blue: #00c8ff;
-            --matrix-blue-soft: rgba(0, 200, 255, 0.4);
-            --matrix-blue-strong: rgba(0, 200, 255, 0.9);
-            --text-dim: #7aa5c7;
-            --accent: #00ffd5;
-            --danger: #ff2e88;
-            --font-main: "Consolas", "Fira Code", "JetBrains Mono", monospace;
-        }
+/* ===== VARIABLES ===== */
+:root{
+  --blue:#6fa3ff;
+  --blue-soft:rgba(111,163,255,0.4);
+  --blue-strong:rgba(111,163,255,0.9);
+  --text:#d0e2ff;
+  --dim:#8aa7d9;
+  --bg:#000;
+  --glitch1:#ff3b8d;
+  --glitch2:#00ffe7;
+  --font:"Poppins",sans-serif;
+}
 
-        body {
-            background: radial-gradient(circle at top, #04101f 0, #02040a 40%, #000000 100%);
-            color: var(--matrix-blue);
-            font-family: var(--font-main);
-            min-height: 100vh;
-            display: flex;
-            align-items: stretch;
-            justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
-        }
+/* ===== GLOBAL ===== */
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font);
+  overflow-x:hidden;
+}
 
-        /* ===== BACKGROUND MATRIX LINES ===== */
-        .matrix-bg {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            background-image:
-                linear-gradient(to bottom, rgba(0, 200, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(to right, rgba(0, 200, 255, 0.04) 1px, transparent 1px);
-            background-size: 100% 24px, 24px 100%;
-            mix-blend-mode: screen;
-            opacity: 0.4;
-        }
+/* ===== BACKGROUND GLOW ===== */
+.glow{
+  position:fixed;
+  width:900px;
+  height:900px;
+  background:radial-gradient(circle,rgba(111,163,255,0.25),transparent 70%);
+  top:-200px;
+  left:50%;
+  transform:translateX(-50%);
+  filter:blur(120px);
+  z-index:-2;
+}
 
-        .scanline {
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(
-                to bottom,
-                rgba(0, 0, 0, 0) 50%,
-                rgba(0, 0, 0, 0.35) 51%,
-                rgba(0, 0, 0, 0) 52%
-            );
-            background-size: 100% 3px;
-            mix-blend-mode: soft-light;
-            opacity: 0.5;
-            pointer-events: none;
-            z-index: 1;
-        }
+/* ===== SCANLINES ===== */
+.scan{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(to bottom,rgba(255,255,255,0.03) 1px,transparent 1px);
+  background-size:100% 3px;
+  opacity:0.25;
+  pointer-events:none;
+  z-index:-1;
+}
 
-        /* ===== CONTAINER PRINCIPAL ===== */
-        .shell {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 1100px;
-            border-radius: 18px;
-            border: 1px solid rgba(0, 200, 255, 0.35);
-            background: radial-gradient(circle at top left, rgba(0, 200, 255, 0.12), transparent 55%),
-                        radial-gradient(circle at bottom right, rgba(0, 255, 213, 0.06), transparent 55%),
-                        rgba(0, 0, 0, 0.85);
-            box-shadow:
-                0 0 40px rgba(0, 200, 255, 0.25),
-                0 0 120px rgba(0, 0, 0, 0.9);
-            padding: 18px 22px 26px;
-            overflow: hidden;
-        }
+/* ===== CONTAINER ===== */
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:40px 20px 80px;
+}
 
-        .shell-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
+/* ===== GLITCH TITLE ===== */
+.title{
+  font-size:2.8rem;
+  font-weight:600;
+  letter-spacing:0.18em;
+  position:relative;
+  color:var(--blue-strong);
+  text-shadow:0 0 25px var(--blue-soft);
+  margin-bottom:10px;
+  user-select:none;
+}
 
-        .shell-title {
-            font-size: 0.9rem;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--text-dim);
-        }
+.title::before,
+.title::after{
+  content:attr(data-text);
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
 
-        .shell-dots {
-            display: flex;
-            gap: 6px;
-        }
+.title::before{
+  left:-3px;
+  text-shadow:-3px 0 var(--glitch1);
+  animation:gl1 2s infinite linear alternate-reverse;
+}
 
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 999px;
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.8);
-        }
+.title::after{
+  left:3px;
+  text-shadow:3px 0 var(--glitch2);
+  animation:gl2 1.6s infinite linear alternate-reverse;
+}
 
-        .dot.red { background: #ff4b5c; }
-        .dot.yellow { background: #ffc857; }
-        .dot.green { background: #2ecc71; }
+@keyframes gl1{
+  0%{clip-path:inset(0 0 80% 0)}
+  25%{clip-path:inset(20% 0 40% 0)}
+  50%{clip-path:inset(40% 0 20% 0)}
+  75%{clip-path:inset(60% 0 10% 0)}
+  100%{clip-path:inset(0 0 80% 0)}
+}
 
-        .shell-body {
-            border-radius: 12px;
-            border: 1px solid rgba(0, 200, 255, 0.25);
-            padding: 18px 18px 22px;
-            background: linear-gradient(135deg, rgba(0, 200, 255, 0.06), transparent 60%);
-            position: relative;
-            overflow: hidden;
-        }
+@keyframes gl2{
+  0%{clip-path:inset(80% 0 0 0)}
+  25%{clip-path:inset(40% 0 20% 0)}
+  50%{clip-path:inset(20% 0 40% 0)}
+  75%{clip-path:inset(10% 0 60% 0)}
+  100%{clip-path:inset(80% 0 0 0)}
+}
 
-        /* ===== GLITCH TITLE ===== */
-        .glitch-title {
-            position: relative;
-            font-size: 2.1rem;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            color: var(--matrix-blue-strong);
-            text-shadow:
-                0 0 12px rgba(0, 200, 255, 0.9),
-                0 0 32px rgba(0, 200, 255, 0.7);
-        }
+/* ===== SUBTITLE ===== */
+.subtitle{
+  font-size:1rem;
+  color:var(--dim);
+  opacity:0.8;
+  margin-bottom:30px;
+  letter-spacing:0.12em;
+}
 
-        .glitch-title::before,
-        .glitch-title::after {
-            content: attr(data-text);
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            mix-blend-mode: screen;
-        }
+/* ===== PANELS ===== */
+.panel{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  padding:22px 26px;
+  margin-bottom:22px;
+  backdrop-filter:blur(18px) saturate(180%);
+  position:relative;
+  overflow:hidden;
+}
 
-        .glitch-title::before {
-            left: -2px;
-            text-shadow: -2px 0 var(--danger);
-            animation: glitch-1 2.2s infinite linear alternate-reverse;
-        }
+.panel::before{
+  content:"";
+  position:absolute;
+  inset:-40%;
+  background:
+    radial-gradient(circle at 20% 0,rgba(111,163,255,0.12),transparent 60%),
+    radial-gradient(circle at 80% 100%,rgba(0,255,231,0.08),transparent 60%);
+  opacity:0.6;
+  pointer-events:none;
+}
 
-        .glitch-title::after {
-            left: 2px;
-            text-shadow: 2px 0 var(--accent);
-            animation: glitch-2 1.8s infinite linear alternate-reverse;
-        }
+.panel h2{
+  font-size:1.1rem;
+  letter-spacing:0.14em;
+  margin-bottom:12px;
+  color:var(--blue-strong);
+}
 
-        @keyframes glitch-1 {
-            0% { clip-path: inset(0 0 80% 0); }
-            20% { clip-path: inset(10% 0 60% 0); }
-            40% { clip-path: inset(40% 0 40% 0); }
-            60% { clip-path: inset(60% 0 20% 0); }
-            80% { clip-path: inset(80% 0 0 0); }
-            100% { clip-path: inset(0 0 80% 0); }
-        }
+.panel p{
+  font-size:0.95rem;
+  line-height:1.6;
+  margin-bottom:10px;
+  color:var(--text);
+}
 
-        @keyframes glitch-2 {
-            0% { clip-path: inset(80% 0 0 0); }
-            25% { clip-path: inset(60% 0 20% 0); }
-            50% { clip-path: inset(40% 0 40% 0); }
-            75% { clip-path: inset(20% 0 60% 0); }
-            100% { clip-path: inset(0 0 80% 0); }
-        }
+.panel ul{
+  list-style:none;
+  padding-left:0;
+}
 
-        .subtitle {
-            font-size: 0.9rem;
-            color: var(--text-dim);
-            margin-bottom: 18px;
-        }
+.panel li{
+  margin-bottom:6px;
+  padding-left:14px;
+  position:relative;
+  color:var(--dim);
+}
 
-        /* ===== LAYOUT COLONNES ===== */
-        .grid {
-            display: grid;
-            grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-            gap: 18px;
-        }
+.panel li::before{
+  content:">";
+  position:absolute;
+  left:0;
+  top:0;
+  color:var(--blue);
+}
 
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
+/* ===== NOISE TEXT ===== */
+.noise{
+  font-size:0.75rem;
+  color:rgba(255,255,255,0.25);
+  margin-top:20px;
+  white-space:nowrap;
+  overflow:hidden;
+}
 
-        /* ===== PANELS ===== */
-        .panel {
-            border-radius: 12px;
-            border: 1px solid rgba(0, 200, 255, 0.25);
-            padding: 14px 14px 16px;
-            background: radial-gradient(circle at top, rgba(0, 200, 255, 0.08), transparent 60%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .panel::before {
-            content: "";
-            position: absolute;
-            inset: -40%;
-            background:
-                radial-gradient(circle at 10% 0, rgba(0, 200, 255, 0.12), transparent 55%),
-                radial-gradient(circle at 90% 100%, rgba(0, 255, 213, 0.08), transparent 55%);
-            opacity: 0.7;
-            mix-blend-mode: screen;
-            pointer-events: none;
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .panel-title {
-            font-size: 0.85rem;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            color: var(--matrix-blue-strong);
-        }
-
-        .panel-tag {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: var(--text-dim);
-            padding: 2px 8px;
-            border-radius: 999px;
-            border: 1px solid rgba(0, 200, 255, 0.35);
-            background: rgba(0, 0, 0, 0.6);
-        }
-
-        .panel-body {
-            font-size: 0.82rem;
-            line-height: 1.6;
-            color: var(--matrix-blue);
-            position: relative;
-            z-index: 1;
-        }
-
-        .panel-body p {
-            margin-bottom: 8px;
-        }
-
-        .panel-body ul {
-            list-style: none;
-            margin-left: 0;
-        }
-
-        .panel-body li {
-            margin-bottom: 4px;
-            position: relative;
-            padding-left: 14px;
-        }
-
-        .panel-body li::before {
-            content: ">";
-            position: absolute;
-            left: 0;
-            top: 0;
-            color: var(--accent);
-            opacity: 0.9;
-        }
-
-        .muted {
-            color: var(--text-dim);
-        }
-
-        .highlight {
-            color: var(--accent);
-        }
-
-        .danger {
-            color: var(--danger);
-        }
-
-        /* ===== LIGNE DE STATUT BAS DE PAGE ===== */
-        .status-bar {
-            margin-top: 16px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(0, 200, 255, 0.25);
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-led {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: var(--accent);
-            box-shadow: 0 0 10px var(--accent);
-            animation: led-pulse 1.8s infinite ease-in-out;
-        }
-
-        @keyframes led-pulse {
-            0%, 100% { opacity: 0.4; transform: scale(0.9); }
-            50% { opacity: 1; transform: scale(1.1); }
-        }
-
-        .status-led.off {
-            background: #555;
-            box-shadow: none;
-            opacity: 0.4;
-            animation: none;
-        }
-
-        /* ===== TEXTE GLITCH / BRUIT ===== */
-        .noise-line {
-            font-size: 0.7rem;
-            color: rgba(0, 200, 255, 0.4);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: clip;
-            margin-bottom: 4px;
-        }
-
-        .noise-line span {
-            opacity: 0.7;
-        }
-
-        .mono {
-            font-family: var(--font-main);
-        }
-
-        a {
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+/* ===== FOOTER ===== */
+.footer{
+  margin-top:40px;
+  text-align:center;
+  font-size:0.8rem;
+  color:var(--dim);
+  opacity:0.7;
+}
+</style>
 </head>
+
 <body>
-    <div class="matrix-bg"></div>
-    <div class="scanline"></div>
 
-    <main class="shell">
-        <header class="shell-header">
-            <div class="shell-title">/NEXSEARCH/ABOUT.HTML</div>
-            <div class="shell-dots">
-                <div class="dot red"></div>
-                <div class="dot yellow"></div>
-                <div class="dot green"></div>
-            </div>
-        </header>
+<div class="glow"></div>
+<div class="scan"></div>
 
-        <section class="shell-body">
-            <h1 class="glitch-title" data-text="NEXSEARCH">NEXSEARCH</h1>
-            <p class="subtitle">[ À PROPOS DU MOTEUR · NEXAI · ARCHITECTURE · PHILOSOPHIE · MODE HACKER ]</p>
+<div class="container">
 
-            <div class="grid">
-                <!-- COLONNE GAUCHE -->
-                <article class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">CORE / VISION</div>
-                        <div class="panel-tag">NEXSEARCH v1.0</div>
-                    </div>
-                    <div class="panel-body">
-                        <p>
-                            NexSearch est un moteur de recherche <span class="highlight">nouvelle génération</span> :
-                            interface inspirée de Copilot+, logique de hacker, IA locale, et
-                            organisation dynamique des résultats.
-                        </p>
-                        <p>
-                            Objectif : remplacer la recherche classique par une expérience
-                            <span class="highlight">plus rapide</span>, <span class="highlight">plus claire</span>,
-                            <span class="highlight">plus geek</span>, sans tracking, sans compte, sans bullshit.
-                        </p>
+  <h1 class="title" data-text="NEXSEARCH / ABOUT">NEXSEARCH / ABOUT</h1>
+  <p class="subtitle">INFORMATION CORPORATE · INFRASTRUCTURE · TECHNOLOGIE · ENGAGEMENT QUALITÉ</p>
 
-                        <p class="muted">Caractéristiques principales :</p>
-                        <ul>
-                            <li>Moteur basé sur une base de sites organisée par catégories (tech, IA, streaming, etc.).</li>
-                            <li>Organisation intelligente des résultats selon le type de requête.</li>
-                            <li>Intégration de NexAI pour analyser, résumer et orienter la recherche.</li>
-                            <li>Design matrix blue, futuriste, volontairement un peu illisible.</li>
-                            <li>100% local : aucune donnée envoyée à un serveur externe.</li>
-                        </ul>
-                    </div>
-                </article>
+  <!-- PANEL 1 -->
+  <div class="panel">
+    <h2>IDENTITÉ & POSITIONNEMENT</h2>
+    <p>
+      NexSearch est une plateforme de recherche conçue pour offrir une expérience
+      moderne, fiable et performante. L’objectif est simple : fournir un accès
+      rapide, clair et structuré à l’information, tout en garantissant une
+      expérience utilisateur premium.
+    </p>
+    <p>
+      L’interface s’appuie sur une esthétique volontairement instable et glitchée,
+      symbole d’un système en évolution constante, mais reposant sur une base
+      technologique solide et maîtrisée.
+    </p>
+  </div>
 
-                <!-- COLONNE DROITE -->
-                <article class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">NEXAI / INTELLIGENCE</div>
-                        <div class="panel-tag">LOCAL AI</div>
-                    </div>
-                    <div class="panel-body">
-                        <p>
-                            NexAI est une <span class="highlight">mini‑IA intégrée</span> à NexSearch.
-                            Elle tourne localement, sans cloud, sans API externe.
-                        </p>
-                        <ul>
-                            <li>Analyse de la requête et détection d’intention.</li>
-                            <li>Résumé IA des résultats ou du contexte.</li>
-                            <li>Réponses simples et guidage de la recherche.</li>
-                            <li>Amélioration de l’ordre et de la pertinence des liens.</li>
-                        </ul>
-                        <p class="muted">
-                            NexAI n’essaie pas d’être “parfaite” : elle est conçue pour être
-                            <span class="highlight">rapide, légère, utile</span>.
-                        </p>
-                    </div>
-                </article>
-            </div>
+  <!-- PANEL 2 -->
+  <div class="panel">
+    <h2>ARCHITECTURE & TECHNOLOGIE</h2>
+    <p>
+      La plateforme repose sur une architecture modulaire permettant une
+      maintenance simplifiée et une évolution rapide des fonctionnalités.
+    </p>
+    <ul>
+      <li>Moteur de recherche interne optimisé pour la rapidité.</li>
+      <li>Interface utilisateur en verre numérique (liquid glass UI).</li>
+      <li>Organisation dynamique des résultats selon le contexte.</li>
+      <li>Compatibilité multi‑plateforme et responsive.</li>
+      <li>Traitement local des requêtes utilisateur.</li>
+    </ul>
+  </div>
 
-            <div class="grid" style="margin-top: 16px;">
-                <!-- ARCHITECTURE -->
-                <article class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">ARCHITECTURE / MODULES</div>
-                        <div class="panel-tag">SYSTEM MAP</div>
-                    </div>
-                    <div class="panel-body">
-                        <p class="muted">Structure principale du projet :</p>
-                        <ul>
-                            <li><span class="highlight">results.html</span> — page principale du moteur.</li>
-                            <li><span class="highlight">about.html</span> — cette page, documentation intégrée.</li>
-                            <li><span class="highlight">nexai.js</span> — logique IA locale.</li>
-                            <li><span class="highlight">search.js</span> — moteur de recherche et scoring dynamique.</li>
-                            <li><span class="highlight">sites_db.js</span> — base de sites (1000+ liens organisés).</li>
-                            <li><span class="highlight">styles.css</span> — design premium, matrix blue, glassmorphism.</li>
-                            <li><span class="highlight">assets/</span> — logos, icônes, favicons.</li>
-                        </ul>
-                        <p>
-                            Chaque module est pensé pour être <span class="highlight">modulaire</span>,
-                            <span class="highlight">hackable</span> et <span class="highlight">facile à maintenir</span>.
-                        </p>
-                    </div>
-                </article>
+  <!-- PANEL 3 -->
+  <div class="panel">
+    <h2>ENGAGEMENT QUALITÉ</h2>
+    <p>
+      NexSearch adopte une approche centrée sur la transparence, la performance
+      et la fiabilité. Chaque composant est conçu pour offrir une expérience
+      stable, tout en conservant une identité visuelle forte et assumée.
+    </p>
+    <ul>
+      <li>Aucune collecte de données personnelles.</li>
+      <li>Aucune exploitation commerciale des requêtes.</li>
+      <li>Respect strict de la confidentialité utilisateur.</li>
+      <li>Performances optimisées pour tous les appareils.</li>
+    </ul>
+  </div>
 
-                <!-- PHILOSOPHIE / PRIVACY -->
-                <article class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">PHILOSOPHIE / PRIVACY</div>
-                        <div class="panel-tag">NO TRACKING</div>
-                    </div>
-                    <div class="panel-body">
-                        <p>
-                            NexSearch est pensé comme un outil de <span class="highlight">power user</span> :
-                            interface geek, logique terminal, mais utilisable par tout le monde.
-                        </p>
-                        <ul>
-                            <li>Aucune collecte de données.</li>
-                            <li>Aucun historique stocké.</li>
-                            <li>Aucun compte requis.</li>
-                            <li>Tout tourne en local, dans ton navigateur.</li>
-                        </ul>
-                        <p class="muted">
-                            Si quelque chose “bug”, c’est probablement parce que tu es en train de
-                            <span class="danger">hacker le système</span>. Continue.
-                        </p>
-                    </div>
-                </article>
-            </div>
+  <!-- PANEL 4 -->
+  <div class="panel">
+    <h2>VISION & DIRECTION</h2>
+    <p>
+      NexSearch vise à devenir une référence dans les solutions de recherche
+      modernes, en combinant design premium, stabilité technique et innovation
+      continue. L’objectif est de proposer une expérience fluide, élégante et
+      technologiquement avancée.
+    </p>
+    <p>
+      La direction stratégique repose sur trois piliers : excellence visuelle,
+      performance technique, et respect absolu de l’utilisateur.
+    </p>
+  </div>
 
-            <div class="grid" style="margin-top: 16px;">
-                <!-- DESIGN / UX -->
-                <article class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">DESIGN / UX</div>
-                        <div class="panel-tag">MATRIX BLUE</div>
-                    </div>
-                    <div class="panel-body">
-                        <p>
-                            L’interface de NexSearch mélange <span class="highlight">glassmorphism</span>,
-                            <span class="highlight">effet terminal</span> et <span class="highlight">vibes Matrix</span>.
-                        </p>
-                        <ul>
-                            <li>Palette bleu néon, cyan, accents verts et magenta.</li>
-                            <li>Texte volontairement dense, un peu illisible, très “hacker”.</li>
-                            <li>Ombres douces, coins arrondis, glow discret.</li>
-                            <li>Barre de recherche principale dans la page de résultats.</li>
-                            <li>NexAI en panneau latéral, façon copilote technique.</li>
-                        </ul>
-                        <p class="muted">
-                            Ce n’est pas un site “grand public” : c’est un
-                            <span class="highlight">outil de geek</span> qui assume son style.
-                        </p>
-                    </div>
-                </article>
+  <!-- NOISE -->
+  <div class="noise" id="noise"></div>
 
-                <!-- CREDITS -->
-                <article class="panel">
-                    <div class="panel-header">
-                        <div class="panel-title">CREDITS / AUTEUR</div>
-                        <div class="panel-tag">Z50</div>
-                    </div>
-                    <div class="panel-body">
-                        <p>
-                            NexSearch est développé par <span class="highlight">Z50</span>,
-                            passionné par l’écosystème Microsoft, l’IA locale, les interfaces modernes
-                            et les moteurs de recherche alternatifs.
-                        </p>
-                        <p class="muted">
-                            Si tu lis cette page, tu es probablement du genre à ouvrir
-                            <span class="highlight">about:flags</span> juste pour voir.
-                        </p>
-                        <p>
-                            Continue d’explorer, de modifier, de forker, de casser, de réparer.
-                            C’est comme ça que NexSearch évoluera.
-                        </p>
-                    </div>
-                </article>
-            </div>
+  <div class="footer">NexSearch · Documentation Corporate</div>
 
-            <!-- LIGNE DE BRUIT / GLITCH TEXTE -->
-            <div style="margin-top: 14px;">
-                <div class="noise-line mono" id="noise-line-1"></div>
-                <div class="noise-line mono" id="noise-line-2"></div>
-            </div>
+</div>
 
-            <!-- STATUS BAR -->
-            <footer class="status-bar">
-                <div class="status-item">
-                    <div class="status-led"></div>
-                    <span>STATUS: <span class="highlight">ONLINE</span></span>
-                </div>
-                <div class="status-item">
-                    <div class="status-led"></div>
-                    <span>MODE: <span class="highlight">LOCAL / NO TRACKING</span></span>
-                </div>
-                <div class="status-item">
-                    <div class="status-led off"></div>
-                    <span>REMOTE AI: <span class="danger">DISABLED</span></span>
-                </div>
-                <div class="status-item">
-                    <span>BUILD: <span class="muted">NEXSEARCH::Z50</span></span>
-                </div>
-            </footer>
-        </section>
-    </main>
+<script>
+/* ===== NOISE GENERATOR ===== */
+const charset="01#/$%&@[]{}<>+=-*^~";
+function noise(len){
+  let o="";
+  for(let i=0;i<len;i++){
+    o+=charset[Math.floor(Math.random()*charset.length)];
+  }
+  return o;
+}
+function updateNoise(){
+  const n=document.getElementById("noise");
+  if(!n)return;
+  n.textContent=noise(Math.floor(window.innerWidth/9));
+}
+setInterval(updateNoise,180);
+updateNoise();
+</script>
 
-    <script>
-        // Petit générateur de bruit / texte pseudo‑illisible
-        const charset = "01#/$%&@[]{}<>+=-*^~";
-        function randomNoise(len) {
-            let out = "";
-            for (let i = 0; i < len; i++) {
-                out += charset[Math.floor(Math.random() * charset.length)];
-            }
-            return out;
-        }
-
-        function updateNoise() {
-            const l1 = document.getElementById("noise-line-1");
-            const l2 = document.getElementById("noise-line-2");
-            if (!l1 || !l2) return;
-
-            const width = Math.floor(window.innerWidth / 9);
-            l1.innerHTML = "<span>" + randomNoise(width) + "</span>";
-            l2.innerHTML = "<span>" + randomNoise(width) + "</span>";
-        }
-
-        updateNoise();
-        setInterval(updateNoise, 260);
-
-        window.addEventListener("resize", () => {
-            updateNoise();
-        });
-    </script>
 </body>
 </html>

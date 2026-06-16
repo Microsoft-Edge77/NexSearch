@@ -18,6 +18,14 @@ body{
   overflow:hidden;
 }
 
+/* ===== CANVAS FX ===== */
+#fxCanvas{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:5;
+}
+
 /* ===== LOADER ===== */
 #loader{
   position:fixed;
@@ -205,34 +213,6 @@ body{
   opacity:0.6;
 }
 
-/* ===== PARTICULES ===== */
-.particle{
-  position:absolute;
-  width:3px;
-  height:3px;
-  background:radial-gradient(circle,#9cc4ff,transparent);
-  border-radius:50%;
-  pointer-events:none;
-  animation:particleFade 1.4s ease-out forwards;
-}
-@keyframes particleFade{
-  0%{opacity:1;transform:scale(1);}
-  100%{opacity:0;transform:translate(var(--x),var(--y)) scale(0);}
-}
-
-/* ===== ONDE METRO UI ===== */
-.wave{
-  position:absolute;
-  border-radius:50%;
-  border:2px solid rgba(111,163,255,0.6);
-  pointer-events:none;
-  animation:waveExpand 1.4s ease-out forwards;
-}
-@keyframes waveExpand{
-  0%{opacity:1;transform:scale(0.2);filter:blur(2px);}
-  100%{opacity:0;transform:scale(3);filter:blur(12px);}
-}
-
 /* ===== FOOTER ===== */
 .footer{
   font-size:0.85rem;
@@ -243,6 +223,8 @@ body{
 </head>
 
 <body>
+
+<canvas id="fxCanvas"></canvas>
 
 <!-- LOADER -->
 <div id="loader">
@@ -289,41 +271,134 @@ setTimeout(()=>{
   document.body.style.overflow="auto";
 },3000);
 
-/* Animation cosmique + onde */
+/* ===== CANVAS FX ENGINE ===== */
+const canvas=document.getElementById("fxCanvas");
+const ctx=canvas.getContext("2d");
+
+function resize(){
+  canvas.width=window.innerWidth;
+  canvas.height=window.innerHeight;
+}
+resize();
+window.addEventListener("resize",resize);
+
+class Particle{
+  constructor(x,y,type){
+    this.x=x;
+    this.y=y;
+
+    const angle=Math.random()*Math.PI*2;
+    const speed=4+Math.random()*4;
+
+    this.vx=Math.cos(angle)*speed;
+    this.vy=Math.sin(angle)*speed;
+
+    this.alpha=1;
+
+    this.size = type===0
+      ? 2+Math.random()*2   // petites (A)
+      : 4+Math.random()*3;  // moyennes (B)
+
+    this.gravity = type===0 ? 0.05 : 0.12;
+    this.friction = 0.98;
+
+    this.turbulence = 0.4;
+  }
+
+  update(){
+    // turbulence
+    this.vx += (Math.random()-0.5)*this.turbulence;
+    this.vy += (Math.random()-0.5)*this.turbulence;
+
+    // vortex
+    const dx=this.x-centerX;
+    const dy=this.y-centerY;
+    this.vx += -dy*0.002;
+    this.vy += dx*0.002;
+
+    // gravité
+    this.vy += this.gravity;
+
+    // friction
+    this.vx *= this.friction;
+    this.vy *= this.friction;
+
+    this.x += this.vx;
+    this.y += this.vy;
+
+    this.alpha -= 0.01;
+  }
+
+  draw(){
+    ctx.globalAlpha=this.alpha;
+    ctx.fillStyle="#8fbaff";
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+let particles=[];
+let centerX=0;
+let centerY=0;
+
+function animate(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  particles=particles.filter(p=>p.alpha>0);
+
+  for(const p of particles){
+    p.update();
+    p.draw();
+  }
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ===== ONDE METRO UI ===== */
+function drawWave(x,y){
+  const wave=document.createElement("div");
+  wave.style.position="fixed";
+  wave.style.left=x+"px";
+  wave.style.top=y+"px";
+  wave.style.width="20px";
+  wave.style.height="20px";
+  wave.style.border="2px solid rgba(111,163,255,0.6)";
+  wave.style.borderRadius="50%";
+  wave.style.pointerEvents="none";
+  wave.style.transform="translate(-50%,-50%) scale(0.2)";
+  wave.style.filter="blur(2px)";
+  wave.style.opacity="1";
+  wave.style.transition="1.4s ease-out";
+  wave.style.zIndex="4";
+
+  document.body.appendChild(wave);
+
+  requestAnimationFrame(()=>{
+    wave.style.transform="translate(-50%,-50%) scale(3)";
+    wave.style.filter="blur(12px)";
+    wave.style.opacity="0";
+  });
+
+  setTimeout(()=>wave.remove(),1400);
+}
+
+/* ===== TRIGGER ===== */
 const searchInput=document.getElementById("searchInput");
 const searchBox=document.getElementById("searchBox");
 
 searchInput.addEventListener("focus",()=>{
   const rect=searchBox.getBoundingClientRect();
-  const centerX=rect.left+rect.width/2;
-  const centerY=rect.top+rect.height/2;
+  centerX=rect.left+rect.width/2;
+  centerY=rect.top+rect.height/2;
 
-  /* Onde Metro UI */
-  const wave=document.createElement("div");
-  wave.classList.add("wave");
-  wave.style.left=centerX+"px";
-  wave.style.top=centerY+"px";
-  wave.style.width="20px";
-  wave.style.height="20px";
-  document.body.appendChild(wave);
-  setTimeout(()=>wave.remove(),1400);
+  drawWave(centerX,centerY);
 
-  /* Explosion de particules */
-  for(let i=0;i<40;i++){
-    const p=document.createElement("div");
-    p.classList.add("particle");
-
-    const angle=Math.random()*Math.PI*2;
-    const distance=60+Math.random()*80;
-
-    p.style.setProperty("--x",Math.cos(angle)*distance+"px");
-    p.style.setProperty("--y",Math.sin(angle)*distance+"px");
-
-    p.style.left=centerX+"px";
-    p.style.top=centerY+"px";
-
-    document.body.appendChild(p);
-    setTimeout(()=>p.remove(),1400);
+  // 300 particules : 150 type A + 150 type B
+  for(let i=0;i<300;i++){
+    const type = Math.random()<0.5 ? 0 : 1;
+    particles.push(new Particle(centerX,centerY,type));
   }
 });
 </script>

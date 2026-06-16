@@ -1,1 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NexSearch</title>
+<link rel="icon" type="image/png" href="https://microsoft-edge77.github.io/NexSearchAssets/favicon-copilot-blue.png">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
+<style>
+/* ===== GLOBAL ===== */
+body {
+  margin: 0;
+  background: #000;
+  color: #d0e2ff;
+  font-family: "Poppins", system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* ===== LOADER ===== */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeOut 0.8s ease forwards;
+  animation-delay: 2.4s;
+}
+#loader.hidden { display: none; }
+
+.loader-logo {
+  font-size: 3.4rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  background: linear-gradient(90deg, #6fa3ff, #9cc4ff);
+  -webkit-background-clip: text;
+  color: transparent;
+  opacity: 0.9;
+  text-shadow: 0 0 25px rgba(59,130,246,0.35);
+  user-select: none;
+  animation: glowPulse 2s infinite ease-in-out;
+}
+
+@keyframes glowPulse {
+  0%,100% { text-shadow: 0 0 25px rgba(59,130,246,0.35); }
+  50% { text-shadow: 0 0 45px rgba(59,130,246,0.6); }
+}
+
+.dots {
+  margin-top: 18px;
+  display: flex;
+  gap: 10px;
+}
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6fa3ff;
+  opacity: 0.4;
+  animation: pulse 1.2s infinite ease-in-out;
+}
+.dot:nth-child(2){animation-delay:0.2s;}
+.dot:nth-child(3){animation-delay:0.4s;}
+@keyframes pulse {
+  0%,100%{opacity:0.3;transform:scale(0.8);}
+  50%{opacity:1;transform:scale(1.2);}
+}
+@keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+/* ===== PAGE ===== */
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 0;
+  opacity: 0;
+  transform: translateY(40px) scale(0.96);
+  filter: brightness(0.6);
+  transition: 1s ease;
+}
+.page.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: brightness(1);
+}
+
+/* ===== BACKGROUND GLOW ===== */
+.glow {
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.35), transparent 70%);
+  top: -150px;
+  left: 50%;
+  transform: translateX(-50%);
+  filter: blur(80px);
+  z-index: -1;
+  animation: slowGlow 6s infinite alternate ease-in-out;
+}
+@keyframes slowGlow {
+  0%{opacity:0.4;transform:translateX(-50%) scale(1);}
+  100%{opacity:0.8;transform:translateX(-50%) scale(1.2);}
+}
+
+/* ===== NAVIGATION ===== */
+.top-right {
+  position: absolute;
+  top: 25px;
+  right: 30px;
+  display: flex;
+  gap: 12px;
+}
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: #9cc4ff;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: 0.25s;
+  backdrop-filter: blur(12px) saturate(180%);
+}
+.nav-btn:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.2);
+  color: #d0e2ff;
+  box-shadow: 0 0 18px rgba(59,130,246,0.25);
+  transform: scale(1.05);
+}
+
+/* ===== LOGO ===== */
+.logo {
+  font-size: 2.8rem;
+  font-weight: 500;
+  letter-spacing: 0.10em;
+  background: linear-gradient(90deg, #6fa3ff, #9cc4ff);
+  -webkit-background-clip: text;
+  color: transparent;
+  opacity: 0.85;
+  text-shadow: 0 0 18px rgba(59,130,246,0.25);
+  transition: 0.3s;
+  user-select: none;
+  margin-top: 40px;
+}
+.logo:hover {
+  opacity: 1;
+  text-shadow: 0 0 30px rgba(59,130,246,0.45);
+  transform: scale(1.05);
+}
+
+/* ===== TAGLINE ===== */
+.tagline {
+  font-size: 1.1rem;
+  color: #9cc4ff;
+  opacity: 0.8;
+  margin-bottom: 10px;
+  animation: fadeSlide 2s ease forwards;
+}
+@keyframes fadeSlide {
+  0%{opacity:0;transform:translateY(20px);}
+  100%{opacity:1;transform:translateY(0);}
+}
+
+/* ===== SEARCH BOX ===== */
+.search-box {
+  backdrop-filter: blur(22px) saturate(200%);
+  background: rgba(255,255,255,0.05);
+  border-radius: 18px;
+  padding: 2px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 25px rgba(59,130,246,0.15);
+  transition: 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.search-box:hover {
+  box-shadow: 0 0 40px rgba(59,130,246,0.25);
+  transform: scale(1.02);
+}
+.search-form input {
+  width: 480px;
+  max-width: 90vw;
+  padding: 1rem 1.4rem;
+  border-radius: 14px;
+  border: none;
+  background: transparent;
+  color: #d0e2ff;
+  font-size: 1.05rem;
+  outline: none;
+}
+.search-form input::placeholder {
+  color: #9cc4ff;
+  opacity: 0.6;
+}
+
+/* ===== FOOTER ===== */
+.footer {
+  font-size: 0.85rem;
+  color: #4f6fbf;
+  opacity: 0.7;
+}
+
+/* ===== PARTICULES + ONDE ===== */
+.particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, #9cc4ff, transparent);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleFade 1.4s ease-out forwards;
+}
+@keyframes particleFade {
+  0%{opacity:1;transform:scale(1);}
+  100%{opacity:0;transform:translate(var(--x),var(--y)) scale(0);}
+}
+.wave {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(111,163,255,0.6);
+  pointer-events: none;
+  animation: waveExpand 1.4s ease-out forwards;
+}
+@keyframes waveExpand {
+  0%{opacity:1;transform:scale(0.2);filter:blur(2px);}
+  100%{opacity:0;transform:scale(3);filter:

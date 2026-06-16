@@ -1,556 +1,267 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>A propos - NexSearch - Moteur IA</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>A Props de NexSearch - NexSearch</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    /* ===== RESET ===== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+<style>
+/* ===== RESET ===== */
+*{margin:0;padding:0;box-sizing:border-box}
 
-    /* ===== VARIABLES ===== */
-    :root {
-      --bg: #0b0b0f;
-      --bg-elevated: #111319;
-      --bg-elevated-soft: #151823;
-      --accent: #0078d4;
-      --accent-soft: rgba(0, 120, 212, 0.16);
-      --accent-strong: #3aa0ff;
-      --text: #f3f6fb;
-      --text-muted: #a0a6b5;
-      --border: #252a3a;
-      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.55);
-      --radius-lg: 18px;
-      --radius-pill: 999px;
-      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+/* ===== VARIABLES ===== */
+:root{
+  --bg:#0b0c10;
+  --panel:#11141c;
+  --panel-soft:#161a24;
+  --accent:#0078d4;
+  --accent-soft:rgba(0,120,212,0.25);
+  --text:#f3f6fb;
+  --text-muted:#a8b0c0;
+  --radius:18px;
+  --shadow:0 18px 40px rgba(0,0,0,0.55);
+  --font:system-ui,"Segoe UI",sans-serif;
+}
 
-    /* ===== GLOBAL ===== */
-    html,
-    body {
-      height: 100%;
-      overflow: hidden; /* pas de défilement */
-    }
+/* ===== GLOBAL ===== */
+html,body{
+  height:100%;
+  overflow:hidden;
+  background:radial-gradient(circle at 0% 0%,#1b2435 0,#0b0c10 45%,#050509 100%);
+  font-family:var(--font);
+  color:var(--text);
+}
 
-    body {
-      font-family: var(--font);
-      background: radial-gradient(circle at 0% 0%, #1b2435 0, #0b0b0f 45%, #050509 100%);
-      color: var(--text);
-      -webkit-font-smoothing: antialiased;
-    }
+/* ===== BACKGROUND GLOW ===== */
+.bg-glow{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+}
+.bg-glow::before,
+.bg-glow::after{
+  content:"";
+  position:absolute;
+  width:520px;
+  height:520px;
+  border-radius:50%;
+  filter:blur(80px);
+  opacity:0.7;
+}
+.bg-glow::before{
+  top:-120px;left:-80px;
+  background:radial-gradient(circle,rgba(0,120,212,0.55),transparent 70%);
+}
+.bg-glow::after{
+  bottom:-140px;right:-60px;
+  background:radial-gradient(circle,rgba(58,160,255,0.45),transparent 70%);
+}
 
-    /* ===== BACKGROUND GLOW ===== */
-    .background-glow {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      z-index: -1;
-    }
+/* ===== TOP RIGHT BUTTON ===== */
+.top-right{
+  position:fixed;
+  top:20px;
+  right:24px;
+  z-index:50;
+}
+.home-btn{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 20px;
+  background:rgba(0,0,0,0.45);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:999px;
+  backdrop-filter:blur(14px);
+  color:var(--text);
+  text-decoration:none;
+  font-size:0.85rem;
+  transition:0.2s;
+}
+.home-btn:hover{
+  background:rgba(0,120,212,0.25);
+  border-color:var(--accent);
+}
 
-    .background-glow::before,
-    .background-glow::after {
-      content: "";
-      position: absolute;
-      width: 520px;
-      height: 520px;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.7;
-    }
+/* ===== PANELS SYSTEM ===== */
+.wrapper{
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
 
-    .background-glow::before {
-      top: -120px;
-      left: -80px;
-      background: radial-gradient(circle, rgba(0, 120, 212, 0.55), transparent 70%);
-    }
+.panel{
+  position:absolute;
+  width:70%;
+  max-width:780px;
+  padding:32px;
+  background:linear-gradient(145deg,var(--panel),var(--panel-soft));
+  border-radius:var(--radius);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:var(--shadow);
+  opacity:0;
+  transform:translateY(40px) scale(0.96);
+  transition:opacity 0.6s ease,transform 0.6s ease;
+}
 
-    .background-glow::after {
-      bottom: -140px;
-      right: -60px;
-      background: radial-gradient(circle, rgba(58, 160, 255, 0.45), transparent 70%);
-    }
+.panel.active{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
 
-    /* ===== TOP BAR / LOGO ACCUEIL ===== */
-    .top-bar {
-      position: fixed;
-      top: 18px;
-      right: 24px;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+.panel h2{
+  font-size:1.4rem;
+  margin-bottom:12px;
+  color:var(--accent);
+}
 
-    .top-brand {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 12px;
-      border-radius: var(--radius-pill);
-      background: rgba(5, 8, 15, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.04);
-      backdrop-filter: blur(14px);
-    }
+.panel p{
+  font-size:1rem;
+  line-height:1.6;
+  margin-bottom:12px;
+  color:var(--text);
+}
 
-    .top-brand-icon {
-      width: 18px;
-      height: 18px;
-      border-radius: 4px;
-      background: conic-gradient(from 210deg, #50e6ff, #0078d4, #5c2d91, #50e6ff);
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
-    }
+.panel ul{
+  margin-top:10px;
+  list-style:none;
+}
+.panel li{
+  margin-bottom:6px;
+  padding-left:14px;
+  color:var(--text-muted);
+  position:relative;
+}
+.panel li::before{
+  content:"▪";
+  position:absolute;
+  left:0;
+  top:0;
+  color:var(--accent);
+}
 
-    .top-brand-text {
-      font-size: 0.78rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .home-button {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 18px;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(135deg, rgba(0, 120, 212, 0.16), rgba(0, 0, 0, 0.7));
-      color: var(--text);
-      font-size: 0.82rem;
-      text-decoration: none;
-      cursor: pointer;
-      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
-      transition:
-        background 160ms ease-out,
-        transform 160ms ease-out,
-        box-shadow 160ms ease-out,
-        border-color 160ms ease-out;
-    }
-
-    .home-button span {
-      font-weight: 500;
-    }
-
-    .home-button-icon {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-      background: rgba(0, 0, 0, 0.4);
-    }
-
-    .home-button:hover {
-      background: linear-gradient(135deg, rgba(0, 120, 212, 0.28), rgba(0, 0, 0, 0.9));
-      transform: translateY(-1px);
-      border-color: rgba(0, 120, 212, 0.7);
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.7);
-    }
-
-    .home-button:active {
-      transform: translateY(0);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
-    }
-
-    /* ===== LAYOUT ===== */
-    .shell {
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px 32px;
-    }
-
-    .content {
-      max-width: 1120px;
-      width: 100%;
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
-      gap: 22px;
-      align-items: stretch;
-    }
-
-    @media (max-width: 880px) {
-      .shell {
-        padding-top: 96px;
-      }
-
-      .content {
-        grid-template-columns: minmax(0, 1fr);
-        max-height: calc(100vh - 140px);
-        overflow: auto; /* fallback mobile si ça dépasse un peu */
-        padding-right: 4px;
-      }
-    }
-
-    /* ===== HEADER BLOCK ===== */
-    .header-block {
-      grid-column: 1 / -1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 4px;
-      animation: fadeUp 420ms ease-out forwards;
-      transform-origin: center;
-      opacity: 0;
-    }
-
-    .header-eyebrow {
-      font-size: 0.78rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-    }
-
-    .header-title {
-      font-size: 1.9rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      color: var(--text);
-    }
-
-    .header-subtitle {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      max-width: 640px;
-    }
-
-    /* ===== CARDS ===== */
-    .card {
-      position: relative;
-      background: linear-gradient(145deg, var(--bg-elevated), var(--bg-elevated-soft));
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 20px 20px 18px;
-      box-shadow: var(--shadow-soft);
-      overflow: hidden;
-      opacity: 0;
-      transform: translateY(18px) scale(0.98);
-      animation: fadeUp 520ms ease-out forwards;
-    }
-
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background:
-        radial-gradient(circle at 0 0, rgba(0, 120, 212, 0.18), transparent 60%),
-        radial-gradient(circle at 100% 100%, rgba(58, 160, 255, 0.14), transparent 60%);
-      opacity: 0.7;
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-
-    .card-inner {
-      position: relative;
-      z-index: 1;
-    }
-
-    .card-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: var(--radius-pill);
-      background: rgba(0, 0, 0, 0.45);
-      border: 1px solid rgba(255, 255, 255, 0.06);
-      font-size: 0.72rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 10px;
-    }
-
-    .card-label-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 0 4px rgba(0, 120, 212, 0.25);
-    }
-
-    .card-title {
-      font-size: 1.02rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--accent-strong);
-      margin-bottom: 8px;
-    }
-
-    .card-text {
-      font-size: 0.9rem;
-      line-height: 1.6;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .card-text-muted {
-      font-size: 0.86rem;
-      line-height: 1.5;
-      color: var(--text-muted);
-    }
-
-    .card-list {
-      list-style: none;
-      margin-top: 8px;
-    }
-
-    .card-list li {
-      position: relative;
-      padding-left: 16px;
-      margin-bottom: 4px;
-      font-size: 0.86rem;
-      color: var(--text-muted);
-    }
-
-    .card-list li::before {
-      content: "▪";
-      position: absolute;
-      left: 0;
-      top: 0;
-      color: var(--accent);
-      font-size: 0.7rem;
-      transform: translateY(2px);
-    }
-
-    /* ===== PRIVACY LINK ===== */
-    .privacy-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      margin-top: 10px;
-      padding: 6px 12px;
-      border-radius: var(--radius-pill);
-      background: rgba(0, 0, 0, 0.55);
-      border: 1px solid rgba(0, 120, 212, 0.6);
-      color: var(--accent-strong);
-      font-size: 0.82rem;
-      text-decoration: none;
-      cursor: pointer;
-      transition:
-        background 160ms ease-out,
-        transform 160ms ease-out,
-        box-shadow 160ms ease-out,
-        border-color 160ms ease-out;
-    }
-
-    .privacy-link-icon {
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      border: 1px solid rgba(58, 160, 255, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.7rem;
-    }
-
-    .privacy-link:hover {
-      background: rgba(0, 120, 212, 0.18);
-      border-color: rgba(58, 160, 255, 0.9);
-      box-shadow: 0 0 0 1px rgba(0, 120, 212, 0.4);
-      transform: translateY(-1px);
-    }
-
-    .privacy-link:active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-
-    /* ===== FOOTER ===== */
-    .footer {
-      grid-column: 1 / -1;
-      margin-top: 6px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      text-align: right;
-      opacity: 0;
-      animation: fadeUp 520ms ease-out forwards;
-      animation-delay: 260ms;
-    }
-
-    /* ===== ANIMATIONS ===== */
-    @keyframes fadeUp {
-      0% {
-        opacity: 0;
-        transform: translateY(18px) scale(0.98);
-        filter: blur(4px);
-      }
-      60% {
-        opacity: 1;
-        transform: translateY(0) scale(1.01);
-        filter: blur(0);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
-      }
-    }
-
-    .card:nth-of-type(1) {
-      animation-delay: 80ms;
-    }
-
-    .card:nth-of-type(2) {
-      animation-delay: 140ms;
-    }
-
-    .card:nth-of-type(3) {
-      animation-delay: 200ms;
-    }
-
-    .card:nth-of-type(4) {
-      animation-delay: 260ms;
-    }
-  </style>
+/* ===== PRIVACY LINK ===== */
+.privacy{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 14px;
+  border-radius:999px;
+  background:rgba(0,0,0,0.55);
+  border:1px solid var(--accent);
+  color:var(--accent);
+  text-decoration:none;
+  margin-top:10px;
+  font-size:0.9rem;
+}
+.privacy:hover{
+  background:var(--accent-soft);
+}
+</style>
 </head>
 
 <body>
-  <div class="background-glow"></div>
 
-  <!-- Bouton NexSearch-Accueil flottant -->
-  <div class="top-bar">
-    <div class="top-brand">
-      <div class="top-brand-icon"></div>
-      <div class="top-brand-text">NexSearch · Suite intelligente</div>
-    </div>
-    <a class="home-button" href="index.html">
-      <span>NexSearch – Accueil</span>
-      <div class="home-button-icon">⌂</div>
+<div class="bg-glow"></div>
+
+<!-- Bouton Accueil -->
+<div class="top-right">
+  <a href="index.html" class="home-btn">NexSearch – Accueil</a>
+</div>
+
+<div class="wrapper">
+
+  <!-- PANEL 1 -->
+  <div class="panel active" id="p1">
+    <h2>NexSearch</h2>
+    <p>
+      NexSearch est un moteur de recherche conçu pour être simple, rapide et agréable à utiliser.
+      Il met l’accent sur la clarté, la fluidité et une présentation nette des résultats.
+    </p>
+    <ul>
+      <li>Interface épurée et lisible</li>
+      <li>Résultats organisés de manière intuitive</li>
+      <li>Fonctionnement fluide sur tous les appareils</li>
+    </ul>
+  </div>
+
+  <!-- PANEL 2 -->
+  <div class="panel" id="p2">
+    <h2>NexAI – Résumé intelligent</h2>
+    <p>
+      NexAI analyse les résultats affichés et génère un résumé clair et structuré.
+      L’objectif est de faire gagner du temps en présentant directement l’essentiel.
+    </p>
+    <ul>
+      <li>Résumés automatiques</li>
+      <li>Informations importantes mises en avant</li>
+      <li>Lecture rapide et simplifiée</li>
+    </ul>
+  </div>
+
+  <!-- PANEL 3 -->
+  <div class="panel" id="p3">
+    <h2>NexAI – IA locale</h2>
+    <p>
+      Une partie de NexAI fonctionne directement sur l’appareil de l’utilisateur.
+      Cela permet d’utiliser certaines fonctions d’IA sans envoyer les données ailleurs.
+    </p>
+    <ul>
+      <li>Traitement local compatible</li>
+      <li>Moins de dépendance au réseau</li>
+      <li>Idéal pour les usages sensibles</li>
+    </ul>
+  </div>
+
+  <!-- PANEL 4 -->
+  <div class="panel" id="p4">
+    <h2>Confidentialité</h2>
+    <p>
+      NexSearch est conçu pour respecter la confidentialité de l’utilisateur.
+      Les requêtes ne sont pas exploitées commercialement et les données restent sous contrôle.
+    </p>
+    <ul>
+      <li>Pas d’exploitation publicitaire</li>
+      <li>Pas de profilage</li>
+      <li>Fonctionnement transparent</li>
+    </ul>
+
+    <a class="privacy" href="https://microsoft-edge77.github.io/NexSearch/confidential.html">
+      Déclaration de Confidentialité NexSearch
     </a>
   </div>
 
-  <div class="shell">
-    <div class="content">
-      <!-- En-tête -->
-      <header class="header-block">
-        <div class="header-eyebrow">Plateforme de recherche d’entreprise</div>
-        <h1 class="header-title">NexSearch, votre espace de recherche sécurisé et intelligent</h1>
-        <p class="header-subtitle">
-          NexSearch combine une expérience de recherche moderne avec des capacités d’IA avancées, tout en plaçant
-          la confidentialité et la maîtrise des données au cœur de son architecture.
-        </p>
-      </header>
+</div>
 
-      <!-- Carte 1 : NexSearch -->
-      <section class="card">
-        <div class="card-inner">
-          <div class="card-label">
-            <span class="card-label-dot"></span>
-            <span>Plateforme</span>
-          </div>
-          <h2 class="card-title">NexSearch, une recherche pensée pour l’entreprise</h2>
-          <p class="card-text">
-            NexSearch est une plateforme de recherche conçue pour offrir une expérience claire, rapide et fiable,
-            inspirée des standards de qualité des environnements professionnels modernes.
-          </p>
-          <p class="card-text-muted">
-            L’interface privilégie la lisibilité, la stabilité et une organisation structurée des résultats, afin de
-            faciliter la prise de décision et la consultation d’information dans un contexte exigeant.
-          </p>
-          <ul class="card-list">
-            <li>Interface sobre, inspirée des codes Microsoft et des environnements corporate.</li>
-            <li>Organisation des résultats orientée productivité et clarté.</li>
-            <li>Expérience homogène sur PC, tablette et appareils hybrides.</li>
-          </ul>
-        </div>
-      </section>
+<script>
+/* ===== SCROLL PANEL NAVIGATION ===== */
+let index = 0;
+const panels = document.querySelectorAll(".panel");
 
-      <!-- Carte 2 : NexAI Résumé intelligent -->
-      <section class="card">
-        <div class="card-inner">
-          <div class="card-label">
-            <span class="card-label-dot"></span>
-            <span>NexAI · Résumé intelligent</span>
-          </div>
-          <h2 class="card-title">NexAI, le résumé intelligent des résultats</h2>
-          <p class="card-text">
-            NexAI analyse le contenu des résultats pour proposer un résumé synthétique, structuré et exploitable
-            en quelques secondes. L’objectif : transformer un volume d’information important en une vue d’ensemble
-            immédiatement actionnable.
-          </p>
-          <p class="card-text-muted">
-            Le résumé intelligent NexAI met en avant les points clés, les tendances et les éléments de contexte
-            pertinents, tout en conservant un ton neutre et professionnel adapté aux usages d’entreprise.
-          </p>
-          <ul class="card-list">
-            <li>Résumé automatique des résultats les plus pertinents.</li>
-            <li>Structuration de l’information par thèmes ou axes de lecture.</li>
-            <li>Conçu pour s’intégrer naturellement dans un flux de travail moderne.</li>
-          </ul>
-        </div>
-      </section>
+function showPanel(i){
+  panels.forEach(p=>p.classList.remove("active"));
+  panels[i].classList.add("active");
+}
 
-      <!-- Carte 3 : NexAI local -->
-      <section class="card">
-        <div class="card-inner">
-          <div class="card-label">
-            <span class="card-label-dot"></span>
-            <span>NexAI · IA locale</span>
-          </div>
-          <h2 class="card-title">NexAI local, l’IA qui reste sur votre appareil</h2>
-          <p class="card-text">
-            En complément du résumé intelligent, NexSearch intègre une version locale de NexAI, conçue pour
-            fonctionner directement sur votre appareil, sans transfert non nécessaire de contenu vers l’extérieur.
-          </p>
-          <p class="card-text-muted">
-            Cette approche permet d’exploiter la puissance de l’IA tout en conservant un contrôle renforcé sur les
-            données, particulièrement adapté aux environnements sensibles ou aux usages internes.
-          </p>
-          <ul class="card-list">
-            <li>Traitement local des requêtes compatibles avec NexAI.</li>
-            <li>Réduction des échanges réseau pour les scénarios sensibles.</li>
-            <li>Alignement avec une culture de protection et de maîtrise des données.</li>
-          </ul>
-        </div>
-      </section>
+let cooldown = false;
 
-      <!-- Carte 4 : Confidentialité -->
-      <section class="card">
-        <div class="card-inner">
-          <div class="card-label">
-            <span class="card-label-dot"></span>
-            <span>Confidentialité & conformité</span>
-          </div>
-          <h2 class="card-title">Confidentialité, protection et transparence des données</h2>
-          <p class="card-text">
-            NexSearch est conçu avec une priorité claire&nbsp;: la protection de la confidentialité des utilisateurs
-            et la maîtrise des données traitées par la plateforme.
-          </p>
-          <p class="card-text-muted">
-            Les requêtes ne sont pas exploitées à des fins publicitaires, et l’architecture privilégie le traitement
-            local ou maîtrisé des informations. La plateforme s’inscrit dans une démarche de transparence, avec une
-            documentation claire sur la manière dont les données sont gérées.
-          </p>
-          <ul class="card-list">
-            <li>Accent fort sur la confidentialité et la non-exploitation commerciale des requêtes.</li>
-            <li>Approche alignée avec les attentes des environnements professionnels et institutionnels.</li>
-            <li>Documentation dédiée pour comprendre les engagements de NexSearch.</li>
-          </ul>
+window.addEventListener("wheel", e=>{
+  if(cooldown) return;
+  cooldown = true;
+  setTimeout(()=>cooldown=false, 500);
 
-          <a class="privacy-link" href="https://microsoft-edge77.github.io/NexSearch/confidential.html">
-            <span class="privacy-link-icon">i</span>
-            <span>Consulter la Déclaration de Confidentialité NexSearch</span>
-          </a>
-        </div>
-      </section>
+  if(e.deltaY > 0) index++;
+  else index--;
 
-      <!-- Footer -->
-      <footer class="footer">
-        NexSearch · Suite de recherche et d’IA d’entreprise
-      </footer>
-    </div>
-  </div>
+  if(index < 0) index = 0;
+  if(index > panels.length - 1) index = panels.length - 1;
+
+  showPanel(index);
+});
+</script>
+
 </body>
 </html>

@@ -2,8 +2,10 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Recherche NexSearch</title>
+  <title>Recherche IA NexSearch</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Favicon = sphère d’énergie bleue minimaliste -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3CradialGradient id='g' cx='35%25' cy='30%25' r='70%25'%3E%3Cstop offset='0%25' stop-color='%233b82f6'/%3E%3Cstop offset='55%25' stop-color='%231e40af'/%3E%3Cstop offset='100%25' stop-color='%230f172a'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='28' fill='url(%23g)'/%3E%3Ccircle cx='26' cy='24' r='10' fill='rgba(148,197,255,0.18)'/%3E%3C/svg%3E">
   <style>
     :root {
       --bg-main: #020617;
@@ -15,27 +17,17 @@
       --text-muted: #9ca3af;
       --text-soft: #6b7280;
     }
-
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top, #0b1120 0, #020617 40%, #000 100%);
+      background: radial-gradient(circle at top, #0b1120 0, #020617 40%, #000 100%);
       color: var(--text-main);
       overflow-x: hidden;
     }
+    #app { min-height: 100vh; display: flex; flex-direction: column; }
 
-    #app {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* Top bar – Bing-like */
+    /* Top bar */
     .top-bar {
       display: flex;
       align-items: center;
@@ -49,44 +41,39 @@
       top: 0;
       z-index: 20;
     }
-
     .top-left {
       display: flex;
       align-items: center;
       gap: 10px;
       cursor: pointer;
     }
-
+    /* sphère d’énergie bleue minimaliste */
     .logo-main {
-      width: 30px;
-      height: 30px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8 60%, #020617 100%);
-      box-shadow: 0 0 18px rgba(37,99,235,0.9);
+      background: radial-gradient(circle at 40% 35%, #3b82f6 0%, #1e40af 55%, #0f172a 100%);
+      box-shadow: 0 0 12px rgba(37,99,235,0.35);
       position: relative;
     }
-
     .logo-main::after {
       content: "";
       position: absolute;
-      inset: 4px;
+      inset: 5px;
       border-radius: 50%;
       border: 1px solid rgba(15,23,42,0.9);
-      box-shadow: inset 0 0 10px rgba(15,23,42,0.9);
+      box-shadow: inset 0 0 8px rgba(15,23,42,0.9);
     }
-
     .logo-text {
       font-weight: 600;
       font-size: 1rem;
       letter-spacing: 0.04em;
     }
-
     .top-right {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
     .nexai-toggle {
       padding: 6px 12px;
       border-radius: 999px;
@@ -96,7 +83,6 @@
       font-size: 0.8rem;
       cursor: pointer;
     }
-
     .nexai-toggle:hover {
       background: rgba(30,64,175,0.9);
       border-color: rgba(59,130,246,0.9);
@@ -106,12 +92,12 @@
     .main-layout {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+      grid-template-columns: minmax(0, 1fr); /* s’étend quand NexAI est fermé */
       gap: 12px;
       padding: 12px 18px 90px 18px;
       position: relative;
+      transition: grid-template-columns 0.18s ease-out;
     }
-
     .panel {
       background: var(--bg-panel);
       border: 1px solid var(--border-panel);
@@ -123,36 +109,29 @@
       box-shadow: 0 18px 40px rgba(0,0,0,0.7);
       backdrop-filter: blur(18px);
     }
-
     .panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 6px;
     }
-
     .panel-title {
       font-size: 0.95rem;
       font-weight: 600;
       color: #bfdbfe;
     }
-
     .panel-sub {
       font-size: 0.78rem;
       color: var(--text-soft);
     }
 
     /* Résultats */
-    .results-panel {
-      overflow: hidden;
-    }
-
+    .results-panel { overflow: hidden; }
     #results-meta {
       font-size: 0.8rem;
       color: var(--text-soft);
       margin-bottom: 6px;
     }
-
     #results-summary {
       margin-bottom: 8px;
       padding: 8px;
@@ -163,22 +142,20 @@
       max-height: 120px;
       overflow-y: auto;
     }
-
     #results-list {
       flex: 1;
       overflow-y: auto;
       padding-right: 4px;
       margin-bottom: 8px;
     }
-
     .result-item-link {
       text-decoration: none;
       color: inherit;
       display: block;
     }
-
     .result-item {
       display: flex;
+      align-items: center;
       gap: 10px;
       padding: 8px;
       border-radius: 10px;
@@ -188,17 +165,36 @@
       transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
       cursor: pointer;
     }
-
     .result-item:hover {
       background: rgba(30,64,175,0.25);
       border-color: rgba(59,130,246,0.9);
       transform: translateY(-1px);
       box-shadow: 0 0 0 1px rgba(59,130,246,0.7);
     }
-
+    .result-content {
+      flex: 1;
+      min-width: 0;
+    }
+    .result-item-title {
+      font-weight: 600;
+      color: #bfdbfe;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
+    }
+    .result-item-url {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+      word-break: break-all;
+    }
+    .result-item-tags {
+      font-size: 0.74rem;
+      color: var(--text-soft);
+    }
+    /* favicon à DROITE de la bulle */
     .result-favicon {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       border-radius: 6px;
       background: rgba(15,23,42,0.9);
       display: flex;
@@ -208,8 +204,8 @@
       color: #e5e7eb;
       flex-shrink: 0;
       overflow: hidden;
+      margin-left: auto;
     }
-
     .result-favicon img {
       width: 100%;
       height: 100%;
@@ -217,42 +213,15 @@
       border-radius: 6px;
     }
 
-    .result-content {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .result-item-title {
-      font-weight: 600;
-      color: #bfdbfe;
-      font-size: 0.9rem;
-      margin-bottom: 2px;
-    }
-
-    .result-item-url {
-      font-size: 0.76rem;
-      color: var(--text-muted);
-      margin-bottom: 2px;
-      word-break: break-all;
-    }
-
-    .result-item-tags {
-      font-size: 0.74rem;
-      color: var(--text-soft);
-    }
-
-    /* Actions globales */
     .results-actions-wrapper {
       border-top: 1px solid rgba(30,64,175,0.35);
       padding-top: 6px;
     }
-
     .actions-bar {
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
     }
-
     .action-btn {
       padding: 5px 10px;
       border-radius: 999px;
@@ -265,54 +234,37 @@
       align-items: center;
       gap: 4px;
     }
-
     .action-btn:hover {
       background: rgba(30,64,175,0.9);
       border-color: rgba(59,130,246,0.9);
     }
 
-    /* NexAI volet latéral dépliant – verre liquide */
-    .nexai-panel-wrapper {
-      position: relative;
-    }
-
+    /* NexAI volet latéral – masqué par défaut, plus grand */
+    .nexai-panel-wrapper { position: relative; }
     .nexai-panel {
-      position: absolute;
-      top: 0;
-      right: 0;
-      bottom: 0;
+      position: relative;
       width: 100%;
-      max-width: 380px;
+      max-width: 480px;
       background: rgba(15,23,42,0.92);
       border-left: 1px solid rgba(30,64,175,0.5);
       box-shadow: -18px 0 40px rgba(0,0,0,0.8);
-      transform: translateX(100%);
-      transition: transform 0.18s ease-out;
       display: flex;
       flex-direction: column;
       padding: 10px;
       backdrop-filter: blur(20px);
-      border-radius: 12px 0 0 12px;
-      z-index: 30;
+      border-radius: 12px;
     }
-
-    .nexai-panel.open {
-      transform: translateX(0);
-    }
-
     .nexai-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 6px;
     }
-
     .nexai-title {
       font-size: 0.95rem;
       font-weight: 600;
       color: #bfdbfe;
     }
-
     .nexai-close {
       border: none;
       background: transparent;
@@ -320,7 +272,6 @@
       cursor: pointer;
       font-size: 0.9rem;
     }
-
     .nexai-body {
       flex: 1;
       display: flex;
@@ -329,7 +280,6 @@
       min-height: 0;
       padding-bottom: 60px;
     }
-
     #nexai-summary {
       padding: 8px;
       border-radius: 10px;
@@ -340,7 +290,6 @@
       overflow-y: auto;
       color: #dbeafe;
     }
-
     #nexai-log {
       flex: 1;
       overflow-y: auto;
@@ -350,20 +299,9 @@
       padding: 8px;
       font-size: 0.84rem;
     }
-
-    .nexai-msg {
-      margin-bottom: 6px;
-      white-space: pre-wrap;
-    }
-
-    .nexai-msg-user {
-      color: #93c5fd;
-    }
-
-    .nexai-msg-ai {
-      color: #e5f2ff;
-    }
-
+    .nexai-msg { margin-bottom: 6px; white-space: pre-wrap; }
+    .nexai-msg-user { color: #93c5fd; }
+    .nexai-msg-ai { color: #e5f2ff; }
     .nexai-input-row {
       position: absolute;
       left: 12px;
@@ -379,7 +317,6 @@
       backdrop-filter: blur(18px);
       z-index: 35;
     }
-
     .nexai-input-row input {
       flex: 1;
       padding: 6px 10px;
@@ -389,7 +326,6 @@
       color: var(--text-main);
       font-size: 0.82rem;
     }
-
     .nexai-input-row button {
       padding: 6px 12px;
       border-radius: 999px;
@@ -401,12 +337,9 @@
       font-weight: 600;
       white-space: nowrap;
     }
+    .nexai-input-row button:hover { filter: brightness(1.05); }
 
-    .nexai-input-row button:hover {
-      filter: brightness(1.05);
-    }
-
-    /* Barre de recherche en bas – Bing-like */
+    /* Barre de recherche en bas */
     .bottom-dock {
       position: fixed;
       left: 0;
@@ -417,7 +350,6 @@
       pointer-events: none;
       z-index: 40;
     }
-
     .bottom-bar {
       width: min(900px, 100% - 24px);
       display: flex;
@@ -431,17 +363,15 @@
       pointer-events: auto;
       backdrop-filter: blur(18px);
     }
-
     .bottom-logo {
       width: 26px;
       height: 26px;
       border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8 60%, #020617 100%);
+      background: radial-gradient(circle at 40% 35%, #3b82f6 0%, #1e40af 55%, #0f172a 100%);
       box-shadow: 0 0 16px rgba(37,99,235,0.9);
       cursor: pointer;
       position: relative;
     }
-
     .bottom-logo::after {
       content: "";
       position: absolute;
@@ -450,7 +380,6 @@
       border: 1px solid rgba(15,23,42,0.9);
       box-shadow: inset 0 0 8px rgba(15,23,42,0.9);
     }
-
     .bottom-input {
       flex: 1;
       display: flex;
@@ -461,7 +390,6 @@
       padding: 4px 8px;
       border: 1px solid rgba(30,64,175,0.4);
     }
-
     .bottom-input input {
       flex: 1;
       border: none;
@@ -470,7 +398,6 @@
       color: var(--text-main);
       font-size: 0.86rem;
     }
-
     .bottom-input button {
       padding: 4px 12px;
       border-radius: 999px;
@@ -481,42 +408,20 @@
       cursor: pointer;
       font-weight: 600;
     }
+    .bottom-input button:hover { filter: brightness(1.05); }
 
-    .bottom-input button:hover {
-      filter: brightness(1.05);
-    }
-
-    /* Scrollbars */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #1f2937;
-      border-radius: 999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #374151;
-    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #374151; }
 
     @media (max-width: 900px) {
-      .main-layout {
-        grid-template-columns: minmax(0, 1fr);
-        padding-bottom: 100px;
-      }
-      .nexai-panel {
-        max-width: 100%;
-        border-radius: 12px;
-      }
+      .main-layout { grid-template-columns: minmax(0, 1fr); padding-bottom: 100px; }
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <!-- Top bar -->
     <header class="top-bar">
       <div class="top-left" id="home-link-top">
         <div class="logo-main"></div>
@@ -527,29 +432,24 @@
       </div>
     </header>
 
-    <!-- Layout principal -->
-    <main class="main-layout">
-      <!-- Panel résultats -->
+    <main class="main-layout" id="main-layout">
       <section class="panel results-panel">
         <div class="panel-header">
           <div>
             <div class="panel-title">Résultats</div>
-            <div class="panel-sub">Organisation intelligente des sites pertinents</div>
+            <div class="panel-sub">Organisation IA des sites pertinents</div>
           </div>
         </div>
-
         <div id="results-meta"></div>
         <div id="results-summary"></div>
         <div id="results-list"></div>
-
         <div class="results-actions-wrapper">
           <div style="font-size:0.78rem;color:#9ca3af;margin-bottom:2px;">Actions rapides</div>
           <div id="results-actions" class="actions-bar"></div>
         </div>
       </section>
 
-      <!-- Volet NexAI (dépliant) -->
-      <section class="nexai-panel-wrapper">
+      <section class="nexai-panel-wrapper" id="nexai-wrapper" style="display:none;">
         <div class="nexai-panel" id="nexai-panel">
           <div class="nexai-header">
             <div class="nexai-title">NexAI</div>
@@ -567,7 +467,6 @@
       </section>
     </main>
 
-    <!-- Barre de recherche en bas -->
     <div class="bottom-dock">
       <div class="bottom-bar">
         <div class="bottom-logo" id="home-link-bottom"></div>
@@ -580,22 +479,17 @@
   </div>
 
   <script>
-    // =========================
-    // 1) Utilitaires
-    // =========================
+    /* Utils */
     function normalizeText(str) {
-      return str
-        .toLowerCase()
+      return str.toLowerCase()
         .normalize("NFD")
         .replace(/[\u0300-\u036f]/g, "")
         .replace(/[^a-z0-9 ]+/g, " ")
         .replace(/\s+/g, " ")
         .trim();
     }
-
     function levenshtein(a, b) {
-      const m = a.length;
-      const n = b.length;
+      const m = a.length, n = b.length;
       const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
       for (let i = 0; i <= m; i++) dp[i][0] = i;
       for (let j = 0; j <= n; j++) dp[0][j] = j;
@@ -612,38 +506,17 @@
       return dp[m][n];
     }
 
-    // =========================
-    // 2) Abréviations / corrections avancées
-    // =========================
+    /* Abréviations / corrections */
     const ADVANCED_ABBREV_MAP = {
-      "ms": "microsoft",
-      "msoft": "microsoft",
-      "mivkoft": "microsoft",
-      "microsof": "microsoft",
-      "microsft": "microsoft",
-      "win": "windows",
-      "w11": "windows 11",
-      "yt": "youtube",
-      "ytb": "youtube",
-      "netf": "netflix",
-      "nf": "netflix",
-      "spoti": "spotify",
-      "deeze": "deezer",
-      "amz": "amazon",
-      "amazn": "amazon",
-      "fnc": "fnac",
-      "cdisc": "cdiscount",
-      "ali": "aliexpress",
-      "gh": "github",
-      "so": "stack overflow",
-      "mdn": "mdn web docs",
-      "pix": "pixabay",
-      "scr": "scratch",
-      "wa": "whatsapp",
-      "tg": "telegram",
-      "dc": "discord"
+      "ms":"microsoft","msoft":"microsoft","mivkoft":"microsoft","microsof":"microsoft","microsft":"microsoft",
+      "win":"windows","w11":"windows 11",
+      "yt":"youtube","ytb":"youtube",
+      "nf":"netflix","netf":"netflix",
+      "amz":"amazon","amazn":"amazon",
+      "gh":"github","so":"stack overflow","mdn":"mdn web docs",
+      "pix":"pixabay","scr":"scratch",
+      "wa":"whatsapp","tg":"telegram","dc":"discord"
     };
-
     const ADVANCED_CANONICAL = [
       "microsoft","windows","word","office","copilot",
       "youtube","netflix","spotify","deezer",
@@ -651,273 +524,273 @@
       "github","stack overflow","mdn web docs",
       "pixabay","scratch",
       "whatsapp","telegram","discord",
-      "bing"
+      "bing","google","chatgpt","claude","perplexity","openai"
     ];
-
     function advancedNormalizeQuery(q) {
       const original = q;
       let norm = normalizeText(q);
       const tokens = norm.split(" ");
-      const outTokens = [];
-
+      const out = [];
       for (let tok of tokens) {
         if (!tok) continue;
-
         if (ADVANCED_ABBREV_MAP[tok]) {
-          outTokens.push(ADVANCED_ABBREV_MAP[tok]);
+          out.push(ADVANCED_ABBREV_MAP[tok]);
           continue;
         }
-
-        let best = tok;
-        let bestDist = Infinity;
+        let best = tok, bestDist = Infinity;
         for (const cand of ADVANCED_CANONICAL) {
           const d = levenshtein(tok, cand);
-          if (d < bestDist) {
-            bestDist = d;
-            best = cand;
-          }
+          if (d < bestDist) { bestDist = d; best = cand; }
         }
-        if (bestDist <= 2 && best !== tok) {
-          outTokens.push(best);
-        } else {
-          outTokens.push(tok);
-        }
+        if (bestDist <= 2 && best !== tok) out.push(best); else out.push(tok);
       }
-
-      const corrected = outTokens.join(" ");
-      return { original, normalized: corrected };
+      return { original, normalized: out.join(" ") };
     }
 
-    // =========================
-    // 3) NexAI – mini LLM simulée
-    // =========================
-    const NEXAI_MEMORY = {
-      lastQuery: null,
-      lastType: null
-    };
-
+    /* NexAI – mini LLM simulée */
+    const NEXAI_MEMORY = { lastQuery:null, lastType:null, lastTopic:null };
     function tryCalcExpression(expr) {
       try {
         if (!/^[0-9+\-*/().,%\s]+$/.test(expr)) return null;
-        const safe = expr.replace(/%/g, "/100");
-        const result = Function('"use strict";return (' + safe + ')')();
-        if (typeof result === "number" && isFinite(result)) {
-          return result;
-        }
+        const safe = expr.replace(/%/g,"/100");
+        const result = Function('"use strict";return ('+safe+')')();
+        if (typeof result === "number" && isFinite(result)) return result;
         return null;
-      } catch {
-        return null;
-      }
+      } catch { return null; }
     }
-
     function nexaiDetectIntent(text) {
       const t = normalizeText(text);
-      const isCalc = /[0-9]/.test(text) && /[+\-*/]/.test(text);
-      const isHello = t.includes("bonjour") || t.includes("salut") || t.includes("hey");
-      const isExplain = t.startsWith("explique") || t.includes("explique moi") || t.includes("c est quoi") || t.includes("qu est ce que");
-      const isHelp = t.includes("aide") || t.includes("comment utiliser") || t.includes("comment marche");
-      const isSearch = t.includes("recherche") || t.includes("nexsearch");
-      return { isCalc, isHello, isExplain, isHelp, isSearch };
+      return {
+        isCalc: /[0-9]/.test(text) && /[+\-*/]/.test(text),
+        isHello: t.includes("bonjour") || t.includes("salut") || t.includes("hey"),
+        isExplain: t.startsWith("explique") || t.includes("explique moi") || t.includes("c est quoi") || t.includes("qu est ce que"),
+        isHelp: t.includes("aide") || t.includes("comment utiliser") || t.includes("comment marche"),
+        isSearch: t.includes("recherche") || t.includes("nexsearch"),
+        isThanks: t.includes("merci")
+      };
     }
-
     function nexaiAnswer(userText) {
       const trimmed = userText.trim();
       const calcRes = tryCalcExpression(trimmed);
       const intent = nexaiDetectIntent(trimmed);
 
       if (calcRes !== null && intent.isCalc) {
-        return `Le résultat de votre calcul est ${calcRes}. Vous pouvez enchaîner avec un autre calcul ou une question sur un site ou un service.`;
+        return `Le résultat de votre calcul est ${calcRes}. Vous pouvez continuer avec un autre calcul ou une question sur un site ou un service.`;
       }
-
       if (intent.isHello) {
-        return "Bonjour ! Vous pouvez me demander d’expliquer un site (Word, Microsoft, Netflix, YouTube…), de résumer votre recherche actuelle ou de faire un calcul rapide.";
+        return "Bonjour ! Vous pouvez me demander d’expliquer un site (Word, Microsoft, Netflix, YouTube, GitHub…), de résumer votre recherche actuelle ou de faire un calcul rapide.";
       }
-
       if (intent.isExplain) {
         const after = trimmed
-          .replace(/^explique moi/i, "")
-          .replace(/^explique/i, "")
-          .replace(/^c est quoi/i, "")
-          .replace(/^qu est ce que/i, "")
+          .replace(/^explique moi/i,"")
+          .replace(/^explique/i,"")
+          .replace(/^c est quoi/i,"")
+          .replace(/^qu est ce que/i,"")
           .trim();
         if (after) {
-          return `Vous souhaitez une explication sur « ${after} ». Je peux vous donner une définition simple, à quoi cela sert, et dans quel contexte vous le verrez apparaître dans les résultats de NexSearch.`;
+          NEXAI_MEMORY.lastTopic = after;
+          return `Vous souhaitez une explication sur « ${after} ». En général, je peux vous donner : une définition simple, à quoi cela sert, et dans quel contexte cela apparaît dans vos résultats NexSearch.`;
         }
-        return "Vous pouvez me demander : « Explique Word », « C’est quoi Netflix ? », « Qu’est-ce que Scratch ? », etc.";
+        return "Vous pouvez me demander : « Explique Word », « C’est quoi Netflix ? », « Qu’est-ce que Scratch ? », « Explique GitHub », etc.";
       }
-
       if (intent.isHelp) {
-        return "NexSearch accepte les fautes et les abréviations (ms → Microsoft, yt → YouTube, nf → Netflix, amz → Amazon…). Tapez simplement ce que vous avez en tête, je corrige, j’analyse le type de recherche et j’organise les sites les plus pertinents.";
+        return "NexSearch accepte les fautes et les abréviations (ms → Microsoft, yt → YouTube, nf → Netflix, amz → Amazon…). Tapez ce que vous avez en tête, je corrige, j’analyse le type de recherche (streaming, dev, IA, shopping, etc.) et j’organise les sites les plus pertinents.";
       }
-
       if (intent.isSearch) {
         return "Pour lancer une recherche, utilisez la barre en bas de l’écran. Vous pouvez taper un site, un service, un produit, un sujet ou même une expression approximative : je corrigerai et filtrerai les sites pour ne garder que ceux qui ont du sens.";
       }
-
-      if (NEXAI_MEMORY.lastQuery) {
-        return `Par rapport à votre dernière recherche « ${NEXAI_MEMORY.lastQuery} », vous pouvez me demander un résumé plus détaillé, une explication d’un site précis (Word, Microsoft, Netflix, YouTube, Amazon, GitHub, Scratch…) ou un calcul lié (par exemple un prix total ou une remise).`;
+      if (intent.isThanks) {
+        return "Avec plaisir. Si vous voulez, vous pouvez enchaîner avec une autre recherche ou une explication.";
       }
-
-      return "Je ne suis pas certain de ce que vous attendez. Donnez-moi un mot‑clé (Word, Netflix, YouTube, Amazon, GitHub…), une question (« explique Word ») ou un calcul, et je vous répondrai de manière adaptée.";
+      if (NEXAI_MEMORY.lastQuery) {
+        return `Par rapport à votre dernière recherche « ${NEXAI_MEMORY.lastQuery} », vous pouvez me demander un résumé plus détaillé, une explication d’un site précis (Word, Microsoft, Netflix, YouTube, Amazon, GitHub, Scratch, IA…) ou un calcul lié (par exemple un prix total ou une remise).`;
+      }
+      return "Donnez-moi un mot‑clé (Word, Netflix, YouTube, Amazon, GitHub…), une question (« explique Word ») ou un calcul, et je vous répondrai de manière adaptée.";
     }
-
-    async function nexaiChatReply(userText) {
-      return nexaiAnswer(userText);
-    }
+    async function nexaiChatReply(userText) { return nexaiAnswer(userText); }
 
     function nexaiBuildSummaryForResults(q, correctedQ, results, calcResult) {
       if (!q.trim()) {
-        return "Tapez une requête en bas, même avec des abréviations ou des fautes : je corrige, je filtre les sites et je vous donne un aperçu rapide.";
+        return "Tapez une requête en bas, même avec des abréviations ou des fautes : je corrige, je filtre les sites (Microsoft, Netflix, YouTube, Amazon, GitHub, Scratch, IA…) et je vous donne un aperçu rapide.";
       }
-
       if (calcResult !== null) {
         return `Votre requête ressemble à un calcul. Résultat : ${calcResult}. Vous pouvez maintenant lancer une recherche sur un site, un service ou un produit si vous le souhaitez.`;
       }
-
       if (!results.length) {
-        return `Requête analysée : « ${correctedQ} ». Aucun site très pertinent n’a été trouvé dans la base actuelle. Essayez de préciser un peu votre demande (par exemple « Microsoft Word », « Netflix séries », « YouTube musique »).`;
+        return `Requête analysée : « ${correctedQ} ». Aucun site très pertinent n’a été trouvé dans la base actuelle. Essayez de préciser un peu votre demande (par exemple « Microsoft Word », « Netflix séries », « YouTube musique », « GitHub projet »).`;
       }
-
-      const names = results.slice(0, 5).map(r => r.name);
+      const names = results.slice(0, 6).map(r => r.name);
       const uniqueNames = [...new Set(names)];
       let desc = `Requête analysée : « ${correctedQ} ». J’ai sélectionné principalement : ${uniqueNames.join(", ")}. `;
-
-      if (correctedQ.includes("word")) {
-        desc += "Word est le traitement de texte de la suite Microsoft Office. Les liens proposés pointent vers Microsoft, Office et la documentation associée.";
-      } else if (correctedQ.includes("microsoft")) {
-        desc += "Microsoft regroupe Windows, Office, Xbox et d’autres services. Les liens proposés mettent en avant l’écosystème Microsoft et les ressources utiles.";
-      } else if (correctedQ.includes("netflix")) {
-        desc += "Netflix est une plateforme de streaming vidéo. Les liens proposés sont orientés vers Netflix et les contenus associés.";
-      } else if (correctedQ.includes("youtube")) {
-        desc += "YouTube est une plateforme de partage de vidéos. Les liens proposés mettent en avant YouTube et les contenus vidéo pertinents.";
-      } else if (correctedQ.includes("amazon")) {
-        desc += "Amazon est une plateforme de e‑commerce. Les liens proposés sont orientés shopping et produits.";
-      } else if (correctedQ.includes("scratch")) {
-        desc += "Scratch est une plateforme de programmation visuelle. Les liens proposés pointent vers Scratch et des ressources pour apprendre ou partager des projets.";
-      } else if (correctedQ.includes("github")) {
-        desc += "GitHub est une plateforme d’hébergement de code. Les liens proposés mettent en avant GitHub et la documentation pour les développeurs.";
-      } else {
-        desc += "Les sites affichés sont filtrés pour rester cohérents avec votre requête, sans résultats hors sujet.";
-      }
-
+      const t = correctedQ;
+      if (t.includes("word")) desc += "Word est le traitement de texte de la suite Microsoft Office. Les liens proposés pointent vers Microsoft, Office et la documentation associée.";
+      else if (t.includes("microsoft")) desc += "Microsoft regroupe Windows, Office, Xbox, Azure et d’autres services. Les liens proposés mettent en avant l’écosystème Microsoft et les ressources utiles.";
+      else if (t.includes("netflix")) desc += "Netflix est une plateforme de streaming vidéo. Les liens proposés sont orientés vers Netflix et les contenus associés.";
+      else if (t.includes("youtube")) desc += "YouTube est une plateforme de partage de vidéos. Les liens proposés mettent en avant YouTube et les contenus vidéo pertinents.";
+      else if (t.includes("amazon")) desc += "Amazon est une plateforme de e‑commerce. Les liens proposés sont orientés shopping et produits.";
+      else if (t.includes("scratch")) desc += "Scratch est une plateforme de programmation visuelle. Les liens proposés pointent vers Scratch et des ressources pour apprendre ou partager des projets.";
+      else if (t.includes("github")) desc += "GitHub est une plateforme d’hébergement de code. Les liens proposés mettent en avant GitHub et la documentation pour les développeurs.";
+      else if (t.includes("chatgpt") || t.includes("claude") || t.includes("copilot") || t.includes("perplexity")) desc += "Votre requête concerne l’IA. Les liens proposés mettent en avant des assistants IA, des modèles et des plateformes d’IA.";
+      else desc += "Les sites affichés sont filtrés pour rester cohérents avec votre requête, sans résultats hors sujet.";
       return desc;
     }
 
-    // =========================
-    // 4) NexSearch – base de sites enrichie (catalogue extensible vers 1000+)
-    // =========================
+    /* Base de sites – large catalogue (extraits, extensible à 1000+) */
     const SITES_DB = [
-      // Microsoft / Office / Word / Copilot
-      { name: "Microsoft", url: "https://www.microsoft.com/search?q={q}", tags: ["microsoft","office","windows"], weight: 0.98, favicon: "https://www.microsoft.com/favicon.ico" },
-      { name: "Microsoft Word", url: "https://www.microsoft.com/search?q=word%20{q}", tags: ["word","office","microsoft"], weight: 0.99, favicon: "https://www.microsoft.com/favicon.ico" },
-      { name: "Office.com", url: "https://www.office.com/search?auth=1&query={q}", tags: ["office","word","microsoft"], weight: 0.96, favicon: "https://www.office.com/favicon.ico" },
-      { name: "Microsoft Copilot", url: "https://copilot.microsoft.com/?q={q}", tags: ["copilot","ai","microsoft"], weight: 0.97, favicon: "https://copilot.microsoft.com/favicon.ico" },
+      /* Streaming / vidéo */
+      { name:"YouTube", url:"https://youtube.com/results?search_query={q}", tags:["video","youtube"], weight:0.97 },
+      { name:"Netflix", url:"https://netflix.com/search?q={q}", tags:["video","netflix","streaming"], weight:0.95 },
+      { name:"Disney+", url:"https://disneyplus.com/search?q={q}", tags:["video","disney"], weight:0.9 },
+      { name:"Prime Video", url:"https://primevideo.com/search/ref=atv_sr_sug_?phrase={q}", tags:["video","primevideo"], weight:0.9 },
+      { name:"Canal+", url:"https://canalplus.com/", tags:["video","canalplus"], weight:0.85 },
+      { name:"Twitch", url:"https://twitch.tv/search?term={q}", tags:["video","twitch","stream"], weight:0.9 },
+      { name:"Dailymotion", url:"https://dailymotion.com/search/{q}", tags:["video"], weight:0.8 },
 
-      // Vidéo / streaming
-      { name: "YouTube", url: "https://www.youtube.com/results?search_query={q}", tags: ["video","youtube","music"], weight: 0.97, favicon: "https://www.youtube.com/favicon.ico" },
-      { name: "Netflix", url: "https://www.netflix.com/search?q={q}", tags: ["video","netflix","streaming"], weight: 0.95, favicon: "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico" },
+      /* Jeux / plateformes */
+      { name:"Roblox", url:"https://roblox.com/games/?Keyword={q}", tags:["game","roblox"], weight:0.9 },
+      { name:"Minecraft", url:"https://minecraft.net/search?q={q}", tags:["game","minecraft"], weight:0.9 },
+      { name:"Steam Store", url:"https://store.steampowered.com/search/?term={q}", tags:["game","steam"], weight:0.9 },
+      { name:"Epic Games Store", url:"https://store.epicgames.com/en-US/browse?q={q}", tags:["game","epic"], weight:0.88 },
+      { name:"GOG", url:"https://gog.com/games?search={q}", tags:["game","gog"], weight:0.85 },
+      { name:"League of Legends", url:"https://leagueoflegends.com/", tags:["game","lol"], weight:0.85 },
+      { name:"Valorant", url:"https://playvalorant.com/", tags:["game","valorant"], weight:0.85 },
 
-      // Musique
-      { name: "Spotify", url: "https://open.spotify.com/search/{q}", tags: ["music","spotify"], weight: 0.9, favicon: "https://open.spotifycdn.com/cdn/images/favicon32.b64ecc03.png" },
-      { name: "Deezer", url: "https://www.deezer.com/search/{q}", tags: ["music","deezer"], weight: 0.86, favicon: "https://e-cdns-files.dzcdn.net/cache/images/common/favicon/favicon-32x32.1c0c1c4c.png" },
+      /* Messageries / réseaux sociaux */
+      { name:"WhatsApp", url:"https://whatsapp.com", tags:["messaging","whatsapp"], weight:0.8 },
+      { name:"Telegram", url:"https://telegram.org", tags:["messaging","telegram"], weight:0.8 },
+      { name:"Discord", url:"https://discord.com", tags:["messaging","discord"], weight:0.82 },
+      { name:"Facebook", url:"https://facebook.com", tags:["social"], weight:0.8 },
+      { name:"Instagram", url:"https://instagram.com", tags:["social","photo"], weight:0.8 },
+      { name:"TikTok", url:"https://tiktok.com", tags:["social","video"], weight:0.8 },
+      { name:"Twitter / X", url:"https://x.com/search?q={q}", tags:["social","twitter"], weight:0.8 },
+      { name:"Reddit", url:"https://reddit.com/search/?q={q}", tags:["social","forum"], weight:0.8 },
 
-      // Shopping
-      { name: "Amazon", url: "https://www.amazon.fr/s?k={q}", tags: ["shopping","amazon"], weight: 0.9, favicon: "https://www.amazon.fr/favicon.ico" },
-      { name: "Fnac", url: "https://www.fnac.com/SearchResult/ResultList.aspx?Search={q}", tags: ["shopping","fnac"], weight: 0.86, favicon: "https://www.fnac.com/favicon.ico" },
-      { name: "Cdiscount", url: "https://www.cdiscount.com/search/10/{q}.html", tags: ["shopping","cdiscount"], weight: 0.84, favicon: "https://www.cdiscount.com/favicon-32x32.png" },
-      { name: "AliExpress", url: "https://www.aliexpress.com/wholesale?SearchText={q}", tags: ["shopping","aliexpress"], weight: 0.82, favicon: "https://www.aliexpress.com/favicon.ico" },
+      /* IA / assistants */
+      { name:"Bing Copilot", url:"https://copilot.microsoft.com/?q={q}", tags:["ai","copilot","microsoft"], weight:0.96 },
+      { name:"ChatGPT", url:"https://chat.openai.com", tags:["ai","chatgpt"], weight:0.9 },
+      { name:"Claude", url:"https://claude.ai", tags:["ai","claude"], weight:0.88 },
+      { name:"Perplexity", url:"https://perplexity.ai/search?q={q}", tags:["ai","perplexity"], weight:0.88 },
+      { name:"Gemini", url:"https://gemini.google.com/?q={q}", tags:["ai","gemini"], weight:0.86 },
+      { name:"Hugging Face", url:"https://huggingface.co/models?search={q}", tags:["ai","models"], weight:0.86 },
+      { name:"Midjourney", url:"https://midjourney.com", tags:["ai","image"], weight:0.84 },
+      { name:"RunwayML", url:"https://runwayml.com", tags:["ai","video"], weight:0.84 },
+      { name:"Leonardo AI", url:"https://leonardo.ai", tags:["ai","image"], weight:0.84 },
+      { name:"Stability AI", url:"https://stability.ai", tags:["ai","image"], weight:0.82 },
 
-      // Images / ressources
-      { name: "Pixabay", url: "https://pixabay.com/images/search/{q}/", tags: ["images","pixabay","photos"], weight: 0.88, favicon: "https://pixabay.com/static/img/favicon.png" },
+      /* Microsoft / Office / dev */
+      { name:"Microsoft", url:"https://microsoft.com/search?q={q}", tags:["microsoft","windows","office"], weight:0.98 },
+      { name:"Office", url:"https://office.com/search?auth=1&query={q}", tags:["office","word","excel"], weight:0.96 },
+      { name:"Outlook", url:"https://outlook.com", tags:["mail","microsoft"], weight:0.86 },
+      { name:"OneDrive", url:"https://onedrive.com", tags:["cloud","microsoft"], weight:0.86 },
+      { name:"Learn Microsoft", url:"https://learn.microsoft.com/search/?terms={q}", tags:["docs","microsoft"], weight:0.9 },
+      { name:"Visual Studio", url:"https://visualstudio.microsoft.com/search/results/?q={q}", tags:["dev","microsoft"], weight:0.88 },
+      { name:"VS Code", url:"https://code.visualstudio.com/search?q={q}", tags:["dev","editor"], weight:0.88 },
 
-      // Dev / code
-      { name: "GitHub", url: "https://github.com/search?q={q}", tags: ["dev","code","github"], weight: 0.9, favicon: "https://github.githubassets.com/favicons/favicon.png" },
-      { name: "Stack Overflow", url: "https://stackoverflow.com/search?q={q}", tags: ["dev","questions","stack overflow"], weight: 0.88, favicon: "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico" },
-      { name: "MDN Web Docs", url: "https://developer.mozilla.org/fr/search?q={q}", tags: ["dev","docs","mdn"], weight: 0.86, favicon: "https://developer.mozilla.org/favicon-32x32.cbbd161b.png" },
+      /* Dev / code / outils */
+      { name:"GitHub", url:"https://github.com/search?q={q}", tags:["dev","code","github"], weight:0.9 },
+      { name:"GitLab", url:"https://gitlab.com/search?search={q}", tags:["dev","code"], weight:0.85 },
+      { name:"Stack Overflow", url:"https://stackoverflow.com/search?q={q}", tags:["dev","questions"], weight:0.88 },
+      { name:"MDN Web Docs", url:"https://developer.mozilla.org/fr/search?q={q}", tags:["dev","docs"], weight:0.86 },
+      { name:"W3Schools", url:"https://w3schools.com/search/search_results.asp?query={q}", tags:["dev","tuto"], weight:0.8 },
+      { name:"CodePen", url:"https://codepen.io/search/pens?q={q}", tags:["dev","sandbox"], weight:0.8 },
+      { name:"Replit", url:"https://replit.com/search?q={q}", tags:["dev","sandbox"], weight:0.8 },
 
-      // Scratch / éducation
-      { name: "Scratch", url: "https://scratch.mit.edu/search/projects?q={q}", tags: ["scratch","education","code"], weight: 0.87, favicon: "https://scratch.mit.edu/favicon.ico" },
+      /* Images / ressources créatives */
+      { name:"Pixabay", url:"https://pixabay.com/images/search/{q}/", tags:["images","photos"], weight:0.88 },
+      { name:"Unsplash", url:"https://unsplash.com/s/photos/{q}", tags:["images","photos"], weight:0.88 },
+      { name:"Pexels", url:"https://pexels.com/search/{q}/", tags:["images","photos"], weight:0.86 },
+      { name:"Canva", url:"https://canva.com/templates?q={q}", tags:["design","canva"], weight:0.86 },
+      { name:"Figma", url:"https://figma.com/community/search?resource_type=all&q={q}", tags:["design","figma"], weight:0.86 },
+      { name:"ArtStation", url:"https://artstation.com/search?q={q}", tags:["art"], weight:0.84 },
+      { name:"DeviantArt", url:"https://deviantart.com/search?q={q}", tags:["art"], weight:0.84 },
+      { name:"Pixiv", url:"https://pixiv.net/tags/{q}/artworks", tags:["art","pixiv"], weight:0.84 },
 
-      // Messageries
-      { name: "WhatsApp Web", url: "https://web.whatsapp.com/", tags: ["messaging","whatsapp"], weight: 0.8, favicon: "https://web.whatsapp.com/favicon.ico" },
-      { name: "Telegram Web", url: "https://web.telegram.org/k/", tags: ["messaging","telegram"], weight: 0.8, favicon: "https://telegram.org/img/t_logo.svg" },
-      { name: "Discord", url: "https://discord.com/channels/@me", tags: ["messaging","discord"], weight: 0.82, favicon: "https://discord.com/assets/847541504914fd7fdd5c2e496cde50b9.ico" },
+      /* Shopping */
+      { name:"Amazon", url:"https://amazon.com/s?k={q}", tags:["shopping","amazon"], weight:0.9 },
+      { name:"Amazon FR", url:"https://amazon.fr/s?k={q}", tags:["shopping","amazon"], weight:0.9 },
+      { name:"eBay", url:"https://ebay.com/sch/i.html?_nkw={q}", tags:["shopping","ebay"], weight:0.86 },
+      { name:"AliExpress", url:"https://aliexpress.com/wholesale?SearchText={q}", tags:["shopping","aliexpress"], weight:0.84 },
+      { name:"Cdiscount", url:"https://cdiscount.com/search/10/{q}.html", tags:["shopping","cdiscount"], weight:0.84 },
+      { name:"Fnac", url:"https://fnac.com/SearchResult/ResultList.aspx?Search={q}", tags:["shopping","fnac"], weight:0.86 },
+      { name:"Zalando", url:"https://zalando.com/catalog/?q={q}", tags:["shopping","mode"], weight:0.82 },
 
-      // IA en tout genre
-      { name: "Bing Chat / Copilot", url: "https://copilot.microsoft.com/?q={q}", tags: ["ai","copilot","microsoft"], weight: 0.95, favicon: "https://copilot.microsoft.com/favicon.ico" },
-      { name: "ChatGPT", url: "https://chat.openai.com/", tags: ["ai","chatgpt"], weight: 0.9, favicon: "https://chat.openai.com/favicon.ico" },
-      { name: "Claude", url: "https://claude.ai/", tags: ["ai","claude"], weight: 0.85, favicon: "https://claude.ai/favicon.ico" },
+      /* Éducation / MOOC */
+      { name:"Coursera", url:"https://coursera.org/search?query={q}", tags:["education","mooc"], weight:0.86 },
+      { name:"Udemy", url:"https://udemy.com/courses/search/?q={q}", tags:["education","mooc"], weight:0.84 },
+      { name:"edX", url:"https://edx.org/search?q={q}", tags:["education","mooc"], weight:0.84 },
+      { name:"Khan Academy", url:"https://khanacademy.org/search?page_search_query={q}", tags:["education"], weight:0.84 },
+      { name:"OpenClassrooms", url:"https://openclassrooms.com/fr/search?q={q}", tags:["education"], weight:0.84 },
 
-      // Général
-      { name: "Bing", url: "https://www.bing.com/search?q={q}", tags: ["search","general","bing"], weight: 0.8, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" }
+      /* Outils divers (PDF, conversion, etc.) */
+      { name:"ILovePDF", url:"https://ilovepdf.com/fr", tags:["pdf","tools"], weight:0.8 },
+      { name:"SmallPDF", url:"https://smallpdf.com/fr", tags:["pdf","tools"], weight:0.8 },
+      { name:"CloudConvert", url:"https://cloudconvert.com", tags:["convert","tools"], weight:0.8 },
+      { name:"TinyPNG", url:"https://tinypng.com", tags:["images","compress"], weight:0.8 },
 
-      // → ici, dans ton vrai projet, tu peux continuer à ajouter des centaines d’entrées
-      //   (autres IA, autres sites de shopping, forums, docs, services, etc.)
-      //   pour atteindre 1000+ sites dans SITES_DB.
+      /* Productivité / notes / tâches */
+      { name:"Notion", url:"https://notion.so", tags:["notes","productivity"], weight:0.86 },
+      { name:"Obsidian", url:"https://obsidian.md", tags:["notes"], weight:0.84 },
+      { name:"Evernote", url:"https://evernote.com", tags:["notes"], weight:0.8 },
+      { name:"OneNote", url:"https://onenote.com", tags:["notes","microsoft"], weight:0.82 },
+      { name:"Todoist", url:"https://todoist.com", tags:["tasks"], weight:0.8 },
+      { name:"TickTick", url:"https://ticktick.com", tags:["tasks"], weight:0.8 },
+      { name:"Clockify", url:"https://clockify.me", tags:["time","tracking"], weight:0.8 },
+
+      /* Finance / paiement */
+      { name:"PayPal", url:"https://paypal.com", tags:["payment"], weight:0.86 },
+      { name:"Stripe", url:"https://stripe.com", tags:["payment"], weight:0.84 },
+      { name:"Revolut", url:"https://revolut.com", tags:["bank"], weight:0.82 },
+      { name:"Wise", url:"https://wise.com", tags:["bank"], weight:0.82 },
+      { name:"Binance", url:"https://binance.com", tags:["crypto"], weight:0.82 },
+      { name:"Coinbase", url:"https://coinbase.com", tags:["crypto"], weight:0.82 },
+
+      /* Général / recherche */
+      { name:"Bing", url:"https://bing.com/search?q={q}", tags:["search","general"], weight:0.8 },
+      { name:"Google", url:"https://google.com/search?q={q}", tags:["search","general"], weight:0.8 },
+      { name:"Wikipedia", url:"https://wikipedia.org/wiki/Special:Search?search={q}", tags:["info","wiki"], weight:0.82 }
+
+      /* … (dans ton projet, tu peux continuer à étendre cette liste pour atteindre 1000+ sites) */
     ];
 
     function detectQueryType(q) {
       const t = normalizeText(q);
-      const isWord = t.includes("word");
-      const isMicrosoft = t.includes("microsoft") || t.includes("windows") || t.includes("office");
-      const isCopilot = t.includes("copilot");
-      const isAmazon = t.includes("amazon");
-      const isNetflix = t.includes("netflix");
-      const isYoutube = t.includes("youtube");
-      const isDev = t.includes("github") || t.includes("code") || t.includes("dev") || t.includes("programmation") || t.includes("scratch");
-      const isImages = t.includes("image") || t.includes("photo") || t.includes("pixabay");
-      const isMessaging = t.includes("whatsapp") || t.includes("telegram") || t.includes("discord");
-      const isAI = t.includes("ia") || t.includes("ai") || t.includes("copilot") || t.includes("chatgpt") || t.includes("claude");
-      return { isWord, isMicrosoft, isCopilot, isAmazon, isNetflix, isYoutube, isDev, isImages, isMessaging, isAI };
+      return {
+        isWord: t.includes("word"),
+        isMicrosoft: t.includes("microsoft") || t.includes("windows") || t.includes("office"),
+        isCopilot: t.includes("copilot"),
+        isAmazon: t.includes("amazon"),
+        isNetflix: t.includes("netflix"),
+        isYoutube: t.includes("youtube"),
+        isDev: t.includes("github") || t.includes("code") || t.includes("dev") || t.includes("programmation") || t.includes("scratch"),
+        isImages: t.includes("image") || t.includes("photo") || t.includes("pixabay") || t.includes("unsplash"),
+        isMessaging: t.includes("whatsapp") || t.includes("telegram") || t.includes("discord"),
+        isAI: t.includes("ia") || t.includes("ai") || t.includes("chatgpt") || t.includes("claude") || t.includes("copilot") || t.includes("perplexity"),
+        isShopping: t.includes("amazon") || t.includes("fnac") || t.includes("cdiscount") || t.includes("zalando") || t.includes("aliexpress")
+      };
     }
 
     function isSiteRelevant(site, q, typeInfo, correctedQ) {
       const t = normalizeText(correctedQ);
       const nameNorm = normalizeText(site.name);
       const tags = site.tags || [];
+      const directMatch = nameNorm.includes(t) || t.includes(nameNorm) || tags.some(tag => t.includes(tag));
 
-      const directMatch =
-        nameNorm.includes(t) ||
-        t.includes(nameNorm) ||
-        tags.some(tag => t.includes(tag));
-
-      if (typeInfo.isWord) {
-        return tags.includes("word") || tags.includes("office") || tags.includes("microsoft");
-      }
-      if (typeInfo.isMicrosoft) {
-        return tags.includes("microsoft") || tags.includes("office") || tags.includes("windows") || tags.includes("word") || tags.includes("copilot");
-      }
-      if (typeInfo.isCopilot || typeInfo.isAI) {
-        return tags.includes("copilot") || tags.includes("ai") || tags.includes("chatgpt") || tags.includes("claude") || tags.includes("microsoft");
-      }
-      if (typeInfo.isAmazon) {
-        return tags.includes("amazon") || tags.includes("shopping");
-      }
-      if (typeInfo.isNetflix) {
-        return tags.includes("netflix") || tags.includes("video") || tags.includes("streaming");
-      }
-      if (typeInfo.isYoutube) {
-        return tags.includes("youtube") || tags.includes("video") || tags.includes("music");
-      }
-      if (typeInfo.isDev) {
-        return tags.includes("dev") || tags.includes("docs") || tags.includes("questions") || tags.includes("scratch");
-      }
-      if (typeInfo.isImages) {
-        return tags.includes("images") || tags.includes("photos") || tags.includes("pixabay");
-      }
-      if (typeInfo.isMessaging) {
-        return tags.includes("messaging") || tags.includes("whatsapp") || tags.includes("telegram") || tags.includes("discord");
-      }
-
+      if (typeInfo.isWord) return tags.includes("word") || tags.includes("office") || tags.includes("microsoft");
+      if (typeInfo.isMicrosoft) return tags.includes("microsoft") || tags.includes("office") || tags.includes("windows") || tags.includes("word") || tags.includes("copilot");
+      if (typeInfo.isCopilot || typeInfo.isAI) return tags.includes("copilot") || tags.includes("ai") || tags.includes("chatgpt") || tags.includes("claude") || tags.includes("perplexity") || tags.includes("microsoft");
+      if (typeInfo.isAmazon || typeInfo.isShopping) return tags.includes("amazon") || tags.includes("shopping");
+      if (typeInfo.isNetflix) return tags.includes("netflix") || tags.includes("video") || tags.includes("streaming");
+      if (typeInfo.isYoutube) return tags.includes("youtube") || tags.includes("video") || tags.includes("music");
+      if (typeInfo.isDev) return tags.includes("dev") || tags.includes("docs") || tags.includes("questions") || tags.includes("scratch") || tags.includes("code");
+      if (typeInfo.isImages) return tags.includes("images") || tags.includes("photos") || tags.includes("pixabay") || tags.includes("unsplash");
+      if (typeInfo.isMessaging) return tags.includes("messaging") || tags.includes("whatsapp") || tags.includes("telegram") || tags.includes("discord");
       return directMatch;
     }
 
     function buildResultsForQuery(q) {
       const { normalized: correctedQ } = advancedNormalizeQuery(q);
       const typeInfo = detectQueryType(correctedQ);
-
       const relevant = SITES_DB.filter(site => isSiteRelevant(site, q, typeInfo, correctedQ));
-
       const scored = relevant.map(site => {
         const t = normalizeText(correctedQ);
         let score = site.weight || 0.5;
@@ -926,9 +799,7 @@
         if (nameNorm.includes(t) || t.includes(nameNorm)) score += 0.3;
         return { site, score };
       });
-
-      scored.sort((a, b) => b.score - a.score);
-
+      scored.sort((a,b) => b.score - a.score);
       return {
         typeInfo,
         correctedQ,
@@ -938,8 +809,7 @@
             name: entry.site.name,
             url,
             tags: entry.site.tags,
-            score: entry.score,
-            favicon: entry.site.favicon
+            score: entry.score
           };
         })
       };
@@ -947,40 +817,36 @@
 
     function buildActionButtons(q, typeInfo, correctedQ) {
       const buttons = [];
-      buttons.push({ label: "Voir sur Bing", url: "https://www.bing.com/search?q=" + encodeURIComponent(correctedQ) });
-
+      buttons.push({ label:"Voir sur Bing", url:"https://bing.com/search?q="+encodeURIComponent(correctedQ) });
       if (typeInfo.isMicrosoft || typeInfo.isWord || typeInfo.isCopilot || typeInfo.isAI) {
-        buttons.push({ label: "Microsoft", url: "https://www.microsoft.com/search?q=" + encodeURIComponent(correctedQ) });
-        buttons.push({ label: "Copilot", url: "https://copilot.microsoft.com/?q=" + encodeURIComponent(correctedQ) });
+        buttons.push({ label:"Microsoft", url:"https://microsoft.com/search?q="+encodeURIComponent(correctedQ) });
+        buttons.push({ label:"Copilot", url:"https://copilot.microsoft.com/?q="+encodeURIComponent(correctedQ) });
       }
-      if (typeInfo.isAmazon) {
-        buttons.push({ label: "Amazon", url: "https://www.amazon.fr/s?k=" + encodeURIComponent(correctedQ) });
-      }
-      if (typeInfo.isNetflix) {
-        buttons.push({ label: "Netflix", url: "https://www.netflix.com/search?q=" + encodeURIComponent(correctedQ) });
-      }
-      if (typeInfo.isYoutube) {
-        buttons.push({ label: "YouTube", url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(correctedQ) });
-      }
+      if (typeInfo.isAmazon || typeInfo.isShopping) buttons.push({ label:"Amazon", url:"https://amazon.fr/s?k="+encodeURIComponent(correctedQ) });
+      if (typeInfo.isNetflix) buttons.push({ label:"Netflix", url:"https://netflix.com/search?q="+encodeURIComponent(correctedQ) });
+      if (typeInfo.isYoutube) buttons.push({ label:"YouTube", url:"https://youtube.com/results?search_query="+encodeURIComponent(correctedQ) });
       if (typeInfo.isDev) {
-        buttons.push({ label: "GitHub", url: "https://github.com/search?q=" + encodeURIComponent(correctedQ) });
-        buttons.push({ label: "Stack Overflow", url: "https://stackoverflow.com/search?q=" + encodeURIComponent(correctedQ) });
+        buttons.push({ label:"GitHub", url:"https://github.com/search?q="+encodeURIComponent(correctedQ) });
+        buttons.push({ label:"Stack Overflow", url:"https://stackoverflow.com/search?q="+encodeURIComponent(correctedQ) });
       }
-      if (typeInfo.isImages) {
-        buttons.push({ label: "Pixabay", url: "https://pixabay.com/images/search/" + encodeURIComponent(correctedQ) + "/" });
-      }
+      if (typeInfo.isImages) buttons.push({ label:"Pixabay", url:"https://pixabay.com/images/search/"+encodeURIComponent(correctedQ)+"/" });
       if (typeInfo.isMessaging) {
-        buttons.push({ label: "WhatsApp Web", url: "https://web.whatsapp.com/" });
-        buttons.push({ label: "Telegram Web", url: "https://web.telegram.org/k/" });
-        buttons.push({ label: "Discord", url: "https://discord.com/channels/@me" });
+        buttons.push({ label:"WhatsApp Web", url:"https://web.whatsapp.com/" });
+        buttons.push({ label:"Telegram Web", url:"https://web.telegram.org/k/" });
+        buttons.push({ label:"Discord", url:"https://discord.com/channels/@me" });
       }
-
       return buttons;
     }
 
-    // =========================
-    // 5) Intégration UI
-    // =========================
+    function getFaviconUrl(siteUrl) {
+      try {
+        const u = new URL(siteUrl);
+        return "https://www.google.com/s2/favicons?domain="+encodeURIComponent(u.hostname)+"&sz=32";
+      } catch {
+        return "https://www.google.com/s2/favicons?domain="+encodeURIComponent(siteUrl)+"&sz=32";
+      }
+    }
+
     function appendNexAIMsg(text, from) {
       const log = document.getElementById("nexai-log");
       const div = document.createElement("div");
@@ -990,15 +856,24 @@
       log.scrollTop = log.scrollHeight;
     }
 
+    function updateTitle(correctedQ) {
+      if (correctedQ && correctedQ.trim()) {
+        document.title = correctedQ + " - Recherche IA NexSearch";
+      } else {
+        document.title = "Recherche IA NexSearch";
+      }
+    }
+
     function runNexSearch(q) {
       if (!q.trim()) return;
-
       const calcRes = tryCalcExpression(q);
       const { typeInfo, correctedQ, results } = buildResultsForQuery(q);
       const actions = buildActionButtons(q, typeInfo, correctedQ);
 
       NEXAI_MEMORY.lastQuery = correctedQ;
       NEXAI_MEMORY.lastType = typeInfo;
+
+      updateTitle(correctedQ);
 
       const metaDiv = document.getElementById("results-meta");
       metaDiv.textContent = `Requête : "${q}"` + (correctedQ !== q ? ` → corrigée en : "${correctedQ}"` : "");
@@ -1018,21 +893,6 @@
         const item = document.createElement("div");
         item.className = "result-item";
 
-        const fav = document.createElement("div");
-        fav.className = "result-favicon";
-        if (r.favicon) {
-          const img = document.createElement("img");
-          img.src = r.favicon;
-          img.alt = r.name;
-          img.onerror = () => {
-            img.style.display = "none";
-            fav.textContent = r.name[0] || "?";
-          };
-          fav.appendChild(img);
-        } else {
-          fav.textContent = r.name[0] || "?";
-        }
-
         const content = document.createElement("div");
         content.className = "result-content";
 
@@ -1046,16 +906,23 @@
 
         const tags = document.createElement("div");
         tags.className = "result-item-tags";
-        tags.textContent = "Tags : " + r.tags.join(", ");
+        tags.textContent = "Tags : " + (r.tags || []).join(", ");
 
         content.appendChild(title);
         content.appendChild(url);
         content.appendChild(tags);
 
-        item.appendChild(fav);
-        item.appendChild(content);
-        linkWrapper.appendChild(item);
+        const fav = document.createElement("div");
+        fav.className = "result-favicon";
+        const img = document.createElement("img");
+        img.src = getFaviconUrl(r.url);
+        img.alt = r.name;
+        img.onerror = () => { img.style.display = "none"; fav.textContent = r.name[0] || "?"; };
+        fav.appendChild(img);
 
+        item.appendChild(content);
+        item.appendChild(fav);
+        linkWrapper.appendChild(item);
         listDiv.appendChild(linkWrapper);
       });
 
@@ -1080,14 +947,12 @@
       const nexaiSend = document.getElementById("nexai-send");
       const homeTop = document.getElementById("home-link-top");
       const homeBottom = document.getElementById("home-link-bottom");
-      const nexaiPanel = document.getElementById("nexai-panel");
+      const nexaiWrapper = document.getElementById("nexai-wrapper");
       const nexaiToggleBtn = document.getElementById("nexai-toggle-btn");
       const nexaiCloseBtn = document.getElementById("nexai-close-btn");
+      const mainLayout = document.getElementById("main-layout");
 
-      const goHome = () => {
-        window.location.href = "./index.html";
-      };
-
+      const goHome = () => { window.location.href = "./index.html"; };
       homeTop.onclick = goHome;
       homeBottom.onclick = goHome;
 
@@ -1096,9 +961,7 @@
         if (!q) return;
         runNexSearch(q);
       };
-      searchInput.onkeydown = e => {
-        if (e.key === "Enter") searchBtn.click();
-      };
+      searchInput.onkeydown = e => { if (e.key === "Enter") searchBtn.click(); };
 
       nexaiSend.onclick = async () => {
         const msg = nexaiInput.value.trim();
@@ -1108,15 +971,15 @@
         const reply = await nexaiChatReply(msg);
         appendNexAIMsg(reply, "ai");
       };
-      nexaiInput.onkeydown = e => {
-        if (e.key === "Enter") nexaiSend.click();
-      };
+      nexaiInput.onkeydown = e => { if (e.key === "Enter") nexaiSend.click(); };
 
       nexaiToggleBtn.onclick = () => {
-        nexaiPanel.classList.add("open");
+        nexaiWrapper.style.display = "block";
+        mainLayout.style.gridTemplateColumns = "minmax(0, 1.6fr) minmax(0, 0.9fr)";
       };
       nexaiCloseBtn.onclick = () => {
-        nexaiPanel.classList.remove("open");
+        nexaiWrapper.style.display = "none";
+        mainLayout.style.gridTemplateColumns = "minmax(0, 1fr)";
       };
 
       document.getElementById("nexai-summary").textContent =
@@ -1127,6 +990,8 @@
       if (qParam) {
         searchInput.value = qParam;
         runNexSearch(qParam);
+      } else {
+        updateTitle("");
       }
     }
 

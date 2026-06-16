@@ -6,76 +6,64 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-/* RESET */
 *{margin:0;padding:0;box-sizing:border-box}
 
-/* VARIABLES */
 :root{
   --bg:#000000;
-  --panel:#050608;
-  --panel-soft:#0b0e12;
+  --block:#050608;
+  --block-soft:#0b0e12;
   --accent:#0078d4;
   --accent-soft:rgba(0,120,212,0.25);
-  --text:#b0b4bd;
-  --text-muted:#70747c;
-  --radius:18px;
-  --shadow:0 18px 40px rgba(0,0,0,0.85);
-  --font:"Courier New",monospace;
+  --text:#a0a4ad;
+  --text-muted:#6b6f78;
+  --shadow:0 18px 40px rgba(0,0,0,0.9);
+  --font:"Courier New","Lucida Console",monospace;
 }
 
-/* GLOBAL */
 html,body{
   height:100%;
   background:var(--bg);
   color:var(--text);
   font-family:var(--font);
-  font-size:10px; /* minuscule */
-  overflow-x:auto;
+  font-size:9px;          /* minuscule */
+  overflow-x:auto;        /* on scrolle à droite */
   overflow-y:hidden;
-  white-space:nowrap;
 }
 
-/* WRAPPER HORIZONTAL */
-.track{
+/* bande horizontale */
+.strip{
   display:flex;
   align-items:stretch;
-  height:100vh;
+  min-height:100vh;
   padding:24px 40px;
-  gap:32px;
+  gap:28px;
 }
 
-/* PANEL */
-.panel{
-  display:inline-block;
-  width:420px;
+/* bloc de texte */
+.block{
+  flex:0 0 420px;
   min-height:calc(100vh - 48px);
   padding:22px 24px;
-  background:linear-gradient(145deg,var(--panel),var(--panel-soft));
-  border-radius:var(--radius);
+  background:linear-gradient(145deg,var(--block),var(--block-soft));
+  border-radius:18px;
   border:1px solid rgba(255,255,255,0.06);
   box-shadow:var(--shadow);
   color:var(--text);
-  overflow:hidden;
   position:relative;
+  overflow:hidden;
+
   opacity:0;
   transform:translateY(40px) scale(0.96);
-  animation:fadeGlow 1s ease forwards;
+  filter:blur(4px);
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s ease,
+    filter 0.7s ease,
+    box-shadow 0.4s ease;
 }
 
-/* stagger */
-.panel:nth-child(1){animation-delay:0.1s}
-.panel:nth-child(2){animation-delay:0.3s}
-.panel:nth-child(3){animation-delay:0.5s}
-.panel:nth-child(4){animation-delay:0.7s}
-.panel:nth-child(5){animation-delay:0.9s}
-.panel:nth-child(6){animation-delay:1.1s}
-.panel:nth-child(7){animation-delay:1.3s}
-.panel:nth-child(8){animation-delay:1.5s}
-.panel:nth-child(9){animation-delay:1.7s}
-.panel:nth-child(10){animation-delay:1.9s}
-
-/* glow background */
-.panel::before{
+/* glow interne */
+.block::before{
   content:"";
   position:absolute;
   inset:-40%;
@@ -87,41 +75,48 @@ html,body{
   pointer-events:none;
 }
 
-/* CONTENT */
-.panel h2{
-  font-size:11px;
+/* état visible (quand dans le viewport) */
+.block.visible{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  filter:blur(0);
+  box-shadow:0 22px 50px rgba(0,0,0,0.95);
+}
+
+.block h2{
+  font-size:10px;
   letter-spacing:0.18em;
   text-transform:uppercase;
   color:var(--accent);
   margin-bottom:10px;
 }
 
-.panel h3{
-  font-size:10px;
-  letter-spacing:0.12em;
+.block h3{
+  font-size:9px;
+  letter-spacing:0.14em;
   text-transform:uppercase;
   color:var(--text-muted);
   margin:10px 0 6px;
 }
 
-.panel p{
-  font-size:9px;
-  line-height:1.5;
+.block p{
+  font-size:8.5px;
+  line-height:1.6;
   color:var(--text);
   margin-bottom:6px;
 }
 
-.panel ul{
+.block ul{
   list-style:none;
   margin:6px 0 8px;
 }
-.panel li{
+.block li{
   position:relative;
   padding-left:10px;
   margin-bottom:4px;
   color:var(--text-muted);
 }
-.panel li::before{
+.block li::before{
   content:"›";
   position:absolute;
   left:0;
@@ -129,22 +124,10 @@ html,body{
   color:var(--accent);
 }
 
-/* ANIMATIONS */
-@keyframes fadeGlow{
-  0%{
-    opacity:0;
-    transform:translateY(40px) scale(0.94);
-    filter:blur(4px);
-  }
-  60%{
-    opacity:1;
-    transform:translateY(0) scale(1.02);
-    filter:blur(0);
-  }
-  100%{
-    opacity:1;
-    transform:translateY(0) scale(1);
-    filter:blur(0);
+/* un peu de largeur totale pour scroller longtemps */
+@media (min-width:800px){
+  .strip{
+    padding-right:2000px; /* rallonge artificielle du ruban */
   }
 }
 </style>
@@ -152,202 +135,219 @@ html,body{
 
 <body>
 
-<div class="track">
+<div class="strip">
 
-  <!-- PANEL 1 -->
-  <section class="panel">
+  <!-- 1 -->
+  <section class="block">
     <h2>PRÉAMBULE – DÉCLARATION DE CONFIDENTIALITÉ NEXSEARCH</h2>
     <p>
-      La présente Déclaration de Confidentialité NexSearch constitue un document explicatif, volontairement exhaustif,
-      relatif aux modalités de traitement, de non‑exploitation et de non‑corrélation des données générées, consultées
-      ou transitant par l’interface NexSearch et ses composants associés, y compris mais sans s’y limiter, les modules
-      de synthèse NexAI, les instances locales de NexAI et les éléments d’infrastructure hébergés via GitHub Pages.
+      La présente Déclaration de Confidentialité NexSearch constitue un exposé volontairement prolixe et
+      terminologiquement dense des modalités de non‑exploitation, de non‑corrélation et de non‑marchandisation
+      des données générées, consultées ou simplement effleurées par l’utilisateur lors de l’usage de NexSearch,
+      de NexAI et de leurs déclinaisons locales.
     </p>
     <p>
-      L’objectif fondamental de ce texte, malgré sa longueur et sa densité terminologique, est de préciser que NexSearch
-      n’a pas vocation à profiler, marchandiser, monétiser ou instrumentaliser les requêtes, contenus ou métadonnées
-      associées à l’usage de la plateforme, et qu’aucune exploitation publicitaire ou comportementale n’est effectuée.
-    </p>
-    <p>
-      Toute référence à des notions telles que « traitement », « persistance », « journalisation » ou « corrélation »
-      doit être comprise dans un cadre strictement technique, sans intention de constitution de base de données
-      nominative ou de système de suivi individualisé.
+      Malgré la longueur délibérément dissuasive de ce texte, l’intention fondamentale demeure singulièrement
+      simple&nbsp;: NexSearch n’a pas vocation à profiler, à monétiser, à marchandiser ou à instrumentaliser
+      vos requêtes, vos contenus ou les métadonnées qui en découlent.
     </p>
   </section>
 
-  <!-- PANEL 2 -->
-  <section class="panel">
+  <!-- 2 -->
+  <section class="block">
     <h2>ARCHITECTURE – HÉBERGEMENT GITHUB PAGES</h2>
     <p>
-      NexSearch est déployé sous la forme d’un site statique, hébergé via l’infrastructure GitHub Pages. Cela implique
-      que la plateforme repose principalement sur des fichiers HTML, CSS et JavaScript, servis tels quels, sans couche
-      applicative serveur personnalisée permettant un traitement actif des requêtes au niveau back‑end.
+      NexSearch est déployé sous la forme d’un ensemble statique de fichiers HTML, CSS et JavaScript, servi
+      via l’infrastructure GitHub Pages. Il n’existe pas, côté NexSearch, de couche applicative serveur
+      personnalisée susceptible de centraliser, d’agréger ou de persister vos requêtes dans une base de données
+      propriétaire.
     </p>
     <p>
-      En pratique, cela signifie que NexSearch ne dispose pas de mécanisme natif de stockage persistant des requêtes
-      utilisateur côté serveur, ni de base de données relationnelle ou documentaire dédiée à la conservation des
-      historiques de recherche, des profils ou des identifiants uniques.
-    </p>
-    <p>
-      Les éventuelles traces techniques générées par GitHub ou par l’infrastructure de distribution de contenu
-      (par exemple des journaux de requêtes HTTP anonymisés) relèvent de la politique propre à GitHub et ne sont
-      ni consultées, ni exploitées, ni recoupées par NexSearch à des fins d’analyse comportementale.
+      Les éventuelles traces techniques (journaux HTTP, métriques d’infrastructure) relèvent de GitHub et ne
+      sont ni consultées, ni recoupées, ni enrichies par NexSearch pour construire un historique nominatif
+      ou un profil comportemental.
     </p>
   </section>
 
-  <!-- PANEL 3 -->
-  <section class="panel">
-    <h2>NEXSEARCH – TRAITEMENT DES REQUÊTES</h2>
+  <!-- 3 -->
+  <section class="block">
+    <h2>TRAITEMENT DES REQUÊTES – MOTEUR NEXSEARCH</h2>
     <p>
-      Lorsqu’un utilisateur saisit une requête dans NexSearch, le traitement de cette requête est effectué de manière
-      essentiellement locale, au sein du navigateur, via des scripts JavaScript et des appels vers des moteurs externes
-      ou des sources d’information publiques, selon la configuration choisie.
+      Lorsqu’une requête est saisie, son traitement est effectué principalement dans le navigateur, au moyen
+      de scripts exécutés localement et, le cas échéant, d’appels vers des moteurs externes ou des sources
+      publiques. NexSearch ne dispose pas d’un mécanisme de captation centralisée des requêtes permettant
+      de les stocker durablement côté serveur.
     </p>
     <p>
-      NexSearch ne met pas en œuvre de mécanisme de captation centralisée des requêtes, ne les enregistre pas dans une
-      base de données propriétaire et ne les associe pas à un identifiant nominatif ou à un profil utilisateur persistant.
-    </p>
-    <p>
-      Les requêtes sont utilisées uniquement pour produire une page de résultats à l’instant T, sans réutilisation
-      ultérieure par NexSearch pour du ciblage, du suivi ou de la personnalisation intrusive.
+      Les requêtes sont utilisées pour produire une page de résultats à l’instant où elles sont émises, puis
+      cessent d’avoir une existence significative pour NexSearch dès que la session est close ou que la page
+      est rechargée.
     </p>
   </section>
 
-  <!-- PANEL 4 -->
-  <section class="panel">
+  <!-- 4 -->
+  <section class="block">
     <h2>NEXAI – RÉSUMÉ INTELLIGENT</h2>
     <p>
-      Le module NexAI de résumé intelligent a pour fonction de synthétiser le contenu des résultats affichés afin de
-      proposer une vue d’ensemble plus compacte. Cette synthèse repose sur des algorithmes d’analyse textuelle et
-      de structuration de l’information, pouvant être exécutés localement ou via des services d’IA externes selon
-      la configuration technique retenue.
+      NexAI a pour fonction de synthétiser le contenu des résultats affichés afin de proposer une vue
+      d’ensemble plus compacte. Cette synthèse repose sur des algorithmes d’analyse textuelle et de
+      structuration de l’information, pouvant être exécutés localement ou via un service d’IA externe,
+      selon la configuration.
     </p>
     <p>
-      Dans le cadre d’un fonctionnement local, les données utilisées pour la synthèse ne quittent pas l’appareil
-      de l’utilisateur. Elles sont traitées en mémoire, puis évacuées lorsque la page est fermée ou rechargée, sans
-      persistance volontaire dans un stockage durable géré par NexSearch.
-    </p>
-    <p>
-      Dans le cadre d’un fonctionnement connecté à un service d’IA externe, les données envoyées sont limitées au
-      strict nécessaire pour produire le résumé, et ne sont pas exploitées par NexSearch pour constituer un profil
-      ou un historique centralisé des requêtes.
+      Dans le cas d’un fonctionnement local, les données utilisées pour la synthèse ne quittent pas
+      l’appareil de l’utilisateur&nbsp;: elles sont traitées en mémoire, puis évacuées sans persistance
+      volontaire dans un stockage durable contrôlé par NexSearch.
     </p>
   </section>
 
-  <!-- PANEL 5 -->
-  <section class="panel">
+  <!-- 5 -->
+  <section class="block">
     <h2>NEXAI LOCAL – TRAITEMENT SUR L’APPAREIL</h2>
     <p>
-      NexAI local désigne les capacités d’analyse et de synthèse exécutées directement sur l’appareil de l’utilisateur,
-      sans transmission systématique des contenus vers un service distant. Ce mode de fonctionnement repose sur des
-      bibliothèques et des modèles pouvant être chargés dans le navigateur ou dans l’environnement local.
+      NexAI local désigne les capacités d’analyse et de synthèse exécutées directement sur l’appareil
+      de l’utilisateur. Les requêtes, extraits de résultats et fragments textuels manipulés dans ce cadre
+      ne sont pas, par défaut, envoyés vers un serveur NexSearch pour archivage ou exploitation.
     </p>
     <p>
-      Dans ce contexte, les données manipulées (requêtes, extraits de résultats, textes affichés) sont traitées
-      en mémoire vive et ne sont pas, par défaut, enregistrées dans un fichier journal, une base de données ou
-      un espace de stockage persistant contrôlé par NexSearch.
-    </p>
-    <p>
-      L’utilisateur conserve ainsi une maîtrise accrue sur la surface d’exposition de ses données, celles‑ci n’étant
-      pas systématiquement envoyées vers un tiers pour analyse ou stockage.
+      Ce mode de fonctionnement réduit la surface d’exposition des données et privilégie un traitement
+      circonscrit à l’environnement local, sous le contrôle du navigateur et du système de l’utilisateur.
     </p>
   </section>
 
-  <!-- PANEL 6 -->
-  <section class="panel">
+  <!-- 6 -->
+  <section class="block">
     <h2>ABSENCE D’EXPLOITATION COMMERCIALE</h2>
     <p>
-      NexSearch n’est pas conçu comme une plateforme de monétisation des requêtes. Aucune logique de ciblage
-      publicitaire, de revente de données, de constitution de segments marketing ou de profilage comportemental
-      n’est mise en œuvre par la plateforme.
+      NexSearch n’est pas conçu comme une plateforme de monétisation des requêtes. Aucune logique de
+      ciblage publicitaire, de revente de données, de constitution de segments marketing ou de profilage
+      comportemental n’est mise en œuvre.
     </p>
     <p>
-      Les requêtes saisies ne sont pas utilisées pour afficher des annonces personnalisées, pour adapter des contenus
-      sponsorisés ou pour alimenter des systèmes de recommandation à vocation commerciale.
-    </p>
-    <p>
-      Toute utilisation des données se limite à la production de résultats de recherche et, le cas échéant, à la
-      génération de résumés ou d’analyses strictement techniques, sans finalité marchande.
+      Les requêtes ne servent ni à afficher des annonces personnalisées, ni à alimenter des systèmes
+      de recommandation à vocation commerciale. Elles ne sont pas revendues à des tiers.
     </p>
   </section>
 
-  <!-- PANEL 7 -->
-  <section class="panel">
+  <!-- 7 -->
+  <section class="block">
     <h2>JOURNALISATION TECHNIQUE ET MÉTADONNÉES</h2>
     <p>
-      Comme toute plateforme accessible via HTTP(S), NexSearch peut être indirectement associé à des journaux
-      techniques générés par l’infrastructure d’hébergement (GitHub Pages, CDN, etc.). Ces journaux peuvent contenir
-      des informations telles que l’adresse IP, l’agent utilisateur, l’horodatage et l’URL demandée.
+      Comme tout site accessible via HTTP(S), l’hébergement GitHub Pages peut générer des journaux
+      techniques contenant des informations telles que l’adresse IP, l’agent utilisateur, l’horodatage
+      ou l’URL demandée. Ces journaux relèvent de la politique de GitHub.
     </p>
     <p>
-      Ces éléments relèvent de la politique de l’hébergeur et ne sont pas exploités par NexSearch pour construire
-      des profils individuels, des historiques nominaux ou des corrélations comportementales.
-    </p>
-    <p>
-      NexSearch ne met pas en place de mécanisme supplémentaire de journalisation applicative visant à enrichir
-      ces données ou à les recouper avec des identifiants internes.
+      NexSearch ne met pas en place de couche supplémentaire visant à enrichir ces journaux, à les
+      corréler avec des identifiants internes ou à les exploiter pour construire des profils individuels.
     </p>
   </section>
 
-  <!-- PANEL 8 -->
-  <section class="panel">
-    <h2>COOKIES, STOCKAGE LOCAL ET ÉLÉMENTS SIMILAIRES</h2>
+  <!-- 8 -->
+  <section class="block">
+    <h2>COOKIES, STOCKAGE LOCAL ET ÉQUIVALENTS</h2>
     <p>
-      NexSearch peut utiliser des mécanismes de stockage local (localStorage, sessionStorage) ou des cookies
-      strictement techniques afin de mémoriser des préférences d’affichage, des paramètres de langue ou des
-      options de configuration de l’interface.
+      NexSearch peut recourir à des mécanismes de stockage local (localStorage, sessionStorage) ou à
+      des cookies strictement techniques pour mémoriser des préférences d’affichage, des paramètres
+      de langue ou des options d’interface.
     </p>
     <p>
-      Ces éléments ne sont pas utilisés pour suivre l’utilisateur sur d’autres sites, pour construire un profil
-      marketing ou pour alimenter des systèmes de publicité ciblée.
-    </p>
-    <p>
-      L’utilisateur peut, à tout moment, effacer ces données via les paramètres de son navigateur, sans que cela
-      n’affecte de manière irréversible l’accès à NexSearch.
+      Ces éléments ne sont pas utilisés pour suivre l’utilisateur sur d’autres sites, ni pour alimenter
+      des systèmes de publicité ciblée. Ils peuvent être effacés à tout moment via les paramètres du
+      navigateur.
     </p>
   </section>
 
-  <!-- PANEL 9 -->
-  <section class="panel">
-    <h2>PORTÉE, LIMITES ET INTERPRÉTATION</h2>
+  <!-- 9 -->
+  <section class="block">
+    <h2>PORTÉE ET LIMITES</h2>
     <p>
-      La présente Déclaration de Confidentialité NexSearch doit être comprise comme une description de l’intention
-      et de la conception de la plateforme, telle qu’elle est déployée via GitHub Pages et utilisée dans un contexte
-      standard de navigation.
+      La présente Déclaration décrit l’intention et la conception de NexSearch tel qu’il est déployé
+      via GitHub Pages. Elle ne couvre pas les politiques propres aux navigateurs, systèmes d’exploitation
+      ou fournisseurs d’accès, qui peuvent disposer de leurs propres mécanismes de collecte.
     </p>
     <p>
-      Elle ne prétend pas couvrir de manière exhaustive toutes les politiques éventuellement appliquées par les
-      fournisseurs d’infrastructure, les navigateurs ou les systèmes d’exploitation, lesquels peuvent disposer de
-      leurs propres mécanismes de collecte et de traitement des données.
-    </p>
-    <p>
-      NexSearch s’engage néanmoins à ne pas ajouter de couche applicative visant à exploiter les données au‑delà
+      NexSearch s’engage à ne pas ajouter de couche applicative visant à exploiter les données au‑delà
       de ce qui est nécessaire au fonctionnement de la recherche et des modules NexAI.
     </p>
   </section>
 
-  <!-- PANEL 10 -->
-  <section class="panel">
+  <!-- 10 -->
+  <section class="block">
     <h2>RÉSUMÉ SYNTHÉTIQUE</h2>
     <p>
-      En dépit de la longueur et de la complexité apparente de ce document, le principe fondamental est le suivant&nbsp;:
-      NexSearch n’exploite pas vos données à des fins commerciales, ne cherche pas à vous profiler, ne conserve pas
-      vos requêtes dans une base de données propriétaire et privilégie, lorsque cela est possible, un traitement
-      local via NexAI.
+      En résumé, malgré la longueur volontairement dissuasive de ce document&nbsp;: NexSearch n’exploite
+      pas vos données à des fins commerciales, ne cherche pas à vous profiler, ne conserve pas vos requêtes
+      dans une base propriétaire et privilégie, lorsque c’est possible, un traitement local via NexAI.
     </p>
     <p>
-      La plateforme est hébergée sous forme statique via GitHub Pages, sans serveur applicatif dédié à la collecte
-      des historiques de recherche. Les éventuelles traces techniques relèvent de l’infrastructure d’hébergement
+      La plateforme est hébergée sous forme statique via GitHub Pages, sans serveur applicatif dédié à la
+      collecte des historiques de recherche. Les traces techniques relèvent de l’infrastructure d’hébergement
       et ne sont pas recoupées par NexSearch pour construire des profils.
     </p>
+  </section>
+
+  <!-- 11+ : blocs de remplissage pour la longueur -->
+  <section class="block">
+    <h2>DISPOSITIONS COMPLÉMENTAIRES</h2>
     <p>
-      En utilisant NexSearch, vous bénéficiez d’un moteur de recherche et de modules d’IA conçus pour fonctionner
-      avec un minimum de collecte et de persistance de données, dans une logique de sobriété et de respect de la
-      confidentialité.
+      Toute interprétation extensive de cette Déclaration visant à supposer une exploitation cachée,
+      détournée ou implicite des données par NexSearch serait contraire à l’intention explicite de
+      conception&nbsp;: limiter la collecte, réduire la persistance et privilégier le local.
+    </p>
+    <p>
+      La redondance apparente de certaines formulations est volontaire, afin de réaffirmer, sous des
+      angles légèrement différents, l’absence de finalité publicitaire ou de profilage.
+    </p>
+  </section>
+
+  <section class="block">
+    <h2>RÉITÉRATION DU CARACTÈRE LOCAL</h2>
+    <p>
+      Chaque fois que NexAI peut fonctionner localement, cette option est privilégiée. Les données
+      restent alors confinées à l’appareil de l’utilisateur, sous le contrôle de son navigateur et
+      de son système, sans transit systématique vers un serveur NexSearch.
+    </p>
+    <p>
+      Cette approche n’implique pas l’absence totale de communication réseau, mais exclut la mise
+      en place d’un entrepôt centralisé de requêtes géré par NexSearch.
+    </p>
+  </section>
+
+  <section class="block">
+    <h2>CONCLUSION FORMELLE</h2>
+    <p>
+      En utilisant NexSearch, vous interagissez avec un moteur de recherche et des modules d’IA qui
+      ont été conçus pour fonctionner avec un minimum de collecte et de persistance de données, dans
+      une logique de sobriété, de transparence et de respect de la confidentialité.
+    </p>
+    <p>
+      Si ce texte vous semble inutilement long, c’est précisément pour que personne ne puisse dire
+      qu’il n’était pas possible de vérifier que NexSearch n’a pas pour objectif d’exploiter vos
+      données personnelles.
     </p>
   </section>
 
 </div>
+
+<script>
+// effet fade+glow quand un bloc entre dans le viewport
+const blocks = document.querySelectorAll('.block');
+
+function updateVisibility(){
+  const vw = window.innerWidth;
+  blocks.forEach(b=>{
+    const rect = b.getBoundingClientRect();
+    const center = rect.left + rect.width/2;
+    const visible = center > -100 && center < vw + 100;
+    if(visible) b.classList.add('visible');
+  });
+}
+
+window.addEventListener('scroll', updateVisibility, {passive:true});
+window.addEventListener('resize', updateVisibility);
+window.addEventListener('load', updateVisibility);
+</script>
 
 </body>
 </html>

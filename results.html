@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
-      --bg-main: #02040a;
-      --bg-panel: #050816;
-      --border-panel: #111827;
+      --bg-main: #020617;
+      --bg-panel: rgba(15,23,42,0.85);
+      --border-panel: rgba(30,64,175,0.35);
       --accent: #2563eb;
       --accent-soft: #1d4ed8;
       --text-main: #e5e7eb;
@@ -23,7 +23,8 @@
     body {
       margin: 0;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #020617;
+      background:
+        radial-gradient(circle at top, #0b1120 0, #020617 40%, #000 100%);
       color: var(--text-main);
       overflow-x: hidden;
     }
@@ -34,14 +35,19 @@
       flex-direction: column;
     }
 
-    /* Top bar */
+    /* Top bar – Bing-like */
     .top-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 8px 14px;
-      background: #020617;
-      border-bottom: 1px solid #111827;
+      padding: 10px 18px;
+      background: rgba(15,23,42,0.9);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(30,64,175,0.4);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
 
     .top-left {
@@ -52,11 +58,11 @@
     }
 
     .logo-main {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8 60%, #020617 100%);
-      box-shadow: 0 0 14px rgba(37,99,235,0.9);
+      box-shadow: 0 0 18px rgba(37,99,235,0.9);
       position: relative;
     }
 
@@ -66,11 +72,11 @@
       inset: 4px;
       border-radius: 50%;
       border: 1px solid rgba(15,23,42,0.9);
-      box-shadow: inset 0 0 8px rgba(15,23,42,0.9);
+      box-shadow: inset 0 0 10px rgba(15,23,42,0.9);
     }
 
     .logo-text {
-      font-weight: 700;
+      font-weight: 600;
       font-size: 1rem;
       letter-spacing: 0.04em;
     }
@@ -82,55 +88,57 @@
     }
 
     .nexai-toggle {
-      padding: 5px 10px;
-      border-radius: 6px;
-      border: 1px solid #1f2937;
-      background: #020617;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(30,64,175,0.6);
+      background: rgba(15,23,42,0.9);
       color: var(--text-main);
       font-size: 0.8rem;
       cursor: pointer;
     }
 
     .nexai-toggle:hover {
-      background: #0b1120;
-      border-color: var(--accent);
+      background: rgba(30,64,175,0.9);
+      border-color: rgba(59,130,246,0.9);
     }
 
     /* Layout principal */
     .main-layout {
       flex: 1;
       display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
-      gap: 10px;
-      padding: 10px 14px 80px 14px;
+      grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px 18px 90px 18px;
       position: relative;
     }
 
     .panel {
       background: var(--bg-panel);
       border: 1px solid var(--border-panel);
-      border-radius: 8px;
-      padding: 8px;
+      border-radius: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       min-height: 0;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+      backdrop-filter: blur(18px);
     }
 
     .panel-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .panel-title {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: #bfdbfe;
     }
 
     .panel-sub {
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: var(--text-soft);
     }
 
@@ -140,19 +148,19 @@
     }
 
     #results-meta {
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       color: var(--text-soft);
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     #results-summary {
-      margin-bottom: 6px;
-      padding: 6px;
-      border-radius: 6px;
-      background: #020617;
-      border: 1px solid #1f2937;
-      font-size: 0.82rem;
-      max-height: 110px;
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 10px;
+      background: radial-gradient(circle at top left, rgba(37,99,235,0.25), rgba(15,23,42,0.9));
+      border: 1px solid rgba(37,99,235,0.5);
+      font-size: 0.84rem;
+      max-height: 120px;
       overflow-y: auto;
     }
 
@@ -160,7 +168,7 @@
       flex: 1;
       overflow-y: auto;
       padding-right: 4px;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .result-item-link {
@@ -171,28 +179,28 @@
 
     .result-item {
       display: flex;
-      gap: 8px;
-      padding: 7px;
-      border-radius: 6px;
-      border: 1px solid #111827;
-      background: #020617;
-      margin-bottom: 5px;
+      gap: 10px;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid rgba(30,64,175,0.35);
+      background: rgba(15,23,42,0.9);
+      margin-bottom: 6px;
       transition: background 0.12s ease, border-color 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
       cursor: pointer;
     }
 
     .result-item:hover {
-      background: #02081a;
-      border-color: #2563eb;
+      background: rgba(30,64,175,0.25);
+      border-color: rgba(59,130,246,0.9);
       transform: translateY(-1px);
-      box-shadow: 0 0 0 1px rgba(37,99,235,0.4);
+      box-shadow: 0 0 0 1px rgba(59,130,246,0.7);
     }
 
     .result-favicon {
-      width: 22px;
-      height: 22px;
-      border-radius: 4px;
-      background: #020617;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: rgba(15,23,42,0.9);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -206,7 +214,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: 6px;
     }
 
     .result-content {
@@ -217,26 +225,26 @@
     .result-item-title {
       font-weight: 600;
       color: #bfdbfe;
-      font-size: 0.88rem;
-      margin-bottom: 1px;
+      font-size: 0.9rem;
+      margin-bottom: 2px;
     }
 
     .result-item-url {
-      font-size: 0.74rem;
+      font-size: 0.76rem;
       color: var(--text-muted);
-      margin-bottom: 1px;
+      margin-bottom: 2px;
       word-break: break-all;
     }
 
     .result-item-tags {
-      font-size: 0.7rem;
+      font-size: 0.74rem;
       color: var(--text-soft);
     }
 
     /* Actions globales */
     .results-actions-wrapper {
-      border-top: 1px solid #111827;
-      padding-top: 4px;
+      border-top: 1px solid rgba(30,64,175,0.35);
+      padding-top: 6px;
     }
 
     .actions-bar {
@@ -246,10 +254,10 @@
     }
 
     .action-btn {
-      padding: 5px 9px;
-      border-radius: 4px;
-      border: 1px solid #1f2937;
-      background: #020617;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(30,64,175,0.6);
+      background: rgba(15,23,42,0.9);
       color: var(--text-main);
       font-size: 0.78rem;
       cursor: pointer;
@@ -259,11 +267,11 @@
     }
 
     .action-btn:hover {
-      background: #0b1120;
-      border-color: #2563eb;
+      background: rgba(30,64,175,0.9);
+      border-color: rgba(59,130,246,0.9);
     }
 
-    /* NexAI volet latéral dépliant */
+    /* NexAI volet latéral dépliant – verre liquide */
     .nexai-panel-wrapper {
       position: relative;
     }
@@ -274,16 +282,18 @@
       right: 0;
       bottom: 0;
       width: 100%;
-      max-width: 360px;
-      background: var(--bg-panel);
-      border-left: 1px solid var(--border-panel);
-      box-shadow: -10px 0 30px rgba(0,0,0,0.7);
+      max-width: 380px;
+      background: rgba(15,23,42,0.92);
+      border-left: 1px solid rgba(30,64,175,0.5);
+      box-shadow: -18px 0 40px rgba(0,0,0,0.8);
       transform: translateX(100%);
       transition: transform 0.18s ease-out;
       display: flex;
       flex-direction: column;
-      padding: 8px;
-      z-index: 10;
+      padding: 10px;
+      backdrop-filter: blur(20px);
+      border-radius: 12px 0 0 12px;
+      z-index: 30;
     }
 
     .nexai-panel.open {
@@ -294,11 +304,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .nexai-title {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
       font-weight: 600;
       color: #bfdbfe;
     }
@@ -321,11 +331,11 @@
     }
 
     #nexai-summary {
-      padding: 6px;
-      border-radius: 6px;
-      background: #020617;
-      border: 1px solid #1d4ed8;
-      font-size: 0.82rem;
+      padding: 8px;
+      border-radius: 10px;
+      background: radial-gradient(circle at top left, rgba(37,99,235,0.25), rgba(15,23,42,0.95));
+      border: 1px solid rgba(37,99,235,0.6);
+      font-size: 0.84rem;
       max-height: 90px;
       overflow-y: auto;
       color: #dbeafe;
@@ -334,15 +344,15 @@
     #nexai-log {
       flex: 1;
       overflow-y: auto;
-      border-radius: 6px;
-      border: 1px solid #111827;
-      background: #020617;
-      padding: 6px;
-      font-size: 0.82rem;
+      border-radius: 10px;
+      border: 1px solid rgba(30,64,175,0.35);
+      background: rgba(15,23,42,0.9);
+      padding: 8px;
+      font-size: 0.84rem;
     }
 
     .nexai-msg {
-      margin-bottom: 5px;
+      margin-bottom: 6px;
       white-space: pre-wrap;
     }
 
@@ -356,33 +366,33 @@
 
     .nexai-input-row {
       position: absolute;
-      left: 10px;
-      right: 10px;
-      bottom: 10px;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
       display: flex;
       gap: 6px;
       padding: 6px 8px;
-      border-radius: 8px;
-      border: 1px solid #1f2937;
-      background: rgba(2,6,23,0.96);
-      box-shadow: 0 10px 25px rgba(0,0,0,0.9);
-      backdrop-filter: blur(10px);
-      z-index: 15;
+      border-radius: 999px;
+      border: 1px solid rgba(30,64,175,0.6);
+      background: rgba(15,23,42,0.96);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.9);
+      backdrop-filter: blur(18px);
+      z-index: 35;
     }
 
     .nexai-input-row input {
       flex: 1;
-      padding: 6px 8px;
-      border-radius: 4px;
-      border: 1px solid #1f2937;
-      background: #020617;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(30,64,175,0.4);
+      background: rgba(15,23,42,0.9);
       color: var(--text-main);
       font-size: 0.82rem;
     }
 
     .nexai-input-row button {
-      padding: 6px 10px;
-      border-radius: 4px;
+      padding: 6px 12px;
+      border-radius: 999px;
       border: none;
       background: var(--accent);
       color: #f9fafb;
@@ -396,37 +406,38 @@
       filter: brightness(1.05);
     }
 
-    /* Barre de recherche en bas */
+    /* Barre de recherche en bas – Bing-like */
     .bottom-dock {
       position: fixed;
       left: 0;
       right: 0;
-      bottom: 8px;
+      bottom: 10px;
       display: flex;
       justify-content: center;
       pointer-events: none;
-      z-index: 20;
+      z-index: 40;
     }
 
     .bottom-bar {
       width: min(900px, 100% - 24px);
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 7px 9px;
-      border-radius: 8px;
-      background: #020617;
-      border: 1px solid #111827;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.9);
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(30,64,175,0.5);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.9);
       pointer-events: auto;
+      backdrop-filter: blur(18px);
     }
 
     .bottom-logo {
-      width: 24px;
-      height: 24px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: radial-gradient(circle at 30% 30%, #60a5fa, #1d4ed8 60%, #020617 100%);
-      box-shadow: 0 0 14px rgba(37,99,235,0.9);
+      box-shadow: 0 0 16px rgba(37,99,235,0.9);
       cursor: pointer;
       position: relative;
     }
@@ -445,10 +456,10 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: #020617;
-      border-radius: 4px;
-      padding: 3px 6px;
-      border: 1px solid #1f2937;
+      background: rgba(15,23,42,0.9);
+      border-radius: 999px;
+      padding: 4px 8px;
+      border: 1px solid rgba(30,64,175,0.4);
     }
 
     .bottom-input input {
@@ -461,8 +472,8 @@
     }
 
     .bottom-input button {
-      padding: 4px 10px;
-      border-radius: 4px;
+      padding: 4px 12px;
+      border-radius: 999px;
       border: none;
       background: var(--accent);
       color: #f9fafb;
@@ -494,7 +505,11 @@
     @media (max-width: 900px) {
       .main-layout {
         grid-template-columns: minmax(0, 1fr);
-        padding-bottom: 90px;
+        padding-bottom: 100px;
+      }
+      .nexai-panel {
+        max-width: 100%;
+        border-radius: 12px;
       }
     }
   </style>
@@ -519,7 +534,7 @@
         <div class="panel-header">
           <div>
             <div class="panel-title">Résultats</div>
-            <div class="panel-sub">Sites filtrés selon votre requête</div>
+            <div class="panel-sub">Organisation intelligente des sites pertinents</div>
           </div>
         </div>
 
@@ -609,8 +624,9 @@
       "win": "windows",
       "w11": "windows 11",
       "yt": "youtube",
-      "youtub": "youtube",
       "ytb": "youtube",
+      "netf": "netflix",
+      "nf": "netflix",
       "spoti": "spotify",
       "deeze": "deezer",
       "amz": "amazon",
@@ -621,31 +637,20 @@
       "gh": "github",
       "so": "stack overflow",
       "mdn": "mdn web docs",
-      "tw": "twitter",
-      "x": "twitter",
-      "ig": "instagram",
-      "fb": "facebook"
+      "pix": "pixabay",
+      "scr": "scratch",
+      "wa": "whatsapp",
+      "tg": "telegram",
+      "dc": "discord"
     };
 
     const ADVANCED_CANONICAL = [
-      "microsoft",
-      "windows",
-      "word",
-      "office",
-      "copilot",
-      "youtube",
-      "spotify",
-      "deezer",
-      "amazon",
-      "fnac",
-      "cdiscount",
-      "aliexpress",
-      "github",
-      "stack overflow",
-      "mdn web docs",
-      "twitter",
-      "instagram",
-      "facebook",
+      "microsoft","windows","word","office","copilot",
+      "youtube","netflix","spotify","deezer",
+      "amazon","fnac","cdiscount","aliexpress",
+      "github","stack overflow","mdn web docs",
+      "pixabay","scratch",
+      "whatsapp","telegram","discord",
       "bing"
     ];
 
@@ -721,11 +726,11 @@
       const intent = nexaiDetectIntent(trimmed);
 
       if (calcRes !== null && intent.isCalc) {
-        return `Le résultat de votre calcul est ${calcRes}. Vous pouvez enchaîner avec un autre calcul ou une question sur un site.`;
+        return `Le résultat de votre calcul est ${calcRes}. Vous pouvez enchaîner avec un autre calcul ou une question sur un site ou un service.`;
       }
 
       if (intent.isHello) {
-        return "Bonjour ! Vous pouvez me demander d’expliquer un site (Word, Microsoft, Amazon…), de résumer votre recherche actuelle ou de faire un calcul rapide.";
+        return "Bonjour ! Vous pouvez me demander d’expliquer un site (Word, Microsoft, Netflix, YouTube…), de résumer votre recherche actuelle ou de faire un calcul rapide.";
       }
 
       if (intent.isExplain) {
@@ -736,28 +741,27 @@
           .replace(/^qu est ce que/i, "")
           .trim();
         if (after) {
-          return `Vous souhaitez une explication sur « ${after} ». En général, je peux vous donner : une définition simple, à quoi cela sert, et dans quel contexte vous le verrez apparaître dans les résultats de NexSearch.`;
+          return `Vous souhaitez une explication sur « ${after} ». Je peux vous donner une définition simple, à quoi cela sert, et dans quel contexte vous le verrez apparaître dans les résultats de NexSearch.`;
         }
-        return "Vous pouvez me demander : « Explique Word », « C’est quoi Copilot ? », « Qu’est-ce que NexSearch ? », etc.";
+        return "Vous pouvez me demander : « Explique Word », « C’est quoi Netflix ? », « Qu’est-ce que Scratch ? », etc.";
       }
 
       if (intent.isHelp) {
-        return "NexSearch accepte les fautes et les abréviations (ms → Microsoft, yt → YouTube, amz → Amazon…). Tapez simplement ce que vous avez en tête, je corrige, j’analyse le type de recherche et j’organise les sites les plus pertinents. Vous pouvez ensuite me demander un résumé ou une explication.";
+        return "NexSearch accepte les fautes et les abréviations (ms → Microsoft, yt → YouTube, nf → Netflix, amz → Amazon…). Tapez simplement ce que vous avez en tête, je corrige, j’analyse le type de recherche et j’organise les sites les plus pertinents.";
       }
 
       if (intent.isSearch) {
-        return "Pour lancer une recherche, utilisez la barre en bas de l’écran. Vous pouvez taper un site, un produit, un sujet ou même une expression approximative : je corrigerai et filtrerai les sites pour ne garder que ceux qui ont du sens.";
+        return "Pour lancer une recherche, utilisez la barre en bas de l’écran. Vous pouvez taper un site, un service, un produit, un sujet ou même une expression approximative : je corrigerai et filtrerai les sites pour ne garder que ceux qui ont du sens.";
       }
 
       if (NEXAI_MEMORY.lastQuery) {
-        return `Par rapport à votre dernière recherche « ${NEXAI_MEMORY.lastQuery} », vous pouvez me demander un résumé plus détaillé, une explication d’un site précis (Word, Microsoft, Copilot, Amazon…) ou un calcul lié (par exemple un prix total ou une remise).`;
+        return `Par rapport à votre dernière recherche « ${NEXAI_MEMORY.lastQuery} », vous pouvez me demander un résumé plus détaillé, une explication d’un site précis (Word, Microsoft, Netflix, YouTube, Amazon, GitHub, Scratch…) ou un calcul lié (par exemple un prix total ou une remise).`;
       }
 
-      return "Je ne suis pas certain de ce que vous attendez. Donnez-moi un mot‑clé (Word, Microsoft, Amazon…), une question (« explique Word ») ou un calcul, et je vous répondrai de manière adaptée.";
+      return "Je ne suis pas certain de ce que vous attendez. Donnez-moi un mot‑clé (Word, Netflix, YouTube, Amazon, GitHub…), une question (« explique Word ») ou un calcul, et je vous répondrai de manière adaptée.";
     }
 
     async function nexaiChatReply(userText) {
-      // Mini LLM simulée : détection d’intention + contexte + génération de texte fluide
       return nexaiAnswer(userText);
     }
 
@@ -767,25 +771,31 @@
       }
 
       if (calcResult !== null) {
-        return `Votre requête ressemble à un calcul. Résultat : ${calcResult}. Vous pouvez maintenant lancer une recherche sur un site ou un produit si vous le souhaitez.`;
+        return `Votre requête ressemble à un calcul. Résultat : ${calcResult}. Vous pouvez maintenant lancer une recherche sur un site, un service ou un produit si vous le souhaitez.`;
       }
 
       if (!results.length) {
-        return `Requête analysée : « ${correctedQ} ». Aucun site très pertinent n’a été trouvé dans la base actuelle. Essayez de préciser un peu votre demande (par exemple « Microsoft Word », « Word téléchargement », « Word tutoriel »).`;
+        return `Requête analysée : « ${correctedQ} ». Aucun site très pertinent n’a été trouvé dans la base actuelle. Essayez de préciser un peu votre demande (par exemple « Microsoft Word », « Netflix séries », « YouTube musique »).`;
       }
 
-      const names = results.slice(0, 4).map(r => r.name);
+      const names = results.slice(0, 5).map(r => r.name);
       const uniqueNames = [...new Set(names)];
       let desc = `Requête analysée : « ${correctedQ} ». J’ai sélectionné principalement : ${uniqueNames.join(", ")}. `;
 
       if (correctedQ.includes("word")) {
-        desc += "Word est le traitement de texte de la suite Microsoft Office. Vous verrez surtout des liens vers Microsoft et la documentation associée.";
+        desc += "Word est le traitement de texte de la suite Microsoft Office. Les liens proposés pointent vers Microsoft, Office et la documentation associée.";
       } else if (correctedQ.includes("microsoft")) {
-        desc += "Microsoft regroupe Windows, Office, Xbox et d’autres services. Les liens proposés pointent vers l’écosystème Microsoft et les ressources utiles.";
-      } else if (correctedQ.includes("copilot")) {
-        desc += "Copilot est un assistant IA de Microsoft. Les liens mettent en avant l’accès à Copilot et la documentation.";
+        desc += "Microsoft regroupe Windows, Office, Xbox et d’autres services. Les liens proposés mettent en avant l’écosystème Microsoft et les ressources utiles.";
+      } else if (correctedQ.includes("netflix")) {
+        desc += "Netflix est une plateforme de streaming vidéo. Les liens proposés sont orientés vers Netflix et les contenus associés.";
+      } else if (correctedQ.includes("youtube")) {
+        desc += "YouTube est une plateforme de partage de vidéos. Les liens proposés mettent en avant YouTube et les contenus vidéo pertinents.";
       } else if (correctedQ.includes("amazon")) {
         desc += "Amazon est une plateforme de e‑commerce. Les liens proposés sont orientés shopping et produits.";
+      } else if (correctedQ.includes("scratch")) {
+        desc += "Scratch est une plateforme de programmation visuelle. Les liens proposés pointent vers Scratch et des ressources pour apprendre ou partager des projets.";
+      } else if (correctedQ.includes("github")) {
+        desc += "GitHub est une plateforme d’hébergement de code. Les liens proposés mettent en avant GitHub et la documentation pour les développeurs.";
       } else {
         desc += "Les sites affichés sont filtrés pour rester cohérents avec votre requête, sans résultats hors sujet.";
       }
@@ -794,7 +804,7 @@
     }
 
     // =========================
-    // 4) NexSearch – base de sites + filtrage strict
+    // 4) NexSearch – base de sites enrichie (catalogue extensible vers 1000+)
     // =========================
     const SITES_DB = [
       // Microsoft / Office / Word / Copilot
@@ -803,19 +813,47 @@
       { name: "Office.com", url: "https://www.office.com/search?auth=1&query={q}", tags: ["office","word","microsoft"], weight: 0.96, favicon: "https://www.office.com/favicon.ico" },
       { name: "Microsoft Copilot", url: "https://copilot.microsoft.com/?q={q}", tags: ["copilot","ai","microsoft"], weight: 0.97, favicon: "https://copilot.microsoft.com/favicon.ico" },
 
-      // Dev / docs
-      { name: "GitHub", url: "https://github.com/search?q={q}", tags: ["dev","code"], weight: 0.9, favicon: "https://github.githubassets.com/favicons/favicon.png" },
-      { name: "Stack Overflow", url: "https://stackoverflow.com/search?q={q}", tags: ["dev","questions"], weight: 0.88, favicon: "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico" },
-      { name: "MDN Web Docs", url: "https://developer.mozilla.org/fr/search?q={q}", tags: ["dev","docs"], weight: 0.86, favicon: "https://developer.mozilla.org/favicon-32x32.cbbd161b.png" },
+      // Vidéo / streaming
+      { name: "YouTube", url: "https://www.youtube.com/results?search_query={q}", tags: ["video","youtube","music"], weight: 0.97, favicon: "https://www.youtube.com/favicon.ico" },
+      { name: "Netflix", url: "https://www.netflix.com/search?q={q}", tags: ["video","netflix","streaming"], weight: 0.95, favicon: "https://assets.nflxext.com/us/ffe/siteui/common/icons/nficon2016.ico" },
+
+      // Musique
+      { name: "Spotify", url: "https://open.spotify.com/search/{q}", tags: ["music","spotify"], weight: 0.9, favicon: "https://open.spotifycdn.com/cdn/images/favicon32.b64ecc03.png" },
+      { name: "Deezer", url: "https://www.deezer.com/search/{q}", tags: ["music","deezer"], weight: 0.86, favicon: "https://e-cdns-files.dzcdn.net/cache/images/common/favicon/favicon-32x32.1c0c1c4c.png" },
 
       // Shopping
       { name: "Amazon", url: "https://www.amazon.fr/s?k={q}", tags: ["shopping","amazon"], weight: 0.9, favicon: "https://www.amazon.fr/favicon.ico" },
       { name: "Fnac", url: "https://www.fnac.com/SearchResult/ResultList.aspx?Search={q}", tags: ["shopping","fnac"], weight: 0.86, favicon: "https://www.fnac.com/favicon.ico" },
       { name: "Cdiscount", url: "https://www.cdiscount.com/search/10/{q}.html", tags: ["shopping","cdiscount"], weight: 0.84, favicon: "https://www.cdiscount.com/favicon-32x32.png" },
+      { name: "AliExpress", url: "https://www.aliexpress.com/wholesale?SearchText={q}", tags: ["shopping","aliexpress"], weight: 0.82, favicon: "https://www.aliexpress.com/favicon.ico" },
+
+      // Images / ressources
+      { name: "Pixabay", url: "https://pixabay.com/images/search/{q}/", tags: ["images","pixabay","photos"], weight: 0.88, favicon: "https://pixabay.com/static/img/favicon.png" },
+
+      // Dev / code
+      { name: "GitHub", url: "https://github.com/search?q={q}", tags: ["dev","code","github"], weight: 0.9, favicon: "https://github.githubassets.com/favicons/favicon.png" },
+      { name: "Stack Overflow", url: "https://stackoverflow.com/search?q={q}", tags: ["dev","questions","stack overflow"], weight: 0.88, favicon: "https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico" },
+      { name: "MDN Web Docs", url: "https://developer.mozilla.org/fr/search?q={q}", tags: ["dev","docs","mdn"], weight: 0.86, favicon: "https://developer.mozilla.org/favicon-32x32.cbbd161b.png" },
+
+      // Scratch / éducation
+      { name: "Scratch", url: "https://scratch.mit.edu/search/projects?q={q}", tags: ["scratch","education","code"], weight: 0.87, favicon: "https://scratch.mit.edu/favicon.ico" },
+
+      // Messageries
+      { name: "WhatsApp Web", url: "https://web.whatsapp.com/", tags: ["messaging","whatsapp"], weight: 0.8, favicon: "https://web.whatsapp.com/favicon.ico" },
+      { name: "Telegram Web", url: "https://web.telegram.org/k/", tags: ["messaging","telegram"], weight: 0.8, favicon: "https://telegram.org/img/t_logo.svg" },
+      { name: "Discord", url: "https://discord.com/channels/@me", tags: ["messaging","discord"], weight: 0.82, favicon: "https://discord.com/assets/847541504914fd7fdd5c2e496cde50b9.ico" },
+
+      // IA en tout genre
+      { name: "Bing Chat / Copilot", url: "https://copilot.microsoft.com/?q={q}", tags: ["ai","copilot","microsoft"], weight: 0.95, favicon: "https://copilot.microsoft.com/favicon.ico" },
+      { name: "ChatGPT", url: "https://chat.openai.com/", tags: ["ai","chatgpt"], weight: 0.9, favicon: "https://chat.openai.com/favicon.ico" },
+      { name: "Claude", url: "https://claude.ai/", tags: ["ai","claude"], weight: 0.85, favicon: "https://claude.ai/favicon.ico" },
 
       // Général
-      { name: "Bing", url: "https://www.bing.com/search?q={q}", tags: ["search","general"], weight: 0.8, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" }
-      // → extensible vers beaucoup plus de sites, mais filtrés par tags
+      { name: "Bing", url: "https://www.bing.com/search?q={q}", tags: ["search","general","bing"], weight: 0.8, favicon: "https://www.bing.com/sa/simg/favicon-2x.ico" }
+
+      // → ici, dans ton vrai projet, tu peux continuer à ajouter des centaines d’entrées
+      //   (autres IA, autres sites de shopping, forums, docs, services, etc.)
+      //   pour atteindre 1000+ sites dans SITES_DB.
     ];
 
     function detectQueryType(q) {
@@ -824,8 +862,13 @@
       const isMicrosoft = t.includes("microsoft") || t.includes("windows") || t.includes("office");
       const isCopilot = t.includes("copilot");
       const isAmazon = t.includes("amazon");
-      const isDev = t.includes("github") || t.includes("code") || t.includes("dev") || t.includes("programmation");
-      return { isWord, isMicrosoft, isCopilot, isAmazon, isDev };
+      const isNetflix = t.includes("netflix");
+      const isYoutube = t.includes("youtube");
+      const isDev = t.includes("github") || t.includes("code") || t.includes("dev") || t.includes("programmation") || t.includes("scratch");
+      const isImages = t.includes("image") || t.includes("photo") || t.includes("pixabay");
+      const isMessaging = t.includes("whatsapp") || t.includes("telegram") || t.includes("discord");
+      const isAI = t.includes("ia") || t.includes("ai") || t.includes("copilot") || t.includes("chatgpt") || t.includes("claude");
+      return { isWord, isMicrosoft, isCopilot, isAmazon, isNetflix, isYoutube, isDev, isImages, isMessaging, isAI };
     }
 
     function isSiteRelevant(site, q, typeInfo, correctedQ) {
@@ -833,30 +876,39 @@
       const nameNorm = normalizeText(site.name);
       const tags = site.tags || [];
 
-      // Match direct sur le nom ou les tags
       const directMatch =
         nameNorm.includes(t) ||
         t.includes(nameNorm) ||
         tags.some(tag => t.includes(tag));
 
-      // Règles spécifiques
       if (typeInfo.isWord) {
         return tags.includes("word") || tags.includes("office") || tags.includes("microsoft");
       }
       if (typeInfo.isMicrosoft) {
         return tags.includes("microsoft") || tags.includes("office") || tags.includes("windows") || tags.includes("word") || tags.includes("copilot");
       }
-      if (typeInfo.isCopilot) {
-        return tags.includes("copilot") || tags.includes("microsoft");
+      if (typeInfo.isCopilot || typeInfo.isAI) {
+        return tags.includes("copilot") || tags.includes("ai") || tags.includes("chatgpt") || tags.includes("claude") || tags.includes("microsoft");
       }
       if (typeInfo.isAmazon) {
         return tags.includes("amazon") || tags.includes("shopping");
       }
+      if (typeInfo.isNetflix) {
+        return tags.includes("netflix") || tags.includes("video") || tags.includes("streaming");
+      }
+      if (typeInfo.isYoutube) {
+        return tags.includes("youtube") || tags.includes("video") || tags.includes("music");
+      }
       if (typeInfo.isDev) {
-        return tags.includes("dev") || tags.includes("docs") || tags.includes("questions");
+        return tags.includes("dev") || tags.includes("docs") || tags.includes("questions") || tags.includes("scratch");
+      }
+      if (typeInfo.isImages) {
+        return tags.includes("images") || tags.includes("photos") || tags.includes("pixabay");
+      }
+      if (typeInfo.isMessaging) {
+        return tags.includes("messaging") || tags.includes("whatsapp") || tags.includes("telegram") || tags.includes("discord");
       }
 
-      // Sinon, on reste strict : nom ou tag doit coller
       return directMatch;
     }
 
@@ -897,16 +949,30 @@
       const buttons = [];
       buttons.push({ label: "Voir sur Bing", url: "https://www.bing.com/search?q=" + encodeURIComponent(correctedQ) });
 
-      if (typeInfo.isMicrosoft || typeInfo.isWord || typeInfo.isCopilot) {
+      if (typeInfo.isMicrosoft || typeInfo.isWord || typeInfo.isCopilot || typeInfo.isAI) {
         buttons.push({ label: "Microsoft", url: "https://www.microsoft.com/search?q=" + encodeURIComponent(correctedQ) });
         buttons.push({ label: "Copilot", url: "https://copilot.microsoft.com/?q=" + encodeURIComponent(correctedQ) });
       }
       if (typeInfo.isAmazon) {
         buttons.push({ label: "Amazon", url: "https://www.amazon.fr/s?k=" + encodeURIComponent(correctedQ) });
       }
+      if (typeInfo.isNetflix) {
+        buttons.push({ label: "Netflix", url: "https://www.netflix.com/search?q=" + encodeURIComponent(correctedQ) });
+      }
+      if (typeInfo.isYoutube) {
+        buttons.push({ label: "YouTube", url: "https://www.youtube.com/results?search_query=" + encodeURIComponent(correctedQ) });
+      }
       if (typeInfo.isDev) {
         buttons.push({ label: "GitHub", url: "https://github.com/search?q=" + encodeURIComponent(correctedQ) });
         buttons.push({ label: "Stack Overflow", url: "https://stackoverflow.com/search?q=" + encodeURIComponent(correctedQ) });
+      }
+      if (typeInfo.isImages) {
+        buttons.push({ label: "Pixabay", url: "https://pixabay.com/images/search/" + encodeURIComponent(correctedQ) + "/" });
+      }
+      if (typeInfo.isMessaging) {
+        buttons.push({ label: "WhatsApp Web", url: "https://web.whatsapp.com/" });
+        buttons.push({ label: "Telegram Web", url: "https://web.telegram.org/k/" });
+        buttons.push({ label: "Discord", url: "https://discord.com/channels/@me" });
       }
 
       return buttons;
@@ -1054,9 +1120,8 @@
       };
 
       document.getElementById("nexai-summary").textContent =
-        "Tapez une requête en bas, je corrige, je filtre les sites pour ne garder que les plus pertinents et je vous donne un aperçu rapide.";
+        "Tapez une requête en bas, je corrige, je filtre les sites (Microsoft, Netflix, YouTube, Amazon, GitHub, Scratch, IA…) et je vous donne un aperçu rapide.";
 
-      // Recherche auto si ?q=... dans l’URL
       const params = new URLSearchParams(window.location.search);
       const qParam = params.get("q");
       if (qParam) {

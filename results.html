@@ -212,7 +212,12 @@ async function fetchBingResults(query){
   const parser = new DOMParser();
   const doc = parser.parseFromString(html,"text/html");
 
-  const items = [...doc.querySelectorAll("li.b_algo")].slice(0,10);
+  // Bing peut utiliser li.b_algo ou div.b_algo
+  const items = [...doc.querySelectorAll("li.b_algo, div.b_algo")].slice(0,10);
+  if(items.length===0){
+    console.warn("Aucun élément b_algo trouvé — structure Bing différente.");
+  }
+
   const results = items.map(el=>{
     const titleEl = el.querySelector("h2 a");
     const descEl = el.querySelector(".b_caption p") || el.querySelector("p");
@@ -335,6 +340,7 @@ async function runSearch(query){
   try{
     results = await fetchBingResults(q);
   }catch(e){
+    console.error(e);
     summaryEl.textContent = "Erreur lors de la récupération des résultats Bing. Réessayez plus tard.";
   }
 

@@ -4,130 +4,153 @@
   <meta charset="UTF-8">
   <title>NexSearch</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234da3ff'/%3E%3Cstop offset='100%25' stop-color='%230078d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='15' y='15' width='150' height='150' rx='22' fill='%230f121a' stroke='url(%23grad)' stroke-width='3'/%3E%3Cg stroke='url(%23grad)' stroke-width='3' opacity='0.85'%3E%3Cline x1='45' y1='45' x2='135' y2='45'/%3E%3Cline x1='45' y1='90' x2='135' y2='90'/%3E%3Cline x1='45' y1='135' x2='135' y2='135'/%3E%3Cline x1='45' y1='45' x2='45' y2='135'/%3E%3Cline x1='90' y1='45' x2='90' y2='135'/%3E%3Cline x1='135' y1='45' x2='135' y2='135'/%3E%3C/g%3E%3Crect x='72' y='72' width='36' height='36' rx='6' fill='url(%23grad)' opacity='0.9'/%3E%3Ccircle cx='90' cy='90' r='58' fill='url(%23grad)' opacity='0.08'/%3E%3C/svg%3E">
+
   <style>
-    :root{--bg:#05060a;--panel:#0f121a;--border:#1f2937;--accent:#0078d4;--accent2:#4da3ff;--txt:#e5e7eb;--muted:#9ca3af;--soft:#6b7280}
+    :root{
+      --bg:#05060a;--panel:#0f121a;--border:#1f2937;
+      --accent:#0078d4;--accent2:#4da3ff;
+      --txt:#e5e7eb;--muted:#9ca3af;--soft:#6b7280;
+    }
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#05060a;color:var(--txt);overflow-x:hidden}
+    body{
+      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+      background:#05060a;color:var(--txt);overflow-x:hidden;
+    }
     #app{min-height:100vh;display:flex;flex-direction:column}
-    .top-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#0b0d13;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+
+    /* TOP BAR */
+    .top-bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:8px 14px;background:#0b0d13;border-bottom:1px solid var(--border);
+      position:sticky;top:0;z-index:10;
+    }
     .top-left{display:flex;align-items:center;gap:8px;cursor:pointer}
-    .logo-main{width:26px;height:26px;border-radius:4px;background:#0f121a;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center}
-    .logo-main-inner{width:18px;height:18px;border-radius:4px;background-image:url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234da3ff'/%3E%3Cstop offset='100%25' stop-color='%230078d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='15' y='15' width='150' height='150' rx='22' fill='%230f121a' stroke='url(%23grad)' stroke-width='3'/%3E%3Cg stroke='url(%23grad)' stroke-width='3' opacity='0.85'%3E%3Cline x1='45' y1='45' x2='135' y2='45'/%3E%3Cline x1='45' y1='90' x2='135' y2='90'/%3E%3Cline x1='45' y1='135' x2='135' y2='135'/%3E%3Cline x1='45' y1='45' x2='45' y2='135'/%3E%3Cline x1='90' y1='45' x2='90' y2='135'/%3E%3Cline x1='135' y1='45' x2='135' y2='135'/%3E%3C/g%3E%3Crect x='72' y='72' width='36' height='36' rx='6' fill='url(%23grad)' opacity='0.9'/%3E%3Ccircle cx='90' cy='90' r='58' fill='url(%23grad)' opacity='0.08'/%3E%3C/svg%3E");background-size:cover}
+    .logo-main{
+      width:26px;height:26px;border-radius:4px;background:#0f121a;
+      border:1px solid #1f2937;
+    }
     .logo-text{font-size:.9rem;font-weight:600}
-    .top-right{display:flex;align-items:center;gap:6px}
-    .nexai-toggle{border:1px solid var(--border);background:#0f121a;color:var(--txt);border-radius:4px;font-size:.75rem;padding:4px 10px;cursor:pointer}
-    .nexai-toggle:hover{border-color:var(--accent)}
-    .main-layout{flex:1;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 10px 80px 10px;transition:grid-template-columns .15s ease-out}
-    .panel{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:8px;display:flex;flex-direction:column;min-height:0}
-    .panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+
+    /* MAIN LAYOUT */
+    .main-layout{
+      flex:1;display:grid;grid-template-columns:minmax(0,1fr);
+      gap:8px;padding:8px 10px 80px 10px;
+    }
+
+    /* PANEL */
+    .panel{
+      background:var(--panel);border:1px solid var(--border);
+      border-radius:4px;padding:8px;display:flex;flex-direction:column;
+    }
     .panel-title{font-size:.9rem;font-weight:600}
     .panel-sub{font-size:.7rem;color:var(--soft)}
     #results-meta{font-size:.75rem;color:var(--soft);margin-bottom:4px}
-    #results-summary{margin-bottom:6px;padding:6px;border-radius:4px;background:#0b0d13;border:1px solid #111827;font-size:.78rem;max-height:110px;overflow-y:auto}
+    #results-summary{
+      margin-bottom:6px;padding:6px;border-radius:4px;background:#0b0d13;
+      border:1px solid #111827;font-size:.78rem;max-height:110px;overflow-y:auto;
+    }
     #results-list{flex:1;overflow-y:auto;padding-right:2px;margin-bottom:6px}
+
+    /* RESULT ITEM */
     .result-item-link{text-decoration:none;color:inherit;display:block}
-    .result-item{display:flex;align-items:center;gap:6px;padding:6px;border-radius:4px;border:1px solid #111827;background:#05060a;margin-bottom:4px;cursor:pointer}
+    .result-item{
+      display:flex;align-items:center;gap:6px;padding:6px;border-radius:4px;
+      border:1px solid #111827;background:#05060a;margin-bottom:4px;
+      cursor:pointer;
+    }
     .result-item:hover{border-color:var(--accent)}
     .result-content{flex:1;min-width:0}
     .result-item-title{font-size:.85rem;font-weight:600}
     .result-item-url{font-size:.7rem;color:var(--muted);word-break:break-all}
     .result-item-tags{font-size:.68rem;color:var(--soft)}
-    .result-favicon{width:18px;height:18px;border-radius:4px;background:#0f121a;display:flex;align-items:center;justify-content:center;margin-left:auto;flex-shrink:0;overflow:hidden}
+    .result-favicon{
+      width:18px;height:18px;border-radius:4px;background:#0f121a;
+      display:flex;align-items:center;justify-content:center;margin-left:auto;
+      overflow:hidden;
+    }
     .result-favicon img{width:100%;height:100%;object-fit:cover}
+
+    /* ACTIONS */
     .results-actions-wrapper{border-top:1px solid #111827;padding-top:4px}
     .actions-bar{display:flex;flex-wrap:wrap;gap:4px}
-    .action-btn{border:1px solid var(--border);background:#05060a;color:var(--txt);border-radius:4px;font-size:.7rem;padding:3px 8px;cursor:pointer}
+    .action-btn{
+      border:1px solid var(--border);background:#05060a;color:var(--txt);
+      border-radius:4px;font-size:.7rem;padding:3px 8px;cursor:pointer;
+    }
     .action-btn:hover{border-color:var(--accent)}
-    .nexai-panel-wrapper{position:relative}
-    .nexai-panel{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:8px;display:flex;flex-direction:column;min-height:0}
-    .nexai-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-    .nexai-title{font-size:.9rem;font-weight:600}
-    .nexai-close{border:none;background:transparent;color:var(--soft);cursor:pointer;font-size:.8rem}
-    .nexai-body{flex:1;display:flex;flex-direction:column;gap:4px;min-height:0;padding-bottom:40px}
-    #nexai-summary{padding:6px;border-radius:4px;background:#05060a;border:1px solid #111827;font-size:.78rem;max-height:80px;overflow-y:auto}
-    #nexai-log{flex:1;overflow-y:auto;border-radius:4px;border:1px solid #111827;background:#05060a;padding:6px;font-size:.78rem}
-    .nexai-msg{margin-bottom:4px;white-space:pre-wrap}
-    .nexai-msg-user{color:var(--accent2)}
-    .nexai-msg-ai{color:var(--txt)}
-    .nexai-input-row{position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:4px;padding:4px 6px;border-radius:4px;border:1px solid var(--border);background:#05060a}
-    .nexai-input-row input{flex:1;padding:4px 6px;border-radius:4px;border:1px solid #111827;background:#05060a;color:var(--txt);font-size:.78rem}
-    .nexai-input-row button{border:none;border-radius:4px;background:var(--accent);color:#f9fafb;font-size:.78rem;padding:4px 8px;cursor:pointer}
-    .bottom-dock{position:fixed;left:0;right:0;bottom:8px;display:flex;justify-content:center;pointer-events:none;z-index:20}
-    .bottom-bar{width:min(880px,100% - 16px);display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:4px;background:#0b0d13;border:1px solid var(--border);pointer-events:auto}
-    .bottom-logo{width:24px;height:24px;border-radius:4px;background:#0f121a;border:1px solid #1f2937;display:flex;align-items:center;justify-content:center;cursor:pointer}
-    .bottom-logo-inner{width:18px;height:18px;border-radius:4px;background-image:url("data:image/svg+xml,%3Csvg width='180' height='180' viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%234da3ff'/%3E%3Cstop offset='100%25' stop-color='%230078d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='15' y='15' width='150' height='150' rx='22' fill='%230f121a' stroke='url(%23grad)' stroke-width='3'/%3E%3Cg stroke='url(%23grad)' stroke-width='3' opacity='0.85'%3E%3Cline x1='45' y1='45' x2='135' y2='45'/%3E%3Cline x1='45' y1='90' x2='135' y2='90'/%3E%3Cline x1='45' y1='135' x2='135' y2='135'/%3E%3Cline x1='45' y1='45' x2='45' y2='135'/%3E%3Cline x1='90' y1='45' x2='90' y2='135'/%3E%3Cline x1='135' y1='45' x2='135' y2='135'/%3E%3C/g%3E%3Crect x='72' y='72' width='36' height='36' rx='6' fill='url(%23grad)' opacity='0.9'/%3E%3Ccircle cx='90' cy='90' r='58' fill='url(%23grad)' opacity='0.08'/%3E%3C/svg%3E");background-size:cover}
-    .bottom-input{flex:1;display:flex;align-items:center;gap:6px;background:#05060a;border-radius:4px;border:1px solid #111827;padding:3px 6px}
-    .bottom-input input{flex:1;border:none;outline:none;background:transparent;color:var(--txt);font-size:.8rem}
-    .bottom-input button{border:none;border-radius:4px;background:var(--accent);color:#f9fafb;font-size:.78rem;padding:4px 10px;cursor:pointer}
-    ::-webkit-scrollbar{width:6px;height:6px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:#111827;border-radius:4px}
-    ::-webkit-scrollbar-thumb:hover{background:#1f2937}
-    @media(max-width:900px){.main-layout{grid-template-columns:minmax(0,1fr);padding-bottom:90px}}
+
+    /* BOTTOM BAR */
+    .bottom-dock{
+      position:fixed;left:0;right:0;bottom:8px;display:flex;
+      justify-content:center;pointer-events:none;z-index:20;
+    }
+    .bottom-bar{
+      width:min(880px,100% - 16px);display:flex;align-items:center;
+      gap:8px;padding:6px 10px;border-radius:4px;background:#0b0d13;
+      border:1px solid var(--border);pointer-events:auto;
+    }
+    .bottom-logo{
+      width:24px;height:24px;border-radius:4px;background:#0f121a;
+      border:1px solid #1f2937;cursor:pointer;
+    }
+    .bottom-input{
+      flex:1;display:flex;align-items:center;gap:6px;background:#05060a;
+      border-radius:4px;border:1px solid #111827;padding:3px 6px;
+    }
+    .bottom-input input{
+      flex:1;border:none;outline:none;background:transparent;color:var(--txt);
+      font-size:.8rem;
+    }
+    .bottom-input button{
+      border:none;border-radius:4px;background:var(--accent);color:#f9fafb;
+      font-size:.78rem;padding:4px 10px;cursor:pointer;
+    }
   </style>
 </head>
+
 <body>
 <div id="app">
+
+  <!-- TOP BAR -->
   <header class="top-bar">
     <div class="top-left" id="home-link-top">
-      <div class="logo-main"><div class="logo-main-inner"></div></div>
+      <div class="logo-main"></div>
       <div class="logo-text">NexSearch</div>
-    </div>
-    <div class="top-right">
-      <button class="nexai-toggle" id="nexai-toggle-btn">NexAI</button>
     </div>
   </header>
 
-  <main class="main-layout" id="main-layout">
-    <section class="panel results-panel">
-      <div class="panel-header">
-        <div>
-          <div class="panel-title">Résultats (DuckDuckGo)</div>
-          <div class="panel-sub">API gratuite, sans clé, format JSON</div>
-        </div>
-      </div>
+  <!-- MAIN -->
+  <main class="main-layout">
+    <section class="panel">
+      <div class="panel-title">Résultats</div>
+      <div class="panel-sub">Moteur indépendant – liens directs</div>
+
       <div id="results-meta"></div>
       <div id="results-summary"></div>
       <div id="results-list"></div>
+
       <div class="results-actions-wrapper">
         <div style="font-size:.7rem;color:#9ca3af;margin-bottom:2px">Actions rapides</div>
         <div id="results-actions" class="actions-bar"></div>
       </div>
     </section>
-
-    <section class="nexai-panel-wrapper" id="nexai-wrapper" style="display:none">
-      <div class="nexai-panel" id="nexai-panel">
-        <div class="nexai-header">
-          <div class="nexai-title">NexAI</div>
-          <button class="nexai-close" id="nexai-close-btn">✕</button>
-        </div>
-        <div class="nexai-body">
-          <div id="nexai-summary"></div>
-          <div id="nexai-log"></div>
-          <div class="nexai-input-row">
-            <input id="nexai-input" type="text" placeholder="Parler avec NexAI...">
-            <button id="nexai-send">Envoyer</button>
-          </div>
-        </div>
-      </div>
-    </section>
   </main>
 
+  <!-- BOTTOM BAR -->
   <div class="bottom-dock">
     <div class="bottom-bar">
-      <div class="bottom-logo" id="home-link-bottom">
-        <div class="bottom-logo-inner"></div>
-      </div>
+      <div class="bottom-logo" id="home-link-bottom"></div>
       <div class="bottom-input">
-        <input id="search-input" type="text" placeholder="Rechercher avec NexSearch (fautes et abréviations acceptées)...">
+        <input id="search-input" type="text" placeholder="Rechercher...">
         <button id="search-btn">Rechercher</button>
       </div>
     </div>
   </div>
+
 </div>
 
 <script>
+/* NORMALISATION */
 function nrm(s){
   return s.toLowerCase().normalize("NFD")
     .replace(/[\u0300-\u036f]/g,"")
@@ -136,8 +159,7 @@ function nrm(s){
     .trim();
 }
 
-const MEM={lastQuery:null,lastType:null,lastTopic:null};
-
+/* CALCUL */
 function tryCalc(e){
   try{
     if(!/^[0-9+\-*/().,%\s]+$/.test(e))return null;
@@ -147,116 +169,23 @@ function tryCalc(e){
   }catch{return null}
 }
 
-function intent(t){
-  const x=nrm(t);
-  return{
-    calc:/[0-9]/.test(t)&&/[+\-*/]/.test(t),
-    hello:x.includes("bonjour")||x.includes("salut")||x.includes("hey"),
-    expl:x.startsWith("explique")||x.includes("explique moi")||x.includes("c est quoi")||x.includes("qu est ce que"),
-    help:x.includes("aide")||x.includes("comment utiliser")||x.includes("comment marche"),
-    search:x.includes("recherche")||x.includes("nexsearch"),
-    thanks:x.includes("merci")
-  };
-}
-
-function aiAnswer(u){
-  const t=u.trim(),c=tryCalc(t),i=intent(t);
-  if(c!==null&&i.calc)return"Le résultat de votre calcul est "+c+". Vous pouvez continuer avec un autre calcul ou une question sur un site ou un service.";
-  if(i.hello)return"Bonjour. Vous pouvez me demander d’expliquer un site (Word, Microsoft, Netflix, YouTube, GitHub…), de résumer votre recherche actuelle ou de faire un calcul rapide.";
-  if(i.expl){
-    const a=t.replace(/^explique moi/i,"").replace(/^explique/i,"").replace(/^c est quoi/i,"").replace(/^qu est ce que/i,"").trim();
-    if(a){
-      MEM.lastTopic=a;
-      return"Vous souhaitez une explication sur « "+a+" ». Je peux donner une définition simple, à quoi cela sert et dans quel contexte cela apparaît dans vos résultats NexSearch.";
-    }
-    return"Vous pouvez me demander : « Explique Word », « C’est quoi Netflix ? », « Qu’est-ce que Scratch ? », « Explique GitHub », etc.";
-  }
-  if(i.help)return"NexSearch accepte les fautes et les abréviations. Tapez ce que vous avez en tête, j’analyse le type de recherche et j’organise les sites les plus pertinents.";
-  if(i.search)return"Pour lancer une recherche, utilisez la barre en bas. Tapez un site, un service, un produit ou un sujet : je corrigerai et filtrerai les résultats DuckDuckGo pour ne garder que ceux qui ont du sens.";
-  if(i.thanks)return"Avec plaisir. Vous pouvez enchaîner avec une autre recherche ou une explication.";
-  if(MEM.lastQuery)return"Par rapport à votre dernière recherche « "+MEM.lastQuery+" », vous pouvez me demander un résumé plus détaillé, une explication d’un site précis ou un calcul lié.";
-  return"Donnez-moi un mot‑clé (Word, Netflix, YouTube, Amazon, GitHub…), une question (« explique Word ») ou un calcul, et je vous répondrai de manière adaptée.";
-}
-
-function aiSummary(query, results, calc){
-  if(!query.trim())
-    return"Tapez une requête en bas, même avec des abréviations ou des fautes : je corrige, je filtre les résultats DuckDuckGo et je vous donne un aperçu rapide.";
-  if(calc!==null)
-    return"Votre requête ressemble à un calcul. Résultat : "+calc+". Vous pouvez maintenant lancer une recherche sur un site, un service ou un produit si vous le souhaitez.";
-  if(!results.length)
-    return"Aucun résultat très pertinent n’a été trouvé pour « "+query+" » via l’API DuckDuckGo. Essayez de préciser un peu votre demande (par exemple « Microsoft Word », « Netflix séries », « YouTube musique », « GitHub projet »).";
-
-  const firstTitles = results.slice(0,5).map(r=>r.title).filter(Boolean);
-  let d="Requête analysée : « "+query+" ». J’ai sélectionné principalement des pages comme : "+firstTitles.join(", ")+". ";
-
-  const t=nrm(query);
-  if(t.includes("word"))d+="Word est le traitement de texte de la suite Microsoft Office. Les liens proposés pointent vers Microsoft, Office et la documentation associée.";
-  else if(t.includes("microsoft"))d+="Microsoft regroupe Windows, Office, Xbox, Azure et d’autres services. Les liens proposés mettent en avant l’écosystème Microsoft et les ressources utiles.";
-  else if(t.includes("netflix"))d+="Netflix est une plateforme de streaming vidéo. Les liens proposés sont orientés vers Netflix et les contenus associés.";
-  else if(t.includes("youtube"))d+="YouTube est une plateforme de partage de vidéos. Les liens proposés mettent en avant YouTube et les contenus vidéo pertinents.";
-  else if(t.includes("amazon"))d+="Amazon est une plateforme de e‑commerce. Les liens proposés sont orientés shopping et produits.";
-  else if(t.includes("scratch"))d+="Scratch est une plateforme de programmation visuelle. Les liens proposés pointent vers Scratch et des ressources pour apprendre ou partager des projets.";
-  else if(t.includes("github"))d+="GitHub est une plateforme d’hébergement de code. Les liens proposés mettent en avant GitHub et la documentation pour les développeurs.";
-  else if(t.includes("chatgpt")||t.includes("claude")||t.includes("copilot")||t.includes("perplexity"))d+="Votre requête concerne l’IA. Les liens proposés mettent en avant des assistants IA, des modèles et des plateformes d’IA.";
-  else d+="Les sites affichés sont filtrés pour rester cohérents avec votre requête, sans résultats hors sujet.";
-
-  return d;
-}
-
-// API DuckDuckGo – sans clé
+/* API MOJEEK – SANS CLÉ */
 async function fetchResults(query){
-  const url = "https://api.duckduckgo.com/?q=" + encodeURIComponent(query) + "&format=json&no_redirect=1&no_html=1";
+  const url = "https://www.mojeek.com/api/search?q=" + encodeURIComponent(query);
   const resp = await fetch(url);
   const data = await resp.json();
 
-  const results = [];
+  if(!data.results) return [];
 
-  // Résultats principaux (Abstract + RelatedTopics)
-  if (data.AbstractURL && data.AbstractText) {
-    try{
-      const u = new URL(data.AbstractURL);
-      results.push({
-        title: data.Heading || data.AbstractText,
-        url: data.AbstractURL,
-        desc: data.AbstractText,
-        favicon: "https://www.google.com/s2/favicons?domain=" + u.hostname
-      });
-    }catch{}
-  }
-
-  if (Array.isArray(data.RelatedTopics)) {
-    data.RelatedTopics.forEach(item => {
-      if (item.Text && item.FirstURL) {
-        try{
-          const u = new URL(item.FirstURL);
-          results.push({
-            title: item.Text,
-            url: item.FirstURL,
-            desc: item.Text,
-            favicon: "https://www.google.com/s2/favicons?domain=" + u.hostname
-          });
-        }catch{}
-      } else if (Array.isArray(item.Topics)) {
-        item.Topics.forEach(t => {
-          if (t.Text && t.FirstURL) {
-            try{
-              const u = new URL(t.FirstURL);
-              results.push({
-                title: t.Text,
-                url: t.FirstURL,
-                desc: t.Text,
-                favicon: "https://www.google.com/s2/favicons?domain=" + u.hostname
-              });
-            }catch{}
-          }
-        });
-      }
-    });
-  }
-
-  return results.slice(0,15);
+  return data.results.slice(0,15).map(r => ({
+    title: r.title || r.url,
+    url: r.url,
+    desc: r.description || "",
+    favicon: "https://www.google.com/s2/favicons?domain=" + new URL(r.url).hostname
+  }));
 }
 
+/* RENDER RESULTS */
 function renderResults(query, results){
   const list = document.getElementById("results-list");
   list.innerHTML = "";
@@ -276,7 +205,7 @@ function renderResults(query, results){
 
     const title = document.createElement("div");
     title.className = "result-item-title";
-    title.textContent = r.title || r.url;
+    title.textContent = r.title;
 
     const url = document.createElement("div");
     url.className = "result-item-url";
@@ -284,7 +213,7 @@ function renderResults(query, results){
 
     const tags = document.createElement("div");
     tags.className = "result-item-tags";
-    tags.textContent = r.desc || "Résultat DuckDuckGo pertinent";
+    tags.textContent = r.desc || "Résultat pertinent";
 
     content.appendChild(title);
     content.appendChild(url);
@@ -292,12 +221,9 @@ function renderResults(query, results){
 
     const fav = document.createElement("div");
     fav.className = "result-favicon";
-    if(r.favicon){
-      const img = document.createElement("img");
-      img.src = r.favicon;
-      img.alt = "";
-      fav.appendChild(img);
-    }
+    const img = document.createElement("img");
+    img.src = r.favicon;
+    fav.appendChild(img);
 
     item.appendChild(content);
     item.appendChild(fav);
@@ -306,118 +232,74 @@ function renderResults(query, results){
   });
 }
 
+/* META */
 function renderMeta(query, results){
   const meta = document.getElementById("results-meta");
   if(!query.trim()){
-    meta.textContent = "Aucune requête. Tapez quelque chose en bas pour lancer une recherche.";
+    meta.textContent = "Aucune requête.";
     return;
   }
-  meta.textContent = "Requête : « "+query+" » — "+results.length+" résultats DuckDuckGo affichés.";
+  meta.textContent = "Requête : « "+query+" » — "+results.length+" résultats.";
 }
 
+/* ACTIONS RAPIDES */
 function renderActions(query){
-  const c = query.trim();
   const bar = document.getElementById("results-actions");
   bar.innerHTML = "";
-  if(!c)return;
 
-  const actions = [
-    {label:"DuckDuckGo",url:"https://duckduckgo.com/?q="+encodeURIComponent(c)},
-    {label:"Images DuckDuckGo",url:"https://duckduckgo.com/?q="+encodeURIComponent(c)+"&iax=images&ia=images"},
-    {label:"Bing",url:"https://www.bing.com/search?q="+encodeURIComponent(c)},
-    {label:"Google",url:"https://www.google.com/search?q="+encodeURIComponent(c)}
-  ];
+  if(!query.trim()) return;
 
-  actions.forEach(a=>{
-    const btn = document.createElement("button");
-    btn.className = "action-btn";
-    btn.textContent = a.label;
-    btn.onclick = ()=>window.open(a.url,"_blank","noopener");
-    bar.appendChild(btn);
-  });
+  const btn = document.createElement("button");
+  btn.className = "action-btn";
+  btn.textContent = "Voir sur Bing";
+  btn.onclick = ()=>window.open("https://www.bing.com/search?q="+encodeURIComponent(query),"_blank");
+  bar.appendChild(btn);
 }
 
+/* SUMMARY */
+function aiSummary(query, results, calc){
+  if(!query.trim()) return "Tapez une requête pour commencer.";
+  if(calc!==null) return "Résultat du calcul : "+calc+".";
+  if(!results.length) return "Aucun résultat trouvé.";
+
+  return "Résultats trouvés pour « "+query+" ».";
+}
+
+/* RUN SEARCH */
 async function runSearch(query){
   const q = query.trim();
   const meta = document.getElementById("results-meta");
   const summaryEl = document.getElementById("results-summary");
   const list = document.getElementById("results-list");
 
-  MEM.lastQuery = q || null;
-
   if(!q){
-    meta.textContent = "Aucune requête. Tapez quelque chose en bas pour lancer une recherche.";
+    meta.textContent = "Aucune requête.";
     summaryEl.textContent = aiSummary("",[],null);
     list.innerHTML = "";
     document.getElementById("results-actions").innerHTML = "";
     return;
   }
 
-  meta.textContent = "Recherche en cours via l’API DuckDuckGo pour « "+q+" »...";
-  summaryEl.textContent = "Analyse de la requête et récupération des résultats DuckDuckGo...";
+  meta.textContent = "Recherche en cours...";
+  summaryEl.textContent = "Analyse de la requête...";
   list.innerHTML = "";
 
   const calc = tryCalc(q);
   let results = [];
+
   try{
     results = await fetchResults(q);
   }catch(e){
-    console.error(e);
-    summaryEl.textContent = "Erreur lors de la récupération des résultats DuckDuckGo. Réessayez plus tard.";
+    summaryEl.textContent = "Erreur lors de la récupération des résultats.";
   }
 
   renderResults(q, results);
   renderMeta(q, results);
   renderActions(q);
   summaryEl.textContent = aiSummary(q, results, calc);
-
-  const nexSummary = document.getElementById("nexai-summary");
-  if(nexSummary){
-    nexSummary.textContent = "Résumé NexAI basé sur la requête « "+q+" » : "+aiSummary(q, results, calc);
-  }
 }
 
-function getInitialQuery(){
-  const p = new URLSearchParams(window.location.search);
-  return p.get("q") || "";
-}
-
-function setupNexAI(){
-  const toggle = document.getElementById("nexai-toggle-btn");
-  const wrapper = document.getElementById("nexai-wrapper");
-  const closeBtn = document.getElementById("nexai-close-btn");
-  const input = document.getElementById("nexai-input");
-  const send = document.getElementById("nexai-send");
-  const log = document.getElementById("nexai-log");
-  const summary = document.getElementById("nexai-summary");
-
-  if(summary)summary.textContent = "NexAI peut expliquer votre recherche, un site (Word, Microsoft, Netflix, YouTube, GitHub…) ou faire un calcul rapide.";
-
-  function addMsg(text,cls){
-    const div=document.createElement("div");
-    div.className="nexai-msg "+cls;
-    div.textContent=text;
-    log.appendChild(div);
-    log.scrollTop=log.scrollHeight;
-  }
-
-  toggle.onclick=()=>{wrapper.style.display=wrapper.style.display==="none"?"block":"none";};
-  closeBtn.onclick=()=>{wrapper.style.display="none";};
-
-  send.onclick=()=>{
-    const v=input.value.trim();
-    if(!v)return;
-    addMsg("Vous : "+v,"nexai-msg-user");
-    const ans=aiAnswer(v);
-    addMsg("NexAI : "+ans,"nexai-msg-ai");
-    input.value="";
-  };
-
-  input.addEventListener("keydown",e=>{
-    if(e.key==="Enter")send.click();
-  });
-}
-
+/* UI */
 function setupUI(){
   const homeTop=document.getElementById("home-link-top");
   const homeBottom=document.getElementById("home-link-bottom");
@@ -440,18 +322,18 @@ function setupUI(){
   });
 }
 
+/* INIT */
 window.addEventListener("load",()=>{
   setupUI();
-  setupNexAI();
-  const initial=getInitialQuery();
+  const p = new URLSearchParams(window.location.search);
+  const initial = p.get("q") || "";
   const input=document.getElementById("search-input");
   if(initial){
     input.value=initial;
     runSearch(initial);
-  }else{
-    runSearch("");
   }
 });
 </script>
+
 </body>
 </html>

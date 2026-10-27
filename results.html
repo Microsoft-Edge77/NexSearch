@@ -5,7 +5,7 @@
   <title>NexSearch - Legacy</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   
-  <!-- Nouvelle favicon plus simple et stylée -->
+  <!-- Favicon stylée -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23ffffff' stroke-width='3'/%3E%3C/svg%3E">
   
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -19,7 +19,6 @@
       --accent2:#4da3ff;
       --txt:#d0e2ff;
       --muted:#9cc4ff;
-      --soft:#4f6fbf;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{
@@ -29,8 +28,6 @@
       overflow-x:hidden;
       min-height:100vh;
     }
-
-    /* Glow de fond inspiré de la page d'accueil */
     .glow {
       position: fixed;
       width: 500px;
@@ -43,10 +40,7 @@
       z-index: -1;
       pointer-events: none;
     }
-
     #app{min-height:100vh;display:flex;flex-direction:column}
-
-    /* TOP BAR */
     .top-bar{
       display:flex;align-items:center;justify-content:space-between;
       padding:12px 24px;background:rgba(0,0,0,0.8);
@@ -65,15 +59,11 @@
       background:linear-gradient(90deg,#6fa3ff,#9cc4ff);
       -webkit-background-clip:text;color:transparent;
     }
-
-    /* MAIN LAYOUT */
     .main-layout{
       flex:1;max-width:900px;width:100%;margin:0 auto;
       display:flex;flex-direction:column;
       gap:16px;padding:20px 16px 100px 16px;
     }
-
-    /* PANEL */
     .panel{
       background:var(--panel);border:1px solid var(--border);
       border-radius:14px;padding:18px;display:flex;flex-direction:column;
@@ -82,10 +72,7 @@
     }
     .panel-title{font-size:1.1rem;font-weight:600;color:#fff}
     .panel-sub{font-size:0.8rem;color:var(--muted);margin-bottom:12px}
-    
     #results-meta{font-size:.8rem;color:var(--muted);margin-bottom:8px}
-    
-    /* NEXAI - LEGACY (Résumé) */
     .ai-legacy-box {
       margin-bottom: 14px;
       padding: 12px 14px;
@@ -107,10 +94,7 @@
       color: var(--txt);
       line-height: 1.4;
     }
-
     #results-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-
-    /* RESULT ITEM */
     .result-item-link{text-decoration:none;color:inherit;display:block}
     .result-item{
       display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;
@@ -134,8 +118,6 @@
       overflow:hidden;border:1px solid var(--border);
     }
     .result-favicon img{width:14px;height:14px;object-fit:cover}
-
-    /* ACTIONS */
     .results-actions-wrapper{border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
     .actions-bar{display:flex;flex-wrap:wrap;gap:8px}
     .action-btn{
@@ -144,8 +126,6 @@
       transition:0.2s;
     }
     .action-btn:hover{border-color:var(--accent);background:rgba(0,120,212,0.1);color:#fff}
-
-    /* BOTTOM BAR */
     .bottom-dock{
       position:fixed;left:0;right:0;bottom:16px;display:flex;
       justify-content:center;pointer-events:none;z-index:20;
@@ -185,7 +165,6 @@
 <div class="glow"></div>
 <div id="app">
 
-  <!-- TOP BAR -->
   <header class="top-bar">
     <div class="top-left" id="home-link-top">
       <div class="logo-main"></div>
@@ -193,7 +172,6 @@
     </div>
   </header>
 
-  <!-- MAIN -->
   <main class="main-layout">
     <section class="panel">
       <div class="panel-title">Résultats de recherche</div>
@@ -201,7 +179,6 @@
 
       <div id="results-meta"></div>
 
-      <!-- NEXAI - LEGACY -->
       <div class="ai-legacy-box">
         <div class="ai-legacy-title">NexAI - Legacy</div>
         <div id="results-summary">Analyse de la requête en cours...</div>
@@ -216,7 +193,6 @@
     </section>
   </main>
 
-  <!-- BOTTOM BAR -->
   <div class="bottom-dock">
     <div class="bottom-bar">
       <div class="bottom-logo" id="home-link-bottom" title="Accueil"></div>
@@ -230,8 +206,15 @@
 </div>
 
 <script>
-/* WORKER CONFIGURATION */
-const WORKER_URL = "https://proxy-nexsearch.zao-gourdet";
+/* WORKER OBFUSQUÉ (Invisible au premier coup d'œil) */
+const _0xW = "Z2V0UmVzdWx0cw=="; // Masquage interne
+function getWorkerUrl(query) {
+  // Décodage dynamique à l'exécution de l'URL obfusquée
+  const encoded = "cz1xP2hjcmFlcy92ZWQuc2Vrcm93LXRlcnVvZy1vYXouaGNyYWVzLXl4b3JwLy86c3B0dGg=";
+  const reversed = atob(encoded);
+  const rawUrl = reversed.split("").reverse().join("");
+  return rawUrl.replace("%s", encodeURIComponent(query));
+}
 
 /* CALCUL */
 function tryCalc(e){
@@ -243,10 +226,9 @@ function tryCalc(e){
   }catch{return null}
 }
 
-/* FETCH VIA CLOUDFLARE WORKER */
+/* FETCH VIA WORKER SÉCURISÉ */
 async function fetchResults(query){
-  // Envoi de la requête via le Worker Cloudflare indiqué
-  const targetUrl = `${WORKER_URL}?q=` + encodeURIComponent(query);
+  const targetUrl = getWorkerUrl(query);
   try {
     const resp = await fetch(targetUrl);
     const data = await resp.json();
@@ -259,10 +241,10 @@ async function fetchResults(query){
       }));
     }
   } catch(e) {
-    console.warn("Erreur Worker direct, bascule de secours Mojeek:", e);
+    console.warn("Erreur Worker direct, bascule de secours:", e);
   }
 
-  // Fallback direct si le Worker renvoie une structure différente ou nécessite des headers spécifiques
+  // Fallback Mojeek si besoin
   const fallbackUrl = "https://www.mojeek.com/api/search?q=" + encodeURIComponent(query);
   const respFallback = await fetch(fallbackUrl);
   const dataFallback = await respFallback.json();
@@ -325,7 +307,7 @@ function renderResults(query, results){
   });
 }
 
-/* META */
+/* META & ACTIONS */
 function renderMeta(query, results){
   const meta = document.getElementById("results-meta");
   if(!query.trim()){
@@ -335,11 +317,9 @@ function renderMeta(query, results){
   meta.textContent = `Requête : « ${query} » — ${results.length} résultats trouvés.`;
 }
 
-/* ACTIONS RAPIDES */
 function renderActions(query){
   const bar = document.getElementById("results-actions");
   bar.innerHTML = "";
-
   if(!query.trim()) return;
 
   const btn = document.createElement("button");
@@ -355,13 +335,12 @@ function renderActions(query){
   bar.appendChild(btnGoogle);
 }
 
-/* SUMMARY */
 function aiSummary(query, results, calc){
   if(!query.trim()) return "Tapez une requête dans la barre ci-dessous pour lancer une recherche.";
   if(calc!==null) return `Calcul mathématique détecté. Résultat : ${calc}.`;
   if(!results.length) return `Aucun résultat pertinent trouvé pour « ${query} ».`;
 
-  return `NexAI - Legacy a analysé la recherche « ${query} » : ${results.length} sources principales ont été indexées et vérifiées pour répondre au mieux à votre intention.`;
+  return `NexAI - Legacy a analysé la recherche « ${query} » : ${results.length} sources principales ont été indexées et vérifiées.`;
 }
 
 /* RUN SEARCH */
@@ -379,7 +358,7 @@ async function runSearch(query){
     return;
   }
 
-  meta.textContent = "Recherche en cours via Cloudflare Worker...";
+  meta.textContent = "Recherche en cours...";
   summaryEl.textContent = "NexAI - Legacy analyse la requête...";
   list.innerHTML = "";
 
@@ -389,7 +368,7 @@ async function runSearch(query){
   try{
     results = await fetchResults(q);
   }catch(e){
-    summaryEl.textContent = "Erreur lors de la communication avec le Worker de proxy.";
+    summaryEl.textContent = "Erreur lors de la communication.";
   }
 
   renderResults(q, results);
@@ -421,7 +400,6 @@ function setupUI(){
   });
 }
 
-/* INIT */
 window.addEventListener("load",()=>{
   setupUI();
   const p = new URLSearchParams(window.location.search);

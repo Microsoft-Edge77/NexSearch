@@ -5,26 +5,30 @@
 <title>Déclaration de Confidentialité – NexSearch</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<!-- Favicon cassée (lien corrompu intentionnellement pour afficher une erreur d'icône) -->
+<link rel="icon" type="image/png" href="https://broken-favicon-path-does-not-exist.invalid/favicon.ico">
+
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 
 :root{
   --bg:#000;
-  --text:#8a8d94;
-  --text-muted:#5f6369;
-  --accent:#1e6fff;
-  --accent-soft:rgba(30,111,255,0.25);
+  --text:#3a3d44;
+  --text-muted:#2f3339;
+  --accent:#0d2d7a;
+  --accent-soft:rgba(13,45,122,0.15);
   --font:"Courier New",monospace;
 }
 
-/* GLOBAL */
+/* GLOBAL - ultra dur à lire (taille minuscule et contraste réduit) */
 html,body{
   height:100%;
   background:var(--bg);
   color:var(--text);
   font-family:var(--font);
-  font-size:9px;
-  overflow:hidden; /* on gère le scroll nous-mêmes */
+  font-size:7px;
+  letter-spacing: -0.5px;
+  overflow:hidden;
 }
 
 /* SIDEBAR BLEUE */
@@ -32,11 +36,11 @@ html,body{
   position:fixed;
   left:0;
   top:0;
-  width:6px;
+  width:4px;
   height:100%;
-  background:linear-gradient(to bottom, #1e6fff, #003a9c);
-  opacity:0.45;
-  box-shadow:0 0 12px #1e6fff;
+  background:linear-gradient(to bottom, #0d2d7a, #001235);
+  opacity:0.25;
+  box-shadow:0 0 6px #0d2d7a;
   z-index:50;
 }
 
@@ -47,61 +51,61 @@ html,body{
   top:0;
   height:100%;
   display:flex;
-  gap:32px;
-  padding:40px;
-  padding-left:60px; /* pour laisser la sidebar respirer */
+  gap:24px;
+  padding:30px;
+  padding-left:50px;
 }
 
-/* BLOCS */
+/* BLOCS - encore plus denses et discrets */
 .block{
-  flex:0 0 480px;
-  height:calc(100vh - 80px);
-  padding:26px;
-  background:#0a0c10;
-  border:1px solid rgba(255,255,255,0.06);
-  border-radius:18px;
-  box-shadow:0 18px 40px rgba(0,0,0,0.85);
+  flex:0 0 420px;
+  height:calc(100vh - 60px);
+  padding:18px;
+  background:#040507;
+  border:1px solid rgba(255,255,255,0.02);
+  border-radius:12px;
+  box-shadow:inset 0 0 20px rgba(0,0,0,0.9);
   position:relative;
   overflow:hidden;
 
   opacity:0;
   transform:translateY(40px) scale(0.94);
-  filter:blur(4px);
+  filter:blur(6px);
   transition:0.7s ease;
 }
 
-/* Glow interne */
+/* Glow interne quasi-invisible */
 .block::before{
   content:"";
   position:absolute;
   inset:-40%;
   background:
-    radial-gradient(circle at 0 0,rgba(30,111,255,0.35),transparent 60%),
-    radial-gradient(circle at 100% 100%,rgba(30,111,255,0.25),transparent 60%);
-  opacity:0.6;
-  filter:blur(12px);
+    radial-gradient(circle at 0 0,rgba(13,45,122,0.15),transparent 60%),
+    radial-gradient(circle at 100% 100%,rgba(13,45,122,0.1),transparent 60%);
+  opacity:0.3;
+  filter:blur(18px);
   pointer-events:none;
 }
 
 /* Quand visible */
 .block.visible{
-  opacity:1;
+  opacity:0.65;
   transform:translateY(0) scale(1);
-  filter:blur(0);
+  filter:blur(0.5px);
 }
 
 .block h2{
-  font-size:10px;
-  letter-spacing:0.18em;
+  font-size:8px;
+  letter-spacing:0.1em;
   text-transform:uppercase;
-  color:var(--accent);
-  margin-bottom:10px;
+  color:var(--text-muted);
+  margin-bottom:8px;
 }
 
 .block p{
-  font-size:8.5px;
-  line-height:1.6;
-  margin-bottom:8px;
+  font-size:7px;
+  line-height:1.4;
+  margin-bottom:6px;
   color:var(--text);
 }
 </style>
@@ -112,9 +116,6 @@ html,body{
 <div class="sidebar"></div>
 
 <div class="strip" id="strip">
-
-  <!-- Génère une vingtaine de blocs pour un scroll très long -->
-  <!-- Tu peux en dupliquer autant que tu veux -->
 
   <div class="block">
     <h2>Déclaration de Confidentialité – Préambule</h2>
@@ -153,9 +154,6 @@ html,body{
     </p>
   </div>
 
-  <!-- BLOCS DE REMPLISSAGE POUR UN SCROLL LONG -->
-  <!-- Je t’en mets une quinzaine pour un vrai scroll horizontal -->
-
   <div class="block"><h2>Section Étendue 1</h2><p>Texte complexe, verbeux, volontairement interminable décrivant l’absence totale de mécanismes d’agrégation, de persistance ou de corrélation algorithmique des requêtes.</p></div>
   <div class="block"><h2>Section Étendue 2</h2><p>Les données ne sont ni consolidées, ni extrapolées, ni dérivées dans un cadre computationnel externe.</p></div>
   <div class="block"><h2>Section Étendue 3</h2><p>Les fragments textuels manipulés par NexAI local demeurent strictement volatils.</p></div>
@@ -175,7 +173,6 @@ html,body{
 </div>
 
 <script>
-// Scroll horizontal avec la molette
 window.addEventListener("wheel", function(e){
   e.preventDefault();
   window.scrollBy({
@@ -184,7 +181,6 @@ window.addEventListener("wheel", function(e){
   });
 }, {passive:false});
 
-// Effet fade+glow quand un bloc entre dans le viewport
 function updateVisibility(){
   const vw = window.innerWidth;
   document.querySelectorAll(".block").forEach(b=>{

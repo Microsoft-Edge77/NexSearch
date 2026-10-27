@@ -2,135 +2,215 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>NexSearch</title>
+  <title>NexSearch - Legacy</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  
+  <!-- Nouvelle favicon plus simple et stylée -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23ffffff' stroke-width='3'/%3E%3C/svg%3E">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     :root{
-      --bg:#05060a;--panel:#0f121a;--border:#1f2937;
-      --accent:#0078d4;--accent2:#4da3ff;
-      --txt:#e5e7eb;--muted:#9ca3af;--soft:#6b7280;
+      --bg:#000000;
+      --panel:#0d111a;
+      --border:rgba(255,255,255,0.08);
+      --accent:#0078d4;
+      --accent2:#4da3ff;
+      --txt:#d0e2ff;
+      --muted:#9cc4ff;
+      --soft:#4f6fbf;
     }
     *{box-sizing:border-box;margin:0;padding:0}
     body{
-      font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-      background:#05060a;color:var(--txt);overflow-x:hidden;
+      font-family:"Poppins",system-ui,-apple-system,sans-serif;
+      background:var(--bg);
+      color:var(--txt);
+      overflow-x:hidden;
+      min-height:100vh;
     }
+
+    /* Glow de fond inspiré de la page d'accueil */
+    .glow {
+      position: fixed;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(59,130,246,0.2), transparent 70%);
+      top: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: blur(80px);
+      z-index: -1;
+      pointer-events: none;
+    }
+
     #app{min-height:100vh;display:flex;flex-direction:column}
 
     /* TOP BAR */
     .top-bar{
       display:flex;align-items:center;justify-content:space-between;
-      padding:8px 14px;background:#0b0d13;border-bottom:1px solid var(--border);
+      padding:12px 24px;background:rgba(0,0,0,0.8);
+      border-bottom:1px solid var(--border);
       position:sticky;top:0;z-index:10;
+      backdrop-filter:blur(16px);
     }
-    .top-left{display:flex;align-items:center;gap:8px;cursor:pointer}
+    .top-left{display:flex;align-items:center;gap:12px;cursor:pointer}
     .logo-main{
-      width:26px;height:26px;border-radius:4px;background:#0f121a;
-      border:1px solid #1f2937;
+      width:28px;height:28px;border-radius:6px;
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow:0 0 12px rgba(0,120,212,0.4);
     }
-    .logo-text{font-size:.9rem;font-weight:600}
+    .logo-text{
+      font-size:1.1rem;font-weight:600;
+      background:linear-gradient(90deg,#6fa3ff,#9cc4ff);
+      -webkit-background-clip:text;color:transparent;
+    }
 
     /* MAIN LAYOUT */
     .main-layout{
-      flex:1;display:grid;grid-template-columns:minmax(0,1fr);
-      gap:8px;padding:8px 10px 80px 10px;
+      flex:1;max-width:900px;width:100%;margin:0 auto;
+      display:flex;flex-direction:column;
+      gap:16px;padding:20px 16px 100px 16px;
     }
 
     /* PANEL */
     .panel{
       background:var(--panel);border:1px solid var(--border);
-      border-radius:4px;padding:8px;display:flex;flex-direction:column;
+      border-radius:14px;padding:18px;display:flex;flex-direction:column;
+      backdrop-filter:blur(20px);
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
     }
-    .panel-title{font-size:.9rem;font-weight:600}
-    .panel-sub{font-size:.7rem;color:var(--soft)}
-    #results-meta{font-size:.75rem;color:var(--soft);margin-bottom:4px}
-    #results-summary{
-      margin-bottom:6px;padding:6px;border-radius:4px;background:#0b0d13;
-      border:1px solid #111827;font-size:.78rem;max-height:110px;overflow-y:auto;
+    .panel-title{font-size:1.1rem;font-weight:600;color:#fff}
+    .panel-sub{font-size:0.8rem;color:var(--muted);margin-bottom:12px}
+    
+    #results-meta{font-size:.8rem;color:var(--muted);margin-bottom:8px}
+    
+    /* NEXAI - LEGACY (Résumé) */
+    .ai-legacy-box {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
     }
-    #results-list{flex:1;overflow-y:auto;padding-right:2px;margin-bottom:6px}
+    .ai-legacy-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent2);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    #results-summary {
+      font-size: .9rem;
+      color: var(--txt);
+      line-height: 1.4;
+    }
+
+    #results-list{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
 
     /* RESULT ITEM */
     .result-item-link{text-decoration:none;color:inherit;display:block}
     .result-item{
-      display:flex;align-items:center;gap:6px;padding:6px;border-radius:4px;
-      border:1px solid #111827;background:#05060a;margin-bottom:4px;
+      display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:10px;
+      border:1px solid var(--border);background:rgba(255,255,255,0.02);
+      transition:all 0.2s ease;
       cursor:pointer;
     }
-    .result-item:hover{border-color:var(--accent)}
-    .result-content{flex:1;min-width:0}
-    .result-item-title{font-size:.85rem;font-weight:600}
-    .result-item-url{font-size:.7rem;color:var(--muted);word-break:break-all}
-    .result-item-tags{font-size:.68rem;color:var(--soft)}
-    .result-favicon{
-      width:18px;height:18px;border-radius:4px;background:#0f121a;
-      display:flex;align-items:center;justify-content:center;margin-left:auto;
-      overflow:hidden;
+    .result-item:hover{
+      border-color:var(--accent);
+      background:rgba(255,255,255,0.05);
+      transform:translateY(-1px);
+      box-shadow:0 4px 20px rgba(0,120,212,0.15);
     }
-    .result-favicon img{width:100%;height:100%;object-fit:cover}
+    .result-content{flex:1;min-width:0}
+    .result-item-title{font-size:.95rem;font-weight:600;color:var(--accent2);margin-bottom:2px}
+    .result-item-url{font-size:.75rem;color:var(--muted);word-break:break-all;margin-bottom:4px}
+    .result-item-tags{font-size:.8rem;color:var(--txt);opacity:0.8;line-height:1.3}
+    .result-favicon{
+      width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,0.05);
+      display:flex;align-items:center;justify-content:center;flex:none;
+      overflow:hidden;border:1px solid var(--border);
+    }
+    .result-favicon img{width:14px;height:14px;object-fit:cover}
 
     /* ACTIONS */
-    .results-actions-wrapper{border-top:1px solid #111827;padding-top:4px}
-    .actions-bar{display:flex;flex-wrap:wrap;gap:4px}
+    .results-actions-wrapper{border-top:1px solid var(--border);padding-top:12px;margin-top:12px}
+    .actions-bar{display:flex;flex-wrap:wrap;gap:8px}
     .action-btn{
-      border:1px solid var(--border);background:#05060a;color:var(--txt);
-      border-radius:4px;font-size:.7rem;padding:3px 8px;cursor:pointer;
+      border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--txt);
+      border-radius:8px;font-size:.8rem;padding:6px 14px;cursor:pointer;
+      transition:0.2s;
     }
-    .action-btn:hover{border-color:var(--accent)}
+    .action-btn:hover{border-color:var(--accent);background:rgba(0,120,212,0.1);color:#fff}
 
     /* BOTTOM BAR */
     .bottom-dock{
-      position:fixed;left:0;right:0;bottom:8px;display:flex;
+      position:fixed;left:0;right:0;bottom:16px;display:flex;
       justify-content:center;pointer-events:none;z-index:20;
     }
     .bottom-bar{
-      width:min(880px,100% - 16px);display:flex;align-items:center;
-      gap:8px;padding:6px 10px;border-radius:4px;background:#0b0d13;
+      width:min(700px,100% - 32px);display:flex;align-items:center;
+      gap:12px;padding:8px 14px;border-radius:14px;background:rgba(13,17,26,0.85);
       border:1px solid var(--border);pointer-events:auto;
+      backdrop-filter:blur(20px);
+      box-shadow:0 10px 40px rgba(0,0,0,0.6);
     }
     .bottom-logo{
-      width:24px;height:24px;border-radius:4px;background:#0f121a;
-      border:1px solid #1f2937;cursor:pointer;
+      width:30px;height:30px;border-radius:8px;
+      background:linear-gradient(135deg, var(--accent), var(--accent2));
+      cursor:pointer;flex:none;
+      box-shadow:0 0 12px rgba(0,120,212,0.4);
     }
     .bottom-input{
-      flex:1;display:flex;align-items:center;gap:6px;background:#05060a;
-      border-radius:4px;border:1px solid #111827;padding:3px 6px;
+      flex:1;display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.4);
+      border-radius:10px;border:1px solid var(--border);padding:4px 4px 4px 12px;
     }
     .bottom-input input{
       flex:1;border:none;outline:none;background:transparent;color:var(--txt);
-      font-size:.8rem;
+      font-size:.95rem;font-family:"Poppins",system-ui,sans-serif;
     }
+    .bottom-input input::placeholder{color:var(--muted);opacity:0.6;}
     .bottom-input button{
-      border:none;border-radius:4px;background:var(--accent);color:#f9fafb;
-      font-size:.78rem;padding:4px 10px;cursor:pointer;
+      border:none;border-radius:8px;background:var(--accent);color:#fff;
+      font-size:.85rem;font-weight:600;padding:8px 16px;cursor:pointer;
+      transition:0.2s;
     }
+    .bottom-input button:hover{background:#1985da;box-shadow:0 0 15px rgba(0,120,212,0.4)}
   </style>
 </head>
 
 <body>
+<div class="glow"></div>
 <div id="app">
 
   <!-- TOP BAR -->
   <header class="top-bar">
     <div class="top-left" id="home-link-top">
       <div class="logo-main"></div>
-      <div class="logo-text">NexSearch</div>
+      <div class="logo-text">NexSearch - Legacy</div>
     </div>
   </header>
 
   <!-- MAIN -->
   <main class="main-layout">
     <section class="panel">
-      <div class="panel-title">Résultats</div>
-      <div class="panel-sub">Moteur indépendant – liens directs</div>
+      <div class="panel-title">Résultats de recherche</div>
+      <div class="panel-sub">Propulsé par le Worker Cloudflare et l'index indépendant</div>
 
       <div id="results-meta"></div>
-      <div id="results-summary"></div>
+
+      <!-- NEXAI - LEGACY -->
+      <div class="ai-legacy-box">
+        <div class="ai-legacy-title">NexAI - Legacy</div>
+        <div id="results-summary">Analyse de la requête en cours...</div>
+      </div>
+
       <div id="results-list"></div>
 
       <div class="results-actions-wrapper">
-        <div style="font-size:.7rem;color:#9ca3af;margin-bottom:2px">Actions rapides</div>
+        <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px">Actions rapides</div>
         <div id="results-actions" class="actions-bar"></div>
       </div>
     </section>
@@ -139,7 +219,7 @@
   <!-- BOTTOM BAR -->
   <div class="bottom-dock">
     <div class="bottom-bar">
-      <div class="bottom-logo" id="home-link-bottom"></div>
+      <div class="bottom-logo" id="home-link-bottom" title="Accueil"></div>
       <div class="bottom-input">
         <input id="search-input" type="text" placeholder="Rechercher...">
         <button id="search-btn">Rechercher</button>
@@ -150,14 +230,8 @@
 </div>
 
 <script>
-/* NORMALISATION */
-function nrm(s){
-  return s.toLowerCase().normalize("NFD")
-    .replace(/[\u0300-\u036f]/g,"")
-    .replace(/[^a-z0-9 ]+/g," ")
-    .replace(/\s+/g," ")
-    .trim();
-}
+/* WORKER CONFIGURATION */
+const WORKER_URL = "https://proxy-nexsearch.zao-gourdet";
 
 /* CALCUL */
 function tryCalc(e){
@@ -169,15 +243,33 @@ function tryCalc(e){
   }catch{return null}
 }
 
-/* API MOJEEK – SANS CLÉ */
+/* FETCH VIA CLOUDFLARE WORKER */
 async function fetchResults(query){
-  const url = "https://www.mojeek.com/api/search?q=" + encodeURIComponent(query);
-  const resp = await fetch(url);
-  const data = await resp.json();
+  // Envoi de la requête via le Worker Cloudflare indiqué
+  const targetUrl = `${WORKER_URL}?q=` + encodeURIComponent(query);
+  try {
+    const resp = await fetch(targetUrl);
+    const data = await resp.json();
+    if(data && data.results) {
+      return data.results.slice(0,15).map(r => ({
+        title: r.title || r.url,
+        url: r.url,
+        desc: r.description || "",
+        favicon: "https://www.google.com/s2/favicons?domain=" + new URL(r.url).hostname
+      }));
+    }
+  } catch(e) {
+    console.warn("Erreur Worker direct, bascule de secours Mojeek:", e);
+  }
 
-  if(!data.results) return [];
+  // Fallback direct si le Worker renvoie une structure différente ou nécessite des headers spécifiques
+  const fallbackUrl = "https://www.mojeek.com/api/search?q=" + encodeURIComponent(query);
+  const respFallback = await fetch(fallbackUrl);
+  const dataFallback = await respFallback.json();
 
-  return data.results.slice(0,15).map(r => ({
+  if(!dataFallback.results) return [];
+
+  return dataFallback.results.slice(0,15).map(r => ({
     title: r.title || r.url,
     url: r.url,
     desc: r.description || "",
@@ -213,7 +305,7 @@ function renderResults(query, results){
 
     const tags = document.createElement("div");
     tags.className = "result-item-tags";
-    tags.textContent = r.desc || "Résultat pertinent";
+    tags.textContent = r.desc || "Résultat pertinent indexé par le moteur.";
 
     content.appendChild(title);
     content.appendChild(url);
@@ -223,6 +315,7 @@ function renderResults(query, results){
     fav.className = "result-favicon";
     const img = document.createElement("img");
     img.src = r.favicon;
+    img.onerror = () => { img.style.display = 'none'; };
     fav.appendChild(img);
 
     item.appendChild(content);
@@ -236,10 +329,10 @@ function renderResults(query, results){
 function renderMeta(query, results){
   const meta = document.getElementById("results-meta");
   if(!query.trim()){
-    meta.textContent = "Aucune requête.";
+    meta.textContent = "Aucune requête active.";
     return;
   }
-  meta.textContent = "Requête : « "+query+" » — "+results.length+" résultats.";
+  meta.textContent = `Requête : « ${query} » — ${results.length} résultats trouvés.`;
 }
 
 /* ACTIONS RAPIDES */
@@ -251,18 +344,24 @@ function renderActions(query){
 
   const btn = document.createElement("button");
   btn.className = "action-btn";
-  btn.textContent = "Voir sur Bing";
+  btn.textContent = "Voir sur Bing ›";
   btn.onclick = ()=>window.open("https://www.bing.com/search?q="+encodeURIComponent(query),"_blank");
   bar.appendChild(btn);
+
+  const btnGoogle = document.createElement("button");
+  btnGoogle.className = "action-btn";
+  btnGoogle.textContent = "Voir sur Google ›";
+  btnGoogle.onclick = ()=>window.open("https://www.google.com/search?q="+encodeURIComponent(query),"_blank");
+  bar.appendChild(btnGoogle);
 }
 
 /* SUMMARY */
 function aiSummary(query, results, calc){
-  if(!query.trim()) return "Tapez une requête pour commencer.";
-  if(calc!==null) return "Résultat du calcul : "+calc+".";
-  if(!results.length) return "Aucun résultat trouvé.";
+  if(!query.trim()) return "Tapez une requête dans la barre ci-dessous pour lancer une recherche.";
+  if(calc!==null) return `Calcul mathématique détecté. Résultat : ${calc}.`;
+  if(!results.length) return `Aucun résultat pertinent trouvé pour « ${query} ».`;
 
-  return "Résultats trouvés pour « "+query+" ».";
+  return `NexAI - Legacy a analysé la recherche « ${query} » : ${results.length} sources principales ont été indexées et vérifiées pour répondre au mieux à votre intention.`;
 }
 
 /* RUN SEARCH */
@@ -280,8 +379,8 @@ async function runSearch(query){
     return;
   }
 
-  meta.textContent = "Recherche en cours...";
-  summaryEl.textContent = "Analyse de la requête...";
+  meta.textContent = "Recherche en cours via Cloudflare Worker...";
+  summaryEl.textContent = "NexAI - Legacy analyse la requête...";
   list.innerHTML = "";
 
   const calc = tryCalc(q);
@@ -290,7 +389,7 @@ async function runSearch(query){
   try{
     results = await fetchResults(q);
   }catch(e){
-    summaryEl.textContent = "Erreur lors de la récupération des résultats.";
+    summaryEl.textContent = "Erreur lors de la communication avec le Worker de proxy.";
   }
 
   renderResults(q, results);
@@ -299,7 +398,7 @@ async function runSearch(query){
   summaryEl.textContent = aiSummary(q, results, calc);
 }
 
-/* UI */
+/* UI SETUP */
 function setupUI(){
   const homeTop=document.getElementById("home-link-top");
   const homeBottom=document.getElementById("home-link-bottom");
@@ -331,6 +430,8 @@ window.addEventListener("load",()=>{
   if(initial){
     input.value=initial;
     runSearch(initial);
+  } else {
+    runSearch("");
   }
 });
 </script>

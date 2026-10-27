@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NexSearch</title>
+<title>NexSearch - Legacy</title>
 
-<link rel="icon" type="image/png" href="https://microsoft-edge77.github.io/NexSearchAssets/favicon-copilot-blue.png">
+<!-- Nouvelle favicon simple et stylée -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230078d4'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='%23ffffff' stroke-width='3'/%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
@@ -244,7 +245,7 @@ body{
   </div>
 
   <header>
-    <div class="logo">NexSearch</div>
+    <div class="logo">NexSearch - Legacy</div>
   </header>
 
   <main class="main">
@@ -306,20 +307,15 @@ class Particle{
   }
 
   update(){
-    // turbulence
     this.vx += (Math.random()-0.5)*this.turbulence;
     this.vy += (Math.random()-0.5)*this.turbulence;
 
-    // vortex
     const dx=this.x-centerX;
     const dy=this.y-centerY;
     this.vx += -dy*0.002;
     this.vy += dx*0.002;
 
-    // gravité
     this.vy += this.gravity;
-
-    // friction
     this.vx *= this.friction;
     this.vy *= this.friction;
 
@@ -395,7 +391,6 @@ searchInput.addEventListener("focus",()=>{
 
   drawWave(centerX,centerY);
 
-  // 300 particules : 150 type A + 150 type B
   for(let i=0;i<300;i++){
     const type = Math.random()<0.5 ? 0 : 1;
     particles.push(new Particle(centerX,centerY,type));
